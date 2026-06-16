@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/kulikman/Secret-project/compare/v1.0.1...v1.1.0) (2026-06-16)
+
+### ✨ Features
+
+* implement secret bureau archive foundation ([ffc3f49](https://github.com/kulikman/Secret-project/commit/ffc3f49e083a0990d20a008b796612f6f0a65c76))
+
 ## [1.0.1](https://github.com/kulikman/Secret-project/compare/v1.0.0...v1.0.1) (2026-06-16)
 
 ### 🐛 Bug Fixes
