@@ -21,6 +21,9 @@ const config: KnipConfig = {
     // template-public APIs: not imported by in-repo code but exported for consumers
     "src/components/plan-gate.tsx",
     "src/lib/analytics.ts",
+    // Secret Bureau public barrels: used as stable import boundaries for agents/admin routes.
+    "src/features/ai-content/index.ts",
+    "src/lib/brain/index.ts",
   ],
   ignoreDependencies: [
     "tailwindcss", // loaded via PostCSS plugin, not imported in TS
@@ -31,6 +34,10 @@ const config: KnipConfig = {
   ignoreIssues: {
     // generated Supabase helper types are public API for app/template consumers
     "src/types/database.ts": ["exports", "types"],
+    // Secret Bureau exported helper/types are kept as public feature contracts.
+    "src/features/ai-content/lib/source-first.ts": ["types"],
+    "src/features/knowledge/lib/projection.ts": ["types"],
+    "src/lib/brain/errors.ts": ["exports"],
   },
   // Exports tagged with `@public` in JSDoc are template-public APIs —
   // exported on purpose for consumers, even if nothing in-repo imports them.
