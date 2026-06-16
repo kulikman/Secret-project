@@ -1,3 +1,9 @@
+## 1.0.0 (2026-06-16)
+
+### 🐛 Bug Fixes
+
+* avoid gitleaks false positive in api key example ([02d42f0](https://github.com/kulikman/Secret-project/commit/02d42f040081d99ad7ba31152b36abfdbe91ed99))
+
 ## [0.3.2](https://github.com/kulikman/Template-Projects/compare/v0.3.1...v0.3.2) (2026-05-27)
 
 ### 🐛 Bug Fixes
