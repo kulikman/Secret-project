@@ -38,8 +38,9 @@ export default async function ApiKeysPage(): Promise<React.ReactElement> {
           Pass the key in the <code className="bg-muted rounded px-1">x-api-key</code> header:
         </p>
         <pre className="bg-muted text-foreground overflow-x-auto rounded px-3 py-2 text-xs">
-          {`curl https://your-app.com/api/endpoint \\
-  -H "x-api-key: sk_live_..."`}
+          {`API_KEY="<your-api-key>"
+curl https://your-app.com/api/endpoint \\
+  -H "x-api-key: \${API_KEY}"`}
         </pre>
       </div>
     </div>
