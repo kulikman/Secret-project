@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/kulikman/Secret-project/compare/v1.1.0...v1.1.1) (2026-06-16)
+
+### 🐛 Bug Fixes
+
+* mark public api surfaces for knip ([8235c3d](https://github.com/kulikman/Secret-project/commit/8235c3da20708444d12ab0e9ec7c7cdbb0e23a6d))
+
 ## [1.1.0](https://github.com/kulikman/Secret-project/compare/v1.0.1...v1.1.0) (2026-06-16)
 
 ### ✨ Features
