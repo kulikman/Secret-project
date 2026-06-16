@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/kulikman/Secret-project/compare/v1.0.0...v1.0.1) (2026-06-16)
+
+### 🐛 Bug Fixes
+
+* override vulnerable transitive dependencies ([c441631](https://github.com/kulikman/Secret-project/commit/c441631a7327a7ba82814062c713df6cb25b64e0))
+
 ## 1.0.0 (2026-06-16)
 
 ### 🐛 Bug Fixes
