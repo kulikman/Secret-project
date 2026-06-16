@@ -71,7 +71,7 @@ if [[ -f src/config/site.ts ]]; then
   sed -i.bak "s|name: \"Template Starter\"|name: \"$DISPLAY_NAME\"|" src/config/site.ts
   sed -i.bak "s|Universal Next.js + Supabase starter — fork and rename for your product.|$DISPLAY_NAME — powered by Next.js + Supabase.|" src/config/site.ts
   sed -i.bak "s|url: \"http://localhost:3000\"|url: \"$PROD_URL\"|" src/config/site.ts
-  sed -i.bak "s|https://github.com/kulikman/Template-Projects|https://github.com/kulikman/$SLUG|" src/config/site.ts
+  sed -i.bak "s|https://github.com/kulikman/Secret-project|https://github.com/kulikman/$SLUG|" src/config/site.ts
   sed -i.bak "s|https://github.com/kulikman/template-starter|https://github.com/kulikman/$SLUG|" src/config/site.ts
   rm -f src/config/site.ts.bak
   echo "  ✓ site.ts → $DISPLAY_NAME ($PROD_URL)"

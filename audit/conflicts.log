@@ -1,4 +1,4 @@
-# audit/conflicts.log — Template-Projects
+# audit/conflicts.log — Тайное Бюро
 #
 # When two or more rules in audit/rules.json disagree or cannot both be satisfied,
 # log the resolution here so the next audit stays consistent.

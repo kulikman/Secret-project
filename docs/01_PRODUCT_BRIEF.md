@@ -1,72 +1,83 @@
 # Product Brief
 
 ## Problem
-[Какую конкретную проблему решает продукт — 2-3 предложения]
+
+Исследовательские материалы, источники, claims и связи между темами быстро превращаются в разрозненный набор заметок, PDF, ссылок и устных решений. Без единого source-first архива сложно проверять происхождение утверждений, публиковать материалы и строить доверие у аудитории.
 
 ## Target Audience
-[Для кого продукт — опиши сегмент: должность, индустрия, размер компании, боль]
+
+- Читатели, которым нужен понятный публичный архив с источниками.
+- Исследователи и редакторы, которым нужно собирать темы, факты, источники и связи.
+- Кураторы Тайного Бюро, которым нужно модерировать события, города и заявки.
+- Администраторы, которым нужен управляемый процесс ingest, review и публикации.
 
 ## User Pain
-[Что сейчас болит у пользователя — как он решает проблему без нашего продукта]
+
+Сейчас знания приходится собирать вручную из разных мест, связи между сущностями теряются, а AI-генерация без строгих ссылок на источники создает риск недостоверных публикаций. Публичный портал также не должен зависеть от live-доступности Brain.
 
 ## Solution
-[Как продукт решает проблему — механика, ключевые функции]
+
+Тайное Бюро разделяет систему на Brain как knowledge backend и App DB как публичную read projection. Администраторы создают и проверяют knowledge-узлы через Brain, вручную публикуют projection в App DB, а публичные страницы читают только готовые опубликованные данные.
 
 ## Unique Value Proposition
-[Почему наш продукт лучше или удобнее альтернатив — 1-2 предложения]
+
+Платформа объединяет архив, граф связей, source-first AI-пайплайн и community-модуль в одном продукте, сохраняя отказоустойчивость публичного портала за счет CQRS-проекции.
 
 ---
 
 ## Main User Scenarios
 
-### Scenario 1: [Название сценария]
-[Пошагово: что делает пользователь, что происходит в системе, какой результат]
+### Scenario 1: Публичный читатель изучает тему
 
-### Scenario 2: [Название сценария]
-[Пошагово]
+Пользователь открывает `/topics`, выбирает тему, читает опубликованное описание, видит источники и связанные сущности. Страница рендерится из App DB projection и не вызывает Brain напрямую.
 
-### Scenario 3: [Название сценария]
-[Пошагово]
+### Scenario 2: Редактор публикует knowledge-тему
+
+Редактор создает или обновляет node в Brain, проверяет источники, запускает manual republish, после чего App DB обновляет `node_projection`. Публичная тема становится доступна только после публикации.
+
+### Scenario 3: Участник подает заявку
+
+Пользователь открывает community-раздел, выбирает город или событие, отправляет заявку. Администратор меняет статус заявки в админке, действие попадает в audit trail.
+
+### Scenario 4: AI генерирует досье или презентацию
+
+Администратор запускает generation job по опубликованной теме. Каждый блок результата обязан иметь `source_refs`; публикация блокируется, если источники отсутствуют.
 
 ---
 
 ## Business Model
-- [ ] Subscription (monthly/annual)
-- [ ] Usage-based (pay-per-use)
-- [ ] Freemium (free tier + paid plans)
-- [ ] One-time payment
-- [ ] Commission / marketplace fee
-- [ ] Enterprise licensing
-- [ ] Other: ...
 
-## Pricing Tiers
+Монетизация не зафиксирована в текущем MVP. В репозитории сохранен Stripe scaffold, но он рассматривается как инфраструктурная возможность, а не обязательное условие первого запуска.
 
-| Plan | Price | Key Limits |
-|---|---|---|
-| Free | $0/mo | [что включено] |
-| Pro | $X/mo | [что включено] |
-| Team | $Y/mo | [что включено] |
+Potential models to decide later:
 
----
+- Membership / donation.
+- Paid reports or presentations.
+- Partner/community sponsorship.
+- Subscription for advanced editorial tools.
 
 ## Success Metrics
 
-### Product Metrics (track in PostHog)
-- Activation rate (% users who complete onboarding): target X%
-- D7 retention: target X%
-- Feature adoption (core action per user): target X/week
+### Product Metrics
 
-### Business Metrics
-- MRR target at 3 months: $X
-- CAC: target <$X
-- LTV:CAC ratio: target >3x
-- Churn rate: target <X%/month
+- Количество опубликованных `topic` pages.
+- Доля опубликованных claims/source blocks с непустыми `source_refs`.
+- Количество проверенных источников на тему.
+- Количество заявок в community-модуль и доля обработанных заявок.
+- Public portal uptime при деградации Brain.
+
+### Quality Metrics
+
+- Нет публичных страниц, которые читают live Brain.
+- Нет AI-публикаций без источников.
+- Republish flow диагностируем через audit/log context.
 
 ---
 
 ## Non-goals
-[Что специально НЕ делаем в этой версии — важно для ограничения scope]
 
-- Not building: [feature]
-- Not targeting: [segment]
-- Deferring: [feature] to v2
+- Не строим публичные страницы напрямую на Brain API.
+- Не запускаем full graph/map production UX до Brain neighbors/subgraph contracts.
+- Не публикуем AI-контент без машинной проверки `source_refs`.
+- Не меняем auth, billing и payment internals без отдельного подтверждения.
+- Не реализуем mobile app в MVP.

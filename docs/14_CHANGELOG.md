@@ -29,6 +29,7 @@
 ## [Unreleased]
 
 ### Added
+
 - Initial project setup from SaaS template
 - User authentication (email + OAuth)
 - Onboarding wizard

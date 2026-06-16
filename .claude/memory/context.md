@@ -6,20 +6,20 @@
 
 ---
 
-## Audit & Cursor (Template-Projects)
+## Audit & Cursor (Тайное Бюро)
 
 - **`audit/`** — `rules.json`, `AUDIT_PROMPT.md`, `audit-history.json`, `conflicts.log`; инструкция в `audit/README.md`.
 - **`.cursorrules`** — приоритет: `CLAUDE.md` → эта память → `audit/rules.json`.
 - **`.cursor/commands/`** — Run audit, Fix all critical, Show rules.
 
-После форка шаблона эти пути остаются валидными; при переносе `audit/` в другой репозиторий см. `audit/README.md`.
+После переименования проекта эти пути остаются валидными; при переносе `audit/` в другой репозиторий см. `audit/README.md`.
 
 ---
 
 ## Current Session
 
 **Last Updated:** 2026-04-24
-**Project:** Template-Projects (`package.json`: `template-projects`)
+**Project:** Тайное Бюро (`package.json`: `secret-bureau`)
 **Current Feature:** Breadcrumbs, URL hierarchy, test setup, llms.txt, audit rules
 **Status:** `done`
 
@@ -42,7 +42,7 @@
 
 ### Next Steps
 1. Подключить Supabase / `.env.local` при старте продукта
-2. Запустить `pnpm post-clone "ProductName" "product-slug" "https://product.com"`
+2. Подключить реальные env и инфраструктуру проекта
 3. Заполнить `public/llms.txt` актуальными данными продукта
 4. Подключить Sentry в `error.tsx` при продакшн-деплое
 

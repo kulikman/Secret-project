@@ -1,36 +1,16 @@
-# Template-Projects
+# Тайное Бюро
 
-Универсальный стартовый репозиторий: Next.js 16 + React 19 + Supabase + Tailwind v4 + TypeScript + pnpm.
-
-Форкните → переименуйте → стройте продукт.
+Веб-платформа для публичного исследовательского архива, карты связей и закрытого сообщества Тайного Бюро.
 
 ---
 
 ## Быстрый старт
 
-После копии шаблона **сразу переименуйте проект** — иначе при каждом `pnpm dev` в консоли будет напоминание (для разработки самого шаблона: `TEMPLATE_DEV=1 pnpm dev`).
-
-### Через git clone
-
 ```bash
-git clone https://github.com/kulikman/Template-Projects.git my-app
-cd my-app
-pnpm post-clone "My Product" "my-product" "https://myproduct.com"
+git clone https://github.com/kulikman/Secret-project.git secret-bureau
+cd secret-bureau
 pnpm install
 cp .env.example .env.local   # заполните ключи Supabase
-pnpm dev
-```
-
-### Локальная копия каталога шаблона
-
-Канонический путь шаблона на машине владельца: `/Users/DEV/TEMLATES/Template-Projects`. Скопируйте в новый каталог проекта и выполните те же шаги:
-
-```bash
-cp -R /Users/DEV/TEMLATES/Template-Projects ~/Projects/my-app
-cd ~/Projects/my-app
-pnpm post-clone "My Product" "my-product" "https://myproduct.com"
-pnpm install
-cp .env.example .env.local
 pnpm dev
 ```
 
@@ -40,26 +20,24 @@ pnpm dev
 
 ## Команды
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Запуск dev-сервера |
-| `pnpm build` | Production-сборка |
-| `pnpm lint` | ESLint проверка |
-| `pnpm typecheck` | TypeScript type-check |
-| `pnpm format:check` | Prettier проверка |
-| `pnpm test` | Vitest unit-тесты |
-| `pnpm test:watch` | Vitest в watch-режиме |
-| `pnpm check` | Lint + typecheck + format (всё сразу) |
-| `pnpm post-clone` | Переименование проекта после форка |
-| `pnpm init:structure` | Scaffold папок в пустой директории |
+| Command               | Description                           |
+| --------------------- | ------------------------------------- |
+| `pnpm dev`            | Запуск dev-сервера                    |
+| `pnpm build`          | Production-сборка                     |
+| `pnpm lint`           | ESLint проверка                       |
+| `pnpm typecheck`      | TypeScript type-check                 |
+| `pnpm format:check`   | Prettier проверка                     |
+| `pnpm test`           | Vitest unit-тесты                     |
+| `pnpm test:watch`     | Vitest в watch-режиме                 |
+| `pnpm check`          | Lint + typecheck + format (всё сразу) |
+| `pnpm init:structure` | Scaffold папок в пустой директории    |
 
 ---
 
-## Проверка шаблона
+## Проверка проекта
 
-Этот репозиторий — шаблон для новых проектов. Миграции Supabase лежат в
-репозитории как baseline будущего проекта; не применяйте их к shared remote
-Supabase-проекту только ради проверки шаблона.
+Миграции Supabase лежат в репозитории как baseline проекта; не применяйте их к
+shared remote Supabase-проекту только ради локальной проверки.
 
 Минимальная проверка перед использованием/публикацией шаблона:
 
@@ -80,14 +58,14 @@ supabase start
 supabase db reset
 ```
 
-После изменения схемы в реальном проекте, созданном из шаблона, обновите типы:
+После изменения схемы обновите типы:
 
 ```bash
 SUPABASE_PROJECT_ID=<your-project-id> pnpm supabase:types
 ```
 
-Часть e2e-сценариев зависит от backend/Supabase окружения и может быть
-пропущена в режиме чистого шаблона. Подробности: [`tests/e2e/README.md`](tests/e2e/README.md).
+Часть e2e-сценариев зависит от backend/Supabase окружения. Подробности:
+[`tests/e2e/README.md`](tests/e2e/README.md).
 
 ---
 
@@ -144,7 +122,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # только сервер
 
 # Optional
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=MyProduct
+NEXT_PUBLIC_APP_NAME=Тайное Бюро
 ```
 
 Все переменные валидируются Zod-схемой в `src/lib/env.ts` — приложение упадёт на старте, если что-то не так.

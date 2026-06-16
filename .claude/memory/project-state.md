@@ -6,27 +6,27 @@
 
 ---
 
-## Audit & Cursor (Template-Projects)
+## Audit & Cursor (Тайное Бюро)
 
 - **`audit/`** — `rules.json`, `AUDIT_PROMPT.md`, `audit-history.json`, `conflicts.log`; инструкция в `audit/README.md`.
 - **`.cursorrules`** — приоритет: `CLAUDE.md` → эта память → `audit/rules.json`.
 - **`.cursor/commands/`** — Run audit, Fix all critical, Show rules.
 
-После форка шаблона эти пути остаются валидными; при переносе `audit/` в другой репозиторий см. `audit/README.md`.
+После переименования проекта эти пути остаются валидными; при переносе `audit/` в другой репозиторий см. `audit/README.md`.
 
 ---
 
 ## Current Session
 
 **Last Updated:** 2026-05-03
-**Project:** Template-Projects (`package.json`: `template-projects`; после `pnpm post-clone` — slug продукта)
-**Template root (локально):** `/Users/DEV/TEMLATES/Template-Projects`
-**Current Feature:** Напоминание переименования при `pnpm dev`, README + локальный быстрый старт
+**Project:** Тайное Бюро (`package.json`: `secret-bureau`)
+**Project root (локально):** `/Users/DEV/Secret-project`
+**Current Feature:** Переименование проекта и актуализация публичных метаданных
 **Status:** `done`
 
 ### What Was Done This Session
-- [x] `scripts/remind-rename-if-template.mjs` + `pnpm dev` выводит напоминание про `pnpm post-clone`, пока `name` = `template-projects`; отключение: `TEMPLATE_DEV=1` или `SKIP_TEMPLATE_RENAME_REMINDER=1`
-- [x] README: быстрый старт с локальным путём `/Users/DEV/TEMLATES/Template-Projects`, бейдж на лендинге из `siteConfig.name`
+- [x] `package.json`, env defaults, site metadata and docs use the Тайное Бюро project name.
+- [x] README now describes the product repository instead of the starter rename flow.
 
 ### What Was Done Last Session
 - [x] Added `<Breadcrumbs />` component (`src/components/layout/breadcrumbs.tsx`)
@@ -47,7 +47,7 @@
 
 ### Next Steps
 1. Подключить Supabase / `.env.local` при старте продукта
-2. Запустить `pnpm post-clone "ProductName" "product-slug" "https://product.com"` (пока `package.json` = `template-projects`, при `pnpm dev` показывается напоминание; для правок самого шаблона: `TEMPLATE_DEV=1 pnpm dev`)
+2. Подключить реальные env и инфраструктуру проекта
 3. Заполнить `public/llms.txt` актуальными данными продукта
 4. Подключить Sentry в `error.tsx` при продакшн-деплое
 

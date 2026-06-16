@@ -28,14 +28,16 @@ try {
   process.exit(0);
 }
 
-if (name !== "template-projects") {
+const legacyTemplatePackageNames = new Set(["template-starter"]);
+
+if (!legacyTemplatePackageNames.has(name)) {
   process.exit(0);
 }
 
 // stderr so the message stays visible above Turbopack logs
 console.warn(`
 ┌─────────────────────────────────────────────────────────────────────
-│  Шаблон: package.json ещё «template-projects» (Template-Projects)
+│  Шаблон: package.json ещё содержит имя стартового шаблона
 │  Переименуйте под продукт (отображаемое имя, slug, продакшен-URL):
 │    pnpm post-clone "Мой продукт" "my-product" "https://myproduct.com"
 │  Разрабатываете сам шаблон?  TEMPLATE_DEV=1 pnpm dev — без этого текста

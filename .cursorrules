@@ -1,8 +1,8 @@
-# Cursor Rules — Template-Projects
+# Cursor Rules — Тайное Бюро
 
 ## 0. Project Identity
 
-This repository is a starter template for new products.
+This repository is the Тайное Бюро product codebase, initialized from a Next.js starter.
 
 Actual stack:
 
@@ -21,7 +21,7 @@ Do not treat this project as a Python codebase unless a future task explicitly a
 Primary local path:
 
 ```text
-/Users/DEV/TEMLATES/Template-Projects
+/Users/DEV/Secret-project
 ```
 
 Read these files before significant changes:

@@ -1,167 +1,233 @@
 # Database Schema
 
 ## Database
-PostgreSQL via Supabase. All migrations in `supabase/migrations/`.
+
+Supabase Postgres is the App DB for Тайное Бюро. Brain owns the live knowledge graph; App DB owns public read projections, generated content, community data, audit logs, auth profiles, billing scaffold, and operational state.
 
 **Rules:**
-- Every schema change requires a migration file (`pnpm supabase migration new <name>`)
-- RLS must be enabled on every table (see migration files for policies)
-- Regenerate types after schema changes: `pnpm supabase gen types typescript --project-id <id> > src/types/database.ts`
-- Never manually edit production DB — always use migrations
+
+- Every App DB schema change requires a new migration in `supabase/migrations/`.
+- Do not edit existing migrations in place.
+- RLS must be enabled on every app-owned table.
+- Regenerate TypeScript types after schema changes.
+- Brain node ids are soft references (`text`), not foreign keys.
 
 ---
 
-## Core Tables (scaffolded in template)
+## Existing Scaffold Tables
 
-### profiles
+These tables already exist in the template and remain part of the platform foundation:
 
-Extends Supabase `auth.users`. Created automatically on signup via trigger.
+- `profiles`: Supabase Auth profile extension. Current migrations do not yet include app roles.
+- `subscriptions`: Stripe subscription state.
+- `orgs` and `org_members`: organization scaffold.
+- `notifications`: in-app notification scaffold.
+- `api_keys`: optional public API key scaffold.
+- `audit_logs`: admin/system audit trail.
 
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | FK → auth.users.id |
-| email | text | ✅ | User email (synced from auth) |
-| full_name | text | | Display name |
-| avatar_url | text | | Profile image URL |
-| role | text | ✅ | user / admin / super_admin |
-| stripe_customer_id | text | | Stripe customer ID |
-| onboarding_completed | bool | ✅ | Whether onboarding is done |
-| created_at | timestamptz | ✅ | |
-| updated_at | timestamptz | ✅ | |
+Prefer extending or reusing `profiles` and `audit_logs` instead of creating parallel `users` or `audit_log` tables.
 
-**RLS:** User reads own row. Admin reads all.
+Admin/editor RBAC requires a future approved migration, for example adding an
+app role column to `profiles`. This pass does not change auth schema.
 
 ---
 
-### subscriptions
+## Secret Bureau Read Model
 
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| user_id | uuid | ✅ | FK → profiles.id |
-| stripe_subscription_id | text | ✅ | Stripe subscription ID |
-| stripe_price_id | text | | Active price ID |
-| stripe_product_id | text | | Active product ID |
-| status | text | ✅ | active / canceled / past_due / … |
-| current_period_end | timestamptz | | Renewal date |
-| created_at | timestamptz | ✅ | |
-| updated_at | timestamptz | ✅ | |
+### node_projection
 
-**RLS:** User reads own row. Admin reads all.
+Public archive read model written by manual republish or future Brain webhook sync.
 
----
+| Field         | Type        | Required | Notes                                                                |
+| ------------- | ----------- | :------: | -------------------------------------------------------------------- |
+| id            | uuid        |    ✅    | App DB primary key                                                   |
+| brain_node_id | text        |    ✅    | Unique soft reference to Brain node                                  |
+| node_type     | text        |    ✅    | `topic`, `source`, `claim`, `person`, `organization`, `event`, `tag` |
+| slug          | text        |          | Public URL slug for topics/sources                                   |
+| title         | text        |    ✅    | Public title                                                         |
+| summary       | text        |          | Short public summary                                                 |
+| content       | jsonb       |    ✅    | Renderable snapshot, e.g. localized body/source refs                 |
+| status        | text        |    ✅    | `draft`, `review`, `published`, `archived`                           |
+| credibility   | text        |          | Source credibility, e.g. `A`, `B`, `C`, `D`                          |
+| claim_status  | text        |          | `supported`, `disputed`, `weak`, `unknown`, `needs_source`           |
+| source_refs   | jsonb       |    ✅    | Source/claim ids used by the published snapshot                      |
+| is_stale      | boolean     |    ✅    | Republish needed                                                     |
+| published_at  | timestamptz |          | First/latest publish time                                            |
+| created_at    | timestamptz |    ✅    |                                                                      |
+| updated_at    | timestamptz |    ✅    |                                                                      |
 
-### orgs
-
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| name | text | ✅ | Organization display name |
-| slug | text | ✅ | URL-safe unique identifier |
-| owner_id | uuid | ✅ | FK → profiles.id |
-| created_at | timestamptz | ✅ | |
-
-**RLS:** Members can read. Owner can update/delete.
-
----
-
-### org_members
-
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| org_id | uuid | ✅ | FK → orgs.id |
-| user_id | uuid | ✅ | FK → profiles.id |
-| role | text | ✅ | owner / admin / member |
-| invited_by | uuid | | FK → profiles.id |
-| accepted_at | timestamptz | | Null if invite pending |
-| expires_at | timestamptz | | Invite expiry |
-| created_at | timestamptz | ✅ | |
-
-**RLS:** Member reads own rows. Org owner reads all org rows.
-
----
-
-### notifications
-
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| user_id | uuid | ✅ | FK → profiles.id |
-| title | text | ✅ | Notification heading |
-| body | text | | Detail text |
-| kind | text | ✅ | info / success / warning / error |
-| href | text | | Optional link |
-| read_at | timestamptz | | Null if unread |
-| created_at | timestamptz | ✅ | |
-
-**RLS:** User reads/updates own notifications only.
-
----
-
-### api_keys
-
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| user_id | uuid | ✅ | FK → profiles.id |
-| name | text | ✅ | Human-readable label |
-| key_hash | text | ✅ | SHA-256 hash of the key |
-| last_used_at | timestamptz | | Updated on each use |
-| created_at | timestamptz | ✅ | |
-
-**RLS:** User reads/deletes own keys. Plain key shown once at creation; only hash stored.
-
----
-
-### audit_logs
-
-| Field | Type | Required | Description |
-|---|---|:---:|---|
-| id | uuid | ✅ | PK |
-| actor_id | uuid | | FK → profiles.id (null for system) |
-| action | text | ✅ | e.g. `user.role.changed`, `org.deleted` |
-| entity_type | text | ✅ | Table name: `profiles`, `orgs`, … |
-| entity_id | uuid | | ID of affected row |
-| metadata | jsonb | | Extra context (before/after values) |
-| created_at | timestamptz | ✅ | |
-
-**RLS:** Admin reads all. No user writes (insert via service role only).
-
----
-
-## Your Feature Tables
-
-Add your domain-specific tables here. Follow this pattern:
+Recommended indexes:
 
 ```sql
--- supabase/migrations/YYYYMMDDHHMMSS_create_[table].sql
-CREATE TABLE public.[table_name] (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  -- your fields
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.[table_name] ENABLE ROW LEVEL SECURITY;
-
--- User can only access their own rows
-CREATE POLICY "[table]_owner" ON public.[table_name]
-  FOR ALL USING (auth.uid() = user_id);
+CREATE UNIQUE INDEX idx_node_projection_brain_node_id ON public.node_projection(brain_node_id);
+CREATE INDEX idx_node_projection_type_status ON public.node_projection(node_type, status);
+CREATE INDEX idx_node_projection_slug ON public.node_projection(slug) WHERE slug IS NOT NULL;
 ```
+
+---
+
+## AI Content Tables
+
+### dossiers
+
+Stores versioned dossier drafts and reviewed/published content for a topic.
+
+Key fields:
+
+- `id uuid primary key`
+- `topic_node_id text not null`
+- `status text not null`
+- `raw_output jsonb not null default '{}'`
+- `edited_content jsonb not null default '{}'`
+- `source_refs jsonb not null default '[]'`
+- `parent_version uuid references dossiers(id)`
+- `created_by uuid references profiles(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### presentations
+
+Stores versioned presentation metadata linked to a topic and optional dossier.
+
+Key fields:
+
+- `id uuid primary key`
+- `topic_node_id text not null`
+- `dossier_id uuid references dossiers(id)`
+- `status text not null`
+- `title text not null`
+- `parent_version uuid references presentations(id)`
+- `created_by uuid references profiles(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### slides
+
+Stores individual slide content and speaker notes.
+
+Key fields:
+
+- `id uuid primary key`
+- `presentation_id uuid not null references presentations(id) on delete cascade`
+- `position integer not null`
+- `title text not null`
+- `body jsonb not null default '{}'`
+- `speaker_notes text`
+- `source_refs jsonb not null default '[]'`
+
+### ai_jobs
+
+Tracks generation jobs for dossiers, presentations, and speech assets.
+
+Key fields:
+
+- `id uuid primary key`
+- `job_type text not null`
+- `topic_node_id text`
+- `status text not null`
+- `input jsonb not null default '{}'`
+- `output jsonb not null default '{}'`
+- `error text`
+- `created_by uuid references profiles(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### ai_prompt_templates
+
+Stores admin-editable prompt templates for generation flows.
+
+Key fields:
+
+- `id uuid primary key`
+- `prompt_type text not null`
+- `title text not null`
+- `body text not null`
+- `version integer not null`
+- `is_active boolean not null`
+- `created_by uuid references profiles(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+Presentation generation uses `prompt_type = 'presentation_pdf'`.
+
+---
+
+## Community Tables
+
+### bureau_cities
+
+Cities where Тайное Бюро has community presence.
+
+Key fields:
+
+- `id uuid primary key`
+- `slug text unique not null`
+- `name text not null`
+- `description text`
+- `status text not null`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### bureau_events
+
+Public or member events linked to cities.
+
+Key fields:
+
+- `id uuid primary key`
+- `city_id uuid references bureau_cities(id)`
+- `slug text unique not null`
+- `title text not null`
+- `description text`
+- `starts_at timestamptz`
+- `status text not null`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### applications
+
+Join/event applications from visitors or authenticated users.
+
+Key fields:
+
+- `id uuid primary key`
+- `user_id uuid references profiles(id)`
+- `city_id uuid references bureau_cities(id)`
+- `event_id uuid references bureau_events(id)`
+- `full_name text not null`
+- `email text not null`
+- `telegram text`
+- `motivation text`
+- `selected_topic text`
+- `status text not null`
+- `reviewed_by uuid references profiles(id)`
+- `reviewed_at timestamptz`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+### photo_reports
+
+Published event/city photo reports.
+
+Key fields:
+
+- `id uuid primary key`
+- `event_id uuid references bureau_events(id)`
+- `city_id uuid references bureau_cities(id)`
+- `title text not null`
+- `body jsonb not null default '{}'`
+- `media jsonb not null default '[]'`
+- `status text not null`
+- `created_by uuid references profiles(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
 
 ---
 
 ## Migration Workflow
 
 ```bash
-# Create migration
-pnpm supabase migration new create_[table_name]
-
-# Apply locally
+pnpm supabase migration new create_secret_bureau_core_tables
 pnpm supabase db reset
-
-# Regenerate TypeScript types
-pnpm supabase gen types typescript --project-id <id> > src/types/database.ts
+pnpm supabase gen types typescript --project-id "$SUPABASE_PROJECT_ID" > src/types/database.ts
 ```

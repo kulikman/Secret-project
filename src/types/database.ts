@@ -88,6 +88,237 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_jobs: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          error: string | null;
+          id: string;
+          input: Json;
+          job_type: string;
+          output: Json;
+          status: string;
+          topic_node_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          error?: string | null;
+          id?: string;
+          input?: Json;
+          job_type: string;
+          output?: Json;
+          status?: string;
+          topic_node_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          error?: string | null;
+          id?: string;
+          input?: Json;
+          job_type?: string;
+          output?: Json;
+          status?: string;
+          topic_node_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_prompt_templates: {
+        Row: {
+          body: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          is_active: boolean;
+          prompt_type: string;
+          title: string;
+          updated_at: string;
+          version: number;
+        };
+        Insert: {
+          body: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          is_active?: boolean;
+          prompt_type: string;
+          title: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          is_active?: boolean;
+          prompt_type?: string;
+          title?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [];
+      };
+      applications: {
+        Row: {
+          city_id: string | null;
+          created_at: string;
+          email: string;
+          event_id: string | null;
+          full_name: string;
+          id: string;
+          motivation: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          selected_topic: string | null;
+          status: string;
+          telegram: string | null;
+          updated_at: string;
+          user_id: string | null;
+        };
+        Insert: {
+          city_id?: string | null;
+          created_at?: string;
+          email: string;
+          event_id?: string | null;
+          full_name: string;
+          id?: string;
+          motivation?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selected_topic?: string | null;
+          status?: string;
+          telegram?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          city_id?: string | null;
+          created_at?: string;
+          email?: string;
+          event_id?: string | null;
+          full_name?: string;
+          id?: string;
+          motivation?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selected_topic?: string | null;
+          status?: string;
+          telegram?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
+      bureau_cities: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          slug: string;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          slug: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          slug?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      bureau_events: {
+        Row: {
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          slug: string;
+          starts_at: string | null;
+          status: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          city_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          slug: string;
+          starts_at?: string | null;
+          status?: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          city_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          slug?: string;
+          starts_at?: string | null;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      dossiers: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          edited_content: Json;
+          id: string;
+          parent_version: string | null;
+          raw_output: Json;
+          source_refs: Json;
+          status: string;
+          topic_node_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          edited_content?: Json;
+          id?: string;
+          parent_version?: string | null;
+          raw_output?: Json;
+          source_refs?: Json;
+          status?: string;
+          topic_node_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          edited_content?: Json;
+          id?: string;
+          parent_version?: string | null;
+          raw_output?: Json;
+          source_refs?: Json;
+          status?: string;
+          topic_node_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
           body: string | null;
@@ -224,6 +455,135 @@ export type Database = {
         };
         Relationships: [];
       };
+      node_projection: {
+        Row: {
+          brain_node_id: string;
+          claim_status: string | null;
+          content: Json;
+          created_at: string;
+          credibility: string | null;
+          id: string;
+          is_stale: boolean;
+          node_type: string;
+          published_at: string | null;
+          slug: string | null;
+          source_refs: Json;
+          status: string;
+          summary: string | null;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          brain_node_id: string;
+          claim_status?: string | null;
+          content?: Json;
+          created_at?: string;
+          credibility?: string | null;
+          id?: string;
+          is_stale?: boolean;
+          node_type: string;
+          published_at?: string | null;
+          slug?: string | null;
+          source_refs?: Json;
+          status?: string;
+          summary?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          brain_node_id?: string;
+          claim_status?: string | null;
+          content?: Json;
+          created_at?: string;
+          credibility?: string | null;
+          id?: string;
+          is_stale?: boolean;
+          node_type?: string;
+          published_at?: string | null;
+          slug?: string | null;
+          source_refs?: Json;
+          status?: string;
+          summary?: string | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      photo_reports: {
+        Row: {
+          body: Json;
+          city_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          event_id: string | null;
+          id: string;
+          media: Json;
+          status: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          body?: Json;
+          city_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          event_id?: string | null;
+          id?: string;
+          media?: Json;
+          status?: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: Json;
+          city_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          event_id?: string | null;
+          id?: string;
+          media?: Json;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      presentations: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          dossier_id: string | null;
+          id: string;
+          parent_version: string | null;
+          status: string;
+          title: string;
+          topic_node_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          dossier_id?: string | null;
+          id?: string;
+          parent_version?: string | null;
+          status?: string;
+          title: string;
+          topic_node_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          dossier_id?: string | null;
+          id?: string;
+          parent_version?: string | null;
+          status?: string;
+          title?: string;
+          topic_node_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -257,6 +617,42 @@ export type Database = {
           stripe_customer_id?: string | null;
           updated_at?: string;
           username?: string;
+        };
+        Relationships: [];
+      };
+      slides: {
+        Row: {
+          body: Json;
+          created_at: string;
+          id: string;
+          position: number;
+          presentation_id: string;
+          source_refs: Json;
+          speaker_notes: string | null;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          body?: Json;
+          created_at?: string;
+          id?: string;
+          position: number;
+          presentation_id: string;
+          source_refs?: Json;
+          speaker_notes?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: Json;
+          created_at?: string;
+          id?: string;
+          position?: number;
+          presentation_id?: string;
+          source_refs?: Json;
+          speaker_notes?: string | null;
+          title?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

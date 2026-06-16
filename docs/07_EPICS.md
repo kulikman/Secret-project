@@ -1,156 +1,269 @@
 # Epics
 
 ## Statuses
+
 `Not Started` · `In Progress` · `Blocked` · `Review` · `Done`
 
 ---
 
-## Epic 1: Project Setup ✅ (template scaffolded)
+## Epic 0: Discovery + Architecture Freeze
 
-**Goal:** Working development environment, CI/CD, deployment.
+**Status:** Blocked
 
-**Included in this template:**
-- [x] Next.js 16 + TypeScript + Tailwind v4
-- [x] Supabase integration (client, server, admin, proxy)
-- [x] Environment variable validation (Zod)
-- [x] ESLint + Prettier + commitlint
-- [x] Vitest unit tests
-- [x] semantic-release + CHANGELOG
-- [x] Vercel deployment config
-- [x] knip dead-code detection
+**Goal:** Verify Brain capabilities before implementing knowledge features.
 
----
+**Scope:**
 
-## Epic 2: Authentication ✅ (template scaffolded)
+- Validate Brain SDK/API against capabilities `C1-C10`.
+- Confirm project/namespace isolation strategy.
+- Confirm ingest profile support.
+- Confirm projection invalidation strategy.
+- Produce app-side and Brain-side blocker lists.
 
-**Goal:** Users can sign up, log in, reset password, manage session.
+**Current Output:**
 
-**Included in this template:**
-- [x] Email/password auth via Supabase
-- [x] OAuth support (Google, GitHub — configure in Supabase dashboard)
-- [x] Magic link support
-- [x] Auth callback with onboarding redirect
-- [x] Session refresh in `proxy.ts`
-- [x] Protected routes via `proxy.ts` matcher
-- [x] Profile creation trigger on signup
+- See `docs/10_BRAIN_DISCOVERY.md`.
 
----
+**Acceptance Criteria:**
 
-## Epic 3: Onboarding ✅ (template scaffolded)
-
-**Goal:** New users are guided to their first value moment.
-
-**Included:**
-- [x] Multi-step onboarding wizard (`/onboarding`)
-- [x] Steps defined in `src/features/onboarding/lib/steps.ts`
-- [x] `profiles.onboarding_completed` flag
-- [x] Auth callback redirects new users to onboarding
-
-**To customize:**
-- [ ] Update steps in `src/features/onboarding/lib/steps.ts`
-- [ ] Add product-specific onboarding questions
+- [x] Local Brain code reviewed.
+- [x] Capability matrix drafted.
+- [x] Brain-side blockers listed.
+- [x] App-side next steps listed.
+- [ ] Live Secret Bureau Brain project/slug confirmed.
+- [ ] Scoped Brain token provisioned through environment variables.
+- [ ] Decision made on whether to implement Brain gaps before Epic 2.
 
 ---
 
-## Epic 4: Core Product Feature
+## Epic 1: Platform Foundation
 
-**Goal:** [What the main feature does]
+**Status:** Done
 
-**Status:** Not Started
+**Goal:** Prepare the app foundation for Secret Bureau-specific development.
 
-### Tasks
-- [ ] Define data model → add to `docs/05_DATABASE_SCHEMA.md`
-- [ ] Write migration
-- [ ] Create Server Actions
-- [ ] Create Server Components (list + detail pages)
-- [ ] Create client forms
-- [ ] Add to nav in `src/config/site.ts`
-- [ ] Add route to `src/lib/constants.ts`
-- [ ] Add breadcrumb label to `src/components/layout/breadcrumbs.tsx`
-- [ ] Write unit tests
-- [ ] Wire up PostHog events
+**Scope:**
 
-### Acceptance Criteria
-- [ ] User can create [entity]
-- [ ] User can view [entity]
-- [ ] User can update [entity]
-- [ ] User cannot access another user's [entity]
-- [ ] Free tier limit enforced via `<PlanGate>`
+- Keep Next.js 16 + React 19.2 + Tailwind v4 stack.
+- Add/confirm app env schema for Brain integration.
+- Prepare Supabase schema direction for community and projection tables.
+- Align docs/backlog with the product architecture.
+- Keep auth/payment internals unchanged unless explicitly approved.
+
+**Acceptance Criteria:**
+
+- [x] Product docs no longer describe generic SaaS template scope.
+- [x] App env schema includes Brain connection variables.
+- [x] Initial App DB migration plan is documented.
+- [x] Health/readiness strategy is documented.
 
 ---
 
-## Epic 5: Payments & Subscriptions ✅ (template scaffolded)
+## Epic 2: Knowledge Authoring + Projection
 
-**Goal:** Users can upgrade to paid plans; revenue flows in.
+**Status:** Blocked
 
-**Included:**
-- [x] Stripe Checkout integration
-- [x] Webhook handler (`checkout.completed`, `subscription.updated`, `invoice.payment_failed`)
-- [x] `upsertSubscription()` keeps DB in sync
-- [x] `getPlanLimits()` driven by env var product IDs
-- [x] `<PlanGate>` component for feature gating
-- [x] Billing settings page (`/settings/billing`)
-- [x] Usage page (`/settings/usage`)
+**Goal:** Let admins create/edit knowledge in Brain and publish App DB read projections.
 
-**To configure:**
-- [ ] Set `STRIPE_PRODUCT_ID_PRO`, `STRIPE_PRODUCT_ID_TEAM`, `STRIPE_PRICE_ID_PRO`, `STRIPE_PRICE_ID_TEAM` in Vercel env
-- [ ] Update limits in `src/lib/plan-limits.ts`
+**Blocked By:**
 
----
+- Brain SDK/API gaps from `docs/10_BRAIN_DISCOVERY.md`.
+- Live Brain project/token not yet confirmed.
 
-## Epic 6: Notifications ✅ (template scaffolded, feature-flagged)
+**Scope:**
 
-**Goal:** Users see real-time in-app notifications.
+- Brain adapter in app.
+- Admin knowledge routes.
+- Manual republish flow.
+- `node_projection` read model.
+- Audit trail for admin actions.
 
-**Enable:** Set `NEXT_PUBLIC_FF_NOTIFICATIONS=true`
+**Current App-Side Output:**
 
-**Included:**
-- [x] `<NotificationsBell>` with Supabase Realtime badge
-- [x] `sendNotification(userId, { title, body, kind, href })` server helper
-- [x] Auto-cleanup of old notifications (cron job)
+- `node_projection` App DB migration added.
+- Projection validation/mapping helpers added in `src/features/knowledge`.
+- Republish remains blocked by missing direct Brain `getNode` / update contracts.
 
----
+**Acceptance Criteria:**
 
-## Epic 7: Organizations / Teams ✅ (template scaffolded)
-
-**Goal:** Multiple users can collaborate within a workspace.
-
-**Included:**
-- [x] `orgs` + `org_members` tables with RLS
-- [x] Create org form (`/settings/org`)
-- [x] Org list with member counts
-
-**To implement:**
-- [ ] Invite flow (email invite → accept link)
-- [ ] Org-scoped data (add `org_id` FK to core tables)
-- [ ] Role management within org
+- [ ] Editor can create a topic/source through the app.
+- [ ] Data is written to Brain.
+- [ ] Manual republish writes projection to App DB.
+- [ ] Public routes do not call live Brain.
 
 ---
 
-## Epic 8: Admin Panel
+## Epic 3: Ingest + Review Workflow
 
-**Goal:** Internal team can manage users and platform data.
+**Status:** Blocked
 
-**Status:** Not Started
+**Goal:** Convert sources into reviewed knowledge entities.
 
-### Tasks
-- [ ] Create `/admin` route group with role guard
-- [ ] Users list with search and role filter
-- [ ] Subscription overview
-- [ ] Audit log viewer
-- [ ] Impersonate user (super_admin only)
+**Blocked By:**
+
+- Deployment/release of local Brain C9 `source_studies_archive` ingest profile.
+- Knowledge authoring/projection not implemented.
+
+**Scope:**
+
+- Source ingest trigger.
+- Review queue.
+- Merge duplicate nodes.
+- Publish reviewed projections.
+
+**Acceptance Criteria:**
+
+- [ ] Admin can ingest 5-10 sources.
+- [ ] Brain creates pending entities/facts/relations.
+- [ ] Editor can review and publish.
 
 ---
 
-## Epic 9: Testing & QA
+## Epic 4: Public Portal
 
-**Goal:** Critical flows are tested; CI enforces quality gates.
+**Status:** Done
 
-**Included:**
-- [x] Vitest unit tests for utilities and Zod schemas
-- [x] CI pipeline (pnpm tsc + lint + test)
+**Goal:** Publish SEO-friendly archive pages from App DB projection.
 
-**To add:**
-- [ ] Playwright E2E for auth flow
-- [ ] Playwright E2E for checkout flow
-- [ ] Playwright E2E for core feature flow
+**Scope:**
+
+- `/`
+- `/topics`
+- `/topics/:slug`
+- `/sources/:id`
+- SSR/ISR from `node_projection`.
+- SEO metadata and sitemap.
+- Graceful degradation when Brain is unavailable.
+
+**Acceptance Criteria:**
+
+- [x] Published topic page renders from App DB.
+- [x] Existing public pages remain available when Brain is unavailable.
+
+**Current Output:**
+
+- Public landing page updated for Тайное Бюро.
+- `GET /api/topics`, `GET /api/topics/:slug`, and `GET /api/sources/:id`
+  read `node_projection`.
+- `/topics`, `/topics/:slug`, and `/sources/:id` pages render from App DB
+  projection helpers.
+- `/topics` added to static sitemap entries.
+
+---
+
+## Epic 5: AI Content Pipeline
+
+**Status:** In Progress
+
+**Goal:** Generate dossiers, presentations, and speech assets from reviewed knowledge.
+
+**Scope:**
+
+- `ai_jobs`.
+- Dossier generation.
+- Presentation generation.
+- Source-first validation.
+- Version history.
+- PDF presentation export.
+- Admin-editable presentation prompt.
+
+**Acceptance Criteria:**
+
+- [x] Every generated block has `source_refs`.
+- [x] Publishing is blocked when sources are missing.
+- [x] Regeneration creates a new version.
+
+**Current Foundation Output:**
+
+- AI content tables migration added for `dossiers`, `presentations`, `slides`,
+  and `ai_jobs`.
+- Source-first validators added in `src/features/ai-content`.
+- No model/provider calls are implemented yet.
+- PDF presentation export remains future work.
+- Presentation prompt must be editable through a future admin surface.
+
+---
+
+## Epic 6: Graph / Awakening Map
+
+**Status:** Blocked
+
+**Goal:** Render an interactive graph of topics and intersections.
+
+**Blocked By:**
+
+- Deployment/release of local Brain C6/C7/C10 neighbors/intersections/subgraph
+  contracts.
+- App-side graph cache/UI wiring.
+
+**Scope:**
+
+- Graph cache.
+- Sigma.js map.
+- 1-hop and 2-hop exploration.
+- Filters by relation/category.
+
+**Acceptance Criteria:**
+
+- [ ] Root topic shows related entities and neighboring topics.
+- [ ] Map does not depend on full live Brain graph for production usage.
+
+---
+
+## Epic 7: Community Module
+
+**Status:** In Progress
+
+**Goal:** Implement cities, events, applications, and photo reports in App DB.
+
+**Scope:**
+
+- Bureau cities.
+- Events.
+- Applications.
+- Admin moderation.
+- Curator/editor/admin permissions.
+
+**Acceptance Criteria:**
+
+- [x] User can submit an application.
+- [ ] Admin can change application status.
+- [ ] Event can be created and published.
+
+**Current Foundation Output:**
+
+- Community tables migration added for cities, events, applications, and photo
+  reports.
+- `POST /api/applications` validates and inserts public applications through
+  the RLS client.
+- Admin moderation remains blocked by the approved RBAC/admin surface.
+
+---
+
+## Epic 8: Hardening + Go-Live
+
+**Status:** In Progress
+
+**Goal:** Prepare the system for production operations.
+
+**Scope:**
+
+- E2E smoke tests.
+- Rate limits.
+- Retry/timeout policies.
+- Projection repair tooling.
+- Cost observability.
+- Runbooks.
+
+**Acceptance Criteria:**
+
+- [ ] Critical paths are covered by smoke tests.
+- [ ] Failures are diagnosable via logs/trace ids.
+- [x] Brain outage behavior is documented and tested.
+
+**Current Foundation Output:**
+
+- `pnpm guardrails` verifies public portal / Brain dependency boundaries.
+- Operational runbooks added in `docs/16_RUNBOOKS.md`.
+- Full production hardening still requires deployed environments and E2E smoke
+  tests.

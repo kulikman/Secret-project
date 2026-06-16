@@ -21,7 +21,7 @@
 ## Decisions
 
 ### 2026-04 — Stack Pinning to Next.js 16
-**Context:** Project is Template-Projects (fork of the SaaS template stack)
+**Context:** Project is Тайное Бюро (fork of the SaaS template stack)
 **Decision:** Next.js 16 App Router + React 19.2 + Supabase + Tailwind v4 + shadcn/ui v4 + Vercel
 **Alternatives Considered:** Remix (less ecosystem), Prisma (redundant with Supabase types), Next.js 14/15 (EOL path)
 **Consequences:** All data fetching in Server Components by default; `proxy.ts` replaces `middleware.ts`; `"use cache"` for opt-in caching; Edge Functions for sensitive ops

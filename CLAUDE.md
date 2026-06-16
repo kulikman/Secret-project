@@ -383,7 +383,7 @@ Three files provide the global error safety net:
 ## SEO & Metadata
 
 - Root `layout.tsx` uses `title.template` from `siteConfig` — child pages only
-  need to set `title` (e.g. `"Dashboard"` renders as `"Dashboard — ProductName"`).
+  need to set `title` (e.g. `"Dashboard"` renders as `"Dashboard — Тайное Бюро"`).
 - Use `generateMetadata()` for dynamic pages (blog posts, docs):
   ```tsx
   export async function generateMetadata({ params }: Props): Promise<Metadata> {

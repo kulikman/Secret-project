@@ -9,22 +9,26 @@ Fill it in when starting a new project. Keep it updated as the project evolves.
 
 ## Files
 
-| File | Purpose | Fill in when |
-|---|---|---|
-| `00_PROJECT_OVERVIEW.md` | Project name, type, stage, links | Day 1 |
-| `01_PRODUCT_BRIEF.md` | Problem, solution, UVP, metrics | Day 1 |
-| `02_MVP_SCOPE.md` | What's in/out of scope, release criteria | Day 1 |
-| `03_USER_ROLES.md` | Roles, permissions, RLS patterns | Day 1 |
-| `04_ARCHITECTURE.md` | System design, folder structure, critical flows | Day 1 (pre-filled for this stack) |
-| `05_DATABASE_SCHEMA.md` | Tables, fields, indexes, RLS policies | As tables are created |
-| `06_API_CONTRACTS.md` | Route Handlers, Server Actions, webhooks | As endpoints are added |
-| `07_EPICS.md` | Feature epics with status | Sprint planning |
-| `08_BACKLOG.md` | Task list with IDs and priorities | Ongoing |
-| `09_CURRENT_STATUS.md` | Live project status — updated after every task | After every task |
-| `12_TEST_PLAN.md` | Test flows, unit test checklist | Before MVP launch |
-| `13_SECURITY_CHECKLIST.md` | Security audit checklist | Before production deploy |
-| `14_CHANGELOG.md` | Product-level changelog | After each release |
-| `15_DECISIONS_LOG.md` | Architectural decision records | When a meaningful choice is made |
+| File                        | Purpose                                         | Fill in when                      |
+| --------------------------- | ----------------------------------------------- | --------------------------------- |
+| `00_PROJECT_OVERVIEW.md`    | Project name, type, stage, links                | Day 1                             |
+| `01_PRODUCT_BRIEF.md`       | Problem, solution, UVP, metrics                 | Day 1                             |
+| `02_MVP_SCOPE.md`           | What's in/out of scope, release criteria        | Day 1                             |
+| `03_USER_ROLES.md`          | Roles, permissions, RLS patterns                | Day 1                             |
+| `04_ARCHITECTURE.md`        | System design, folder structure, critical flows | Day 1 (pre-filled for this stack) |
+| `05_DATABASE_SCHEMA.md`     | Tables, fields, indexes, RLS policies           | As tables are created             |
+| `06_API_CONTRACTS.md`       | Route Handlers, Server Actions, webhooks        | As endpoints are added            |
+| `07_EPICS.md`               | Feature epics with status                       | Sprint planning                   |
+| `08_BACKLOG.md`             | Task list with IDs and priorities               | Ongoing                           |
+| `09_CURRENT_STATUS.md`      | Live project status — updated after every task  | After every task                  |
+| `10_BRAIN_DISCOVERY.md`     | Brain SDK/API capability matrix and blockers    | Epic 0                            |
+| `11_PLATFORM_FOUNDATION.md` | Brain env, adapter, DB, and readiness plan      | Epic 1                            |
+| `12_TEST_PLAN.md`           | Test flows, unit test checklist                 | Before MVP launch                 |
+| `13_SECURITY_CHECKLIST.md`  | Security audit checklist                        | Before production deploy          |
+| `14_CHANGELOG.md`           | Product-level changelog                         | After each release                |
+| `15_DECISIONS_LOG.md`       | Architectural decision records                  | When a meaningful choice is made  |
+| `16_RUNBOOKS.md`            | Operational guardrails and runbooks             | During hardening                  |
+| `17_EXTERNAL_SETUP.md`      | External access/provisioning handoff            | Before connecting live services   |
 
 ---
 

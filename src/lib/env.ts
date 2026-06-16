@@ -9,62 +9,88 @@ import { z } from "zod";
  *
  * Add new env vars here BEFORE using them in code.
  */
-const serverSchema = z.object({
-  // Supabase
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+const serverSchema = z
+  .object({
+    // Supabase
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 
-  // App
-  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_APP_NAME: z.string().default("Template-Projects"),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+    // App
+    NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_APP_NAME: z.string().default("Тайное Бюро"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
-  // Analytics (optional)
-  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
-  NEXT_PUBLIC_GTM_ID: z.string().optional(),
+    // Brain (server-only). BRAIN_API_KEY must never be exposed through client env.
+    BRAIN_API_URL: z.string().url().default("https://brain.elaurion.com"),
+    BRAIN_API_KEY: z.string().min(1).optional(),
+    BRAIN_PROJECT_ID: z.string().min(1).optional(),
+    BRAIN_PROJECT_SLUG: z.string().min(1).optional(),
 
-  // Payments (optional)
-  STRIPE_SECRET_KEY: z.string().optional(),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().optional(),
-  // Stripe product IDs — map to plan tiers in plan-limits.ts
-  STRIPE_PRODUCT_ID_PRO: z.string().optional(),
-  STRIPE_PRODUCT_ID_TEAM: z.string().optional(),
-  // Price IDs — used by BillingCard checkout buttons
-  STRIPE_PRICE_ID_PRO: z.string().optional(),
-  STRIPE_PRICE_ID_TEAM: z.string().optional(),
+    // Analytics (optional)
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+    NEXT_PUBLIC_GTM_ID: z.string().optional(),
 
-  // AI (optional)
-  ANTHROPIC_API_KEY: z.string().optional(),
-  OPENAI_API_KEY: z.string().optional(),
+    // Payments (optional)
+    STRIPE_SECRET_KEY: z.string().optional(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    // Stripe product IDs — map to plan tiers in plan-limits.ts
+    STRIPE_PRODUCT_ID_PRO: z.string().optional(),
+    STRIPE_PRODUCT_ID_TEAM: z.string().optional(),
+    // Price IDs — used by BillingCard checkout buttons
+    STRIPE_PRICE_ID_PRO: z.string().optional(),
+    STRIPE_PRICE_ID_TEAM: z.string().optional(),
 
-  // Email (optional)
-  RESEND_API_KEY: z.string().optional(),
-  RESEND_FROM_EMAIL: z.string().email().optional(),
+    // AI (optional)
+    ANTHROPIC_API_KEY: z.string().optional(),
+    OPENAI_API_KEY: z.string().optional(),
 
-  // Cron jobs (required when you wire scheduled routes)
-  CRON_SECRET: z.string().min(16).optional(),
+    // Email (optional)
+    RESEND_API_KEY: z.string().optional(),
+    RESEND_FROM_EMAIL: z.string().email().optional(),
 
-  // Rate limiting in production (optional — falls back to in-memory limiter)
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    // Cron jobs (required when you wire scheduled routes)
+    CRON_SECRET: z.string().min(16).optional(),
 
-  // Error tracking (optional)
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-  SENTRY_AUTH_TOKEN: z.string().optional(),
-  SENTRY_ORG: z.string().optional(),
-  SENTRY_PROJECT: z.string().optional(),
+    // Rate limiting in production (optional — falls back to in-memory limiter)
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
-  // Product analytics — PostHog (optional)
-  NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-  NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+    // Error tracking (optional)
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+    SENTRY_AUTH_TOKEN: z.string().optional(),
+    SENTRY_ORG: z.string().optional(),
+    SENTRY_PROJECT: z.string().optional(),
 
-  // Feature flags (optional)
-  NEXT_PUBLIC_FF_ONBOARDING: z.string().optional(),
-  NEXT_PUBLIC_FF_NOTIFICATIONS: z.string().optional(),
-  NEXT_PUBLIC_FF_API_KEYS: z.string().optional(),
-});
+    // Product analytics — PostHog (optional)
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+
+    // Feature flags (optional)
+    NEXT_PUBLIC_FF_ONBOARDING: z.string().optional(),
+    NEXT_PUBLIC_FF_NOTIFICATIONS: z.string().optional(),
+    NEXT_PUBLIC_FF_API_KEYS: z.string().optional(),
+  })
+  .superRefine((env, ctx) => {
+    const hasBrainProject = Boolean(env.BRAIN_PROJECT_ID || env.BRAIN_PROJECT_SLUG);
+
+    if (env.BRAIN_API_KEY && !hasBrainProject) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["BRAIN_PROJECT_ID"],
+        message: "BRAIN_PROJECT_ID or BRAIN_PROJECT_SLUG is required when BRAIN_API_KEY is set",
+      });
+    }
+
+    if (!env.BRAIN_API_KEY && hasBrainProject) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["BRAIN_API_KEY"],
+        message: "BRAIN_API_KEY is required when a Brain project is configured",
+      });
+    }
+  });
 
 /**
  * Client-side environment variables.
@@ -76,7 +102,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_APP_NAME: z.string().default("Template-Projects"),
+  NEXT_PUBLIC_APP_NAME: z.string().default("Тайное Бюро"),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_GTM_ID: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
@@ -88,7 +114,7 @@ const clientSchema = z.object({
 /** Public site URL/name only — for `robots.ts`, `sitemap.ts`, and other metadata that must build without Supabase keys. */
 const publicMetadataSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_APP_NAME: z.string().default("Template-Projects"),
+  NEXT_PUBLIC_APP_NAME: z.string().default("Тайное Бюро"),
 });
 
 const publicAnalyticsSchema = z.object({

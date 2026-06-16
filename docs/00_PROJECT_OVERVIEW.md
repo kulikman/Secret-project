@@ -1,33 +1,43 @@
 # Project Overview
 
 ## Project Name
-[Название проекта]
+
+Тайное Бюро
 
 ## One-line Description
-[Коротко: что это за продукт — 1 предложение]
+
+Публичный исследовательский архив, карта knowledge-связей и закрытое сообщество под одним фронтендом.
 
 ## Project Type
-- [ ] SaaS
+
+- [x] Web Platform
+- [x] Knowledge Archive
+- [x] Community Platform
+- [x] AI-assisted Editorial Tool
 - [ ] Marketplace
-- [ ] Internal Tool / Admin Panel
-- [ ] AI Agent / Chatbot
-- [ ] Web Platform
+- [ ] Internal-only Tool
 - [ ] API Product
-- [ ] Other: ...
 
 ## Main Goal
-[Главная цель проекта — что он должен доказать или достигнуть]
+
+Запустить надежный публичный портал Тайного Бюро, где проверенные темы, источники и связи публикуются из App DB projection, а админская работа с knowledge-графом идет через Brain.
 
 ## Target Users
-[Кто будет пользоваться продуктом — B2B / B2C / internal]
+
+- Публичные читатели и исследователи: изучают темы, источники и связи.
+- Редакторы и кураторы: создают, проверяют и публикуют knowledge-материалы.
+- Администраторы: управляют публикацией, ingest, сообществом и модерацией заявок.
+- Участники сообщества: смотрят города/события и подают заявки на участие.
 
 ## Core Value
-[Какую ключевую ценность продукт даёт пользователю]
+
+Тайное Бюро соединяет source-first архив, граф связей и community-модуль так, чтобы публичные страницы оставались быстрыми и доступными даже при деградации Brain.
 
 ## Current Stage
+
 - [ ] Idea
 - [ ] Prototype
-- [ ] MVP
+- [x] MVP Foundation
 - [ ] Beta
 - [ ] Production
 - [ ] Scaling
@@ -36,38 +46,41 @@
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 (strict) |
-| Styling | Tailwind CSS v4 |
-| UI Primitives | shadcn/ui + radix-ui |
-| Backend | Supabase (Postgres, Auth, Storage) |
-| Payments | Stripe |
-| Email | Resend + React Email |
-| Analytics | PostHog |
-| Deployment | Vercel |
-| Package Manager | pnpm 10 |
+| Layer             | Choice                                 |
+| ----------------- | -------------------------------------- |
+| Framework         | Next.js 16 App Router                  |
+| Language          | TypeScript strict                      |
+| Styling           | Tailwind CSS v4                        |
+| UI Primitives     | shadcn/ui + radix-ui                   |
+| App DB/Auth       | Supabase Postgres + Supabase Auth      |
+| Knowledge Backend | Elaurion Brain via server-only adapter |
+| Payments Scaffold | Stripe                                 |
+| Email Scaffold    | Resend + React Email                   |
+| Analytics         | PostHog                                |
+| Deployment        | Vercel                                 |
+| Package Manager   | pnpm 10                                |
 
 ---
 
 ## Important Links
 
-| Resource | URL |
-|---|---|
-| Repository | https://github.com/[org]/[repo] |
-| Design | [Figma link] |
-| Production | https://[domain] |
-| Staging | https://staging.[domain] |
-| Supabase | https://supabase.com/dashboard/project/[id] |
-| Stripe | https://dashboard.stripe.com |
-| Vercel | https://vercel.com/[team]/[project] |
+| Resource       | URL                                        |
+| -------------- | ------------------------------------------ |
+| Repository     | https://github.com/kulikman/Secret-project |
+| Local app      | http://localhost:3000                      |
+| Production     | TBD                                        |
+| Staging        | TBD                                        |
+| Supabase       | TBD                                        |
+| Brain project  | `secret-bureau-public-archive` recommended |
+| Vercel project | TBD                                        |
 
 ---
 
 ## Team
 
-| Role | Person |
-|---|---|
-| Product Owner | [Name] |
-| Lead Developer | [Name / Claude Code] |
+| Role                 | Owner                        |
+| -------------------- | ---------------------------- |
+| Product Owner        | Anton                        |
+| Technical Lead Agent | Codex                        |
+| Brain Owner          | External Brain project owner |
+| Editors / Curators   | TBD                          |

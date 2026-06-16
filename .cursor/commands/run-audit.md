@@ -1,8 +1,8 @@
 ---
-description: Run audit — полный аудит Template-Projects, при необходимости обновляет rules.json
+description: Run audit — полный аудит Тайное Бюро, при необходимости обновляет rules.json
 ---
 
-Выполни полный аудит репозитория **Template-Projects** строго по инструкции в `audit/AUDIT_PROMPT.md`.
+Выполни полный аудит репозитория **Тайное Бюро** строго по инструкции в `audit/AUDIT_PROMPT.md`.
 
 1. Прочитай `audit/rules.json` и `CLAUDE.md`.
 2. Проверь дерево `src/` (в т.ч. `src/app/`, `src/lib/`, `src/components/`) и конфиги на соответствие каждому правилу; сформируй отчёт с таблицей статусов.

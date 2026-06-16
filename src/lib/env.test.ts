@@ -25,6 +25,7 @@ describe("getServerEnv()", () => {
     const env = getServerEnv();
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe(VALID_ENV.NEXT_PUBLIC_SUPABASE_URL);
     expect(env.SUPABASE_SERVICE_ROLE_KEY).toBe(VALID_ENV.SUPABASE_SERVICE_ROLE_KEY);
+    expect(env.BRAIN_API_URL).toBe("https://brain.elaurion.com");
   });
 
   it("throws when SUPABASE_SERVICE_ROLE_KEY is missing", () => {
@@ -34,6 +35,33 @@ describe("getServerEnv()", () => {
 
   it("throws when SUPABASE_URL is not a valid URL", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "not-a-url");
+    expect(() => getServerEnv()).toThrow("Invalid environment variables");
+  });
+
+  it("accepts scoped Brain configuration on the server", () => {
+    vi.stubEnv("BRAIN_API_URL", "https://brain.example.com");
+    vi.stubEnv("BRAIN_API_KEY", "brain-test-key");
+    vi.stubEnv("BRAIN_PROJECT_SLUG", "secret-bureau-public-archive");
+
+    const env = getServerEnv();
+
+    expect(env.BRAIN_API_URL).toBe("https://brain.example.com");
+    expect(env.BRAIN_API_KEY).toBe("brain-test-key");
+    expect(env.BRAIN_PROJECT_SLUG).toBe("secret-bureau-public-archive");
+  });
+
+  it("throws when Brain token is set without project scope", () => {
+    vi.stubEnv("BRAIN_API_KEY", "brain-test-key");
+    vi.stubEnv("BRAIN_PROJECT_ID", "");
+    vi.stubEnv("BRAIN_PROJECT_SLUG", "");
+
+    expect(() => getServerEnv()).toThrow("Invalid environment variables");
+  });
+
+  it("throws when Brain project is set without token", () => {
+    vi.stubEnv("BRAIN_API_KEY", "");
+    vi.stubEnv("BRAIN_PROJECT_SLUG", "secret-bureau-public-archive");
+
     expect(() => getServerEnv()).toThrow("Invalid environment variables");
   });
 });
@@ -47,10 +75,14 @@ describe("getClientEnv()", () => {
   });
 
   it("returns only public env vars", () => {
+    vi.stubEnv("BRAIN_API_KEY", "brain-test-key");
+    vi.stubEnv("BRAIN_PROJECT_SLUG", "secret-bureau-public-archive");
+
     const env = getClientEnv();
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe(VALID_ENV.NEXT_PUBLIC_SUPABASE_URL);
     // Service role should not exist on client env type
     expect(env).not.toHaveProperty("SUPABASE_SERVICE_ROLE_KEY");
+    expect(env).not.toHaveProperty("BRAIN_API_KEY");
   });
 
   it("exposes optional public analytics env vars to client code", () => {
@@ -72,7 +104,7 @@ describe("getPublicMetadataEnv()", () => {
   it("returns defaults when URL/name are unset (no Supabase vars required)", () => {
     const env = getPublicMetadataEnv();
     expect(env.NEXT_PUBLIC_APP_URL).toBe("http://localhost:3000");
-    expect(env.NEXT_PUBLIC_APP_NAME).toBe("Template-Projects");
+    expect(env.NEXT_PUBLIC_APP_NAME).toBe("Тайное Бюро");
   });
 
   it("reads overrides when set", () => {
