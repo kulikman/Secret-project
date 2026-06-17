@@ -6,8 +6,10 @@
 
 Current implementation status:
 
-- Existing scaffold routes for auth, Stripe, health, and cron remain unchanged.
+- Payment routes are removed from product scope; there is no checkout, portal, or Stripe webhook API.
+- API routes are being standardized through `src/lib/api-response.ts`.
 - Secret Bureau public archive read routes for topics/sources are implemented.
+- Secret Bureau public application submission is implemented with Zod validation and rate limiting.
 - Secret Bureau admin/community routes below are target contracts until implemented.
 - Public archive routes must read App DB projection, not Brain.
 
@@ -27,6 +29,25 @@ Error:
 { "ok": false, "error": "Human-readable message" }
 ```
 
+Backend Epic BE-03 tracks the remaining response envelope standardization.
+
+---
+
+## Route Inventory
+
+| Route                  | Method   | Auth                 | Data Source                               | Status                       | Test Coverage                             |
+| ---------------------- | -------- | -------------------- | ----------------------------------------- | ---------------------------- | ----------------------------------------- |
+| `/api/health`          | GET      | public               | stateless                                 | implemented                  | no dedicated test                         |
+| `/api/topics`          | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/route.test.ts`        |
+| `/api/topics/:slug`    | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/[slug]/route.test.ts` |
+| `/api/sources/:id`     | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/sources/[id]/route.test.ts`  |
+| `/api/applications`    | POST     | public/authenticated | service-role duplicate check + RLS insert | implemented                  | `src/app/api/applications/route.test.ts`  |
+| `/api/orgs`            | GET/POST | authenticated        | org feature + Supabase                    | implemented                  | `src/app/api/orgs/route.test.ts`          |
+| `/api/cron/cleanup`    | GET      | `CRON_SECRET` bearer | maintenance feature + service role        | implemented                  | `src/app/api/cron/cleanup/route.test.ts`  |
+| `/api/cron/example`    | GET      | `CRON_SECRET` bearer | stateless log                             | scaffold-only, not scheduled | envelope helper only                      |
+| `/api/map/graph`       | GET      | public               | future graph cache/projection             | not implemented              | none                                      |
+| `/api/admin/*`         | mixed    | admin role           | future server actions                     | not implemented              | feature-level moderation tests only       |
+
 ---
 
 ## Public Archive Routes
@@ -39,9 +60,8 @@ Reads published topic rows from `node_projection`.
 
 Query params:
 
-- `cursor`
+- `page`
 - `limit`
-- `q`
 
 Response:
 
@@ -50,7 +70,7 @@ Response:
   "ok": true,
   "data": {
     "items": [],
-    "pagination": { "cursor": null, "hasMore": false }
+    "pagination": { "page": 1, "limit": 20, "total": 0, "hasMore": false }
   }
 }
 ```
@@ -67,9 +87,7 @@ Response:
 {
   "ok": true,
   "data": {
-    "topic": {},
-    "related": [],
-    "sources": []
+    "topic": {}
   }
 }
 ```
@@ -83,6 +101,8 @@ Reads one published source projection by App DB id or Brain node id, depending o
 ### GET /api/map/graph
 
 **Auth:** public
+
+**Status:** not implemented.
 
 Reads graph cache/projection, not live Brain.
 
@@ -204,6 +224,19 @@ Returns published upcoming events.
 
 Creates a join/event application after Zod validation and rate limiting.
 
+Current rate limit:
+
+- key: client IP + normalized email
+- window: 1 hour
+- max attempts: 5
+- exceeded response: `429` with `Retry-After`
+
+Duplicate handling:
+
+- duplicate key: normalized email + city + event
+- duplicate response: same `{ "ok": true }` shape as a fresh submission
+- duplicate insert: skipped, to avoid repeated rows and email enumeration
+
 Request:
 
 ```json
@@ -218,27 +251,80 @@ Request:
 }
 ```
 
+Responses:
+
+```json
+{ "ok": true }
+```
+
+```json
+{ "ok": false, "error": "Too many application attempts" }
+```
+
 ### PATCH /api/admin/applications/:id
 
 **Auth:** curator/admin/super_admin
 
 Changes application status and writes audit log.
 
+Status: route not implemented yet. The admin UI uses the backend helper from
+`src/features/community/api/moderation.ts`, exported via `@/features/community`.
+
+---
+
+## Organization API
+
+### GET /api/orgs
+
+**Auth:** authenticated
+
+Returns the current user's organizations. Unauthenticated requests return JSON
+`401`, not a login redirect.
+
+```json
+{
+  "ok": true,
+  "data": { "orgs": [] }
+}
+```
+
+### POST /api/orgs
+
+**Auth:** authenticated
+
+Creates an organization for the current user. Validation failures include Zod
+issue summaries.
+
+```json
+{
+  "ok": true,
+  "data": { "org": { "id": "uuid", "slug": "bureau" } }
+}
+```
+
+```json
+{
+  "ok": false,
+  "error": "Unauthorized"
+}
+```
+
 ---
 
 ## Internal / External Callbacks
 
-### POST /api/webhooks/stripe
-
-Existing scaffold route.
-
-**Auth:** Stripe signature verification.
-
-Handled events remain owned by the billing scaffold.
-
 ### GET /api/cron/cleanup
 
-Existing scaffold route.
+**Auth:** `CRON_SECRET` bearer
+
+Runs scheduled cleanup and returns the standard envelope.
+
+```json
+{
+  "ok": true,
+  "data": { "notificationsDeleted": 0, "expiredInvitesDeleted": 0 }
+}
+```
 
 **Auth:** `Authorization: Bearer ${CRON_SECRET}`.
 

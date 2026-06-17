@@ -10,17 +10,18 @@ export type AuditAction =
   | "auth.signup"
   | "auth.password_reset_requested"
   | "auth.password_reset_completed"
-  | "billing.checkout_started"
-  | "billing.subscription_created"
-  | "billing.subscription_updated"
-  | "billing.subscription_canceled"
+  | "admin.role_assigned"
+  | "admin.role_revoked"
+  | "admin.application_status_changed"
+  | "admin.prompt_template_updated"
+  | "admin.generated_content_published"
   | "profile.updated"
   | "profile.deleted";
 
 interface AuditParams {
   userId: string | null;
   action: AuditAction;
-  /** e.g. "subscription:sub_xxx", "profile:uuid" */
+  /** e.g. "application:uuid", "profile:uuid" */
   resource?: string;
   /** Extra structured data: IP, user-agent, diff, etc. */
   metadata?: Json;

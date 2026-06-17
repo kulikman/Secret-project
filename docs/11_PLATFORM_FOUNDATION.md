@@ -15,7 +15,7 @@ Done.
 ## Goal
 
 Prepare the existing Next.js/Supabase template for Secret Bureau-specific
-development without changing auth, billing, or payment behavior.
+development without changing auth behavior.
 
 ## Current Baseline
 
@@ -26,7 +26,6 @@ Already present in the repository:
 - TypeScript strict.
 - Tailwind v4.
 - Supabase clients and auth scaffold.
-- Stripe billing scaffold.
 - Zod env validation.
 - `GET /api/health` stateless health endpoint.
 
@@ -170,8 +169,8 @@ First Secret Bureau migration group:
 
 Important open schema decision:
 
-- The template already has `profiles`, `subscriptions`, `orgs`,
-  `org_members`, `notifications`, `api_keys`, and `audit_logs`.
+- The template already has `profiles`, `orgs`, `org_members`,
+  `notifications`, `api_keys`, and `audit_logs`.
 - The architecture document uses `users` and `audit_log`.
 - Prefer adapting the product schema to existing `profiles` and `audit_logs`
   unless there is a strong reason to introduce parallel user/audit tables.
@@ -214,7 +213,7 @@ Brain readiness rule:
 - App-side adapter plan is documented.
 - Initial App DB migration direction is documented.
 - Health/readiness behavior is documented.
-- Auth/payment internals remain unchanged.
+- Auth internals remain unchanged.
 
 ## Epic 1 Verification
 
@@ -231,4 +230,4 @@ Dependency check:
 - No new runtime or dev dependencies were added.
 - `@elaurion/brain-sdk` is not listed in `package.json`; the app uses a
   server-only HTTP adapter until a consumable SDK contract is available.
-- Auth, payment, billing, CI, and `.env` secrets were not changed.
+- Auth, CI, and `.env` secrets were not changed.

@@ -54,7 +54,6 @@
 | UI Primitives     | shadcn/ui + radix-ui                   |
 | App DB/Auth       | Supabase Postgres + Supabase Auth      |
 | Knowledge Backend | Elaurion Brain via server-only adapter |
-| Payments Scaffold | Stripe                                 |
 | Email Scaffold    | Resend + React Email                   |
 | Analytics         | PostHog                                |
 | Deployment        | Vercel                                 |

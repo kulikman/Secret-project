@@ -163,6 +163,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      admin_role_assignments: {
+        Row: {
+          created_at: string;
+          granted_by: string | null;
+          id: string;
+          reason: string | null;
+          role: Database["public"]["Enums"]["admin_role"];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          granted_by?: string | null;
+          id?: string;
+          reason?: string | null;
+          role: Database["public"]["Enums"]["admin_role"];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          granted_by?: string | null;
+          id?: string;
+          reason?: string | null;
+          role?: Database["public"]["Enums"]["admin_role"];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       applications: {
         Row: {
           city_id: string | null;
@@ -592,7 +622,6 @@ export type Database = {
           id: string;
           onboarding_completed: boolean;
           onboarding_step: number;
-          stripe_customer_id: string | null;
           updated_at: string;
           username: string;
         };
@@ -603,7 +632,6 @@ export type Database = {
           id: string;
           onboarding_completed?: boolean;
           onboarding_step?: number;
-          stripe_customer_id?: string | null;
           updated_at?: string;
           username: string;
         };
@@ -614,7 +642,6 @@ export type Database = {
           id?: string;
           onboarding_completed?: boolean;
           onboarding_step?: number;
-          stripe_customer_id?: string | null;
           updated_at?: string;
           username?: string;
         };
@@ -656,57 +683,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean;
-          canceled_at: string | null;
-          created_at: string;
-          current_period_end: string | null;
-          current_period_start: string | null;
-          id: string;
-          price_id: string | null;
-          product_id: string | null;
-          quantity: number;
-          status: string;
-          trial_end: string | null;
-          trial_start: string | null;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          cancel_at_period_end?: boolean;
-          canceled_at?: string | null;
-          created_at?: string;
-          current_period_end?: string | null;
-          current_period_start?: string | null;
-          id: string;
-          price_id?: string | null;
-          product_id?: string | null;
-          quantity?: number;
-          status: string;
-          trial_end?: string | null;
-          trial_start?: string | null;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          cancel_at_period_end?: boolean;
-          canceled_at?: string | null;
-          created_at?: string;
-          current_period_end?: string | null;
-          current_period_start?: string | null;
-          id?: string;
-          price_id?: string | null;
-          product_id?: string | null;
-          quantity?: number;
-          status?: string;
-          trial_end?: string | null;
-          trial_start?: string | null;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
     };
     Views: {
       [_ in never]: never;
@@ -715,6 +691,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
+      admin_role: "super_admin" | "admin" | "editor" | "curator" | "support" | "viewer";
       org_role: "owner" | "admin" | "member";
     };
     CompositeTypes: {
@@ -844,6 +821,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      admin_role: ["super_admin", "admin", "editor", "curator", "support", "viewer"],
       org_role: ["owner", "admin", "member"],
     },
   },

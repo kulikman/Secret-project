@@ -20,7 +20,7 @@
 
 - [ ] RLS enabled on **every** table (`ALTER TABLE x ENABLE ROW LEVEL SECURITY`)
 - [ ] Users cannot read other users' data (verified with test user)
-- [ ] Admin routes check `profiles.role IN ('admin', 'super_admin')` on backend
+- [ ] Admin routes check `admin_role_assignments.role` on backend
 - [ ] Server Actions call `supabase.auth.getUser()` before any DB operation
 - [ ] `service_role` client (`lib/supabase/admin.ts`) never imported from `"use client"` files
 - [ ] Org-scoped data cannot be accessed by non-members
@@ -48,13 +48,12 @@
 
 ---
 
-## Payments (Stripe)
+## Payments
 
-- [ ] Webhook signature verified via `stripe.webhooks.constructEvent()`
-- [ ] Payment status comes from Stripe webhook, not from client payload
-- [ ] Duplicate webhooks handled idempotently (upsert, not insert)
-- [ ] Failed payments trigger user notification
-- [ ] Stripe keys: `sk_test_*` on staging, `sk_live_*` on production only
+- [x] Payments are out of scope for the product.
+- [x] Checkout, subscription portal, and payment webhook routes are absent.
+- [x] Stripe keys are absent from `.env.example` and env validation.
+- [x] Legacy payment DB columns/tables are removed by `20260617124704_remove_payment_schema.sql`.
 
 ---
 
@@ -69,7 +68,7 @@
 
 ## Admin Panel (when built)
 
-- [ ] Admin routes protected: `role IN ('admin', 'super_admin')` check on every Server Action
+- [ ] Admin routes protected with `requireAdminRole()` or a narrower role check on every Server Action
 - [ ] Destructive admin actions require confirmation dialog
 - [ ] All admin actions written to `audit_logs` table
 - [ ] Admin cannot access other admins' credentials
@@ -90,7 +89,6 @@
 - [ ] Critical errors logged with `console.error` (or Sentry if configured)
 - [ ] No sensitive data logged (passwords, tokens, full PII)
 - [ ] Admin actions logged to `audit_logs`
-- [ ] Payment events logged
 - [ ] Auth failures logged (Supabase handles this)
 
 ---

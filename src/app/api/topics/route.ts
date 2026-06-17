@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { listPublishedTopics } from "@/features/knowledge";
+import { apiError, apiOk, apiValidationError } from "@/lib/api-response";
 import { paginationSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -10,13 +11,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: "Invalid pagination params" }, { status: 422 });
+    return apiValidationError("Invalid pagination params");
   }
 
   try {
     const data = await listPublishedTopics(parsed.data);
-    return NextResponse.json({ ok: true, data });
+    return apiOk(data);
   } catch {
-    return NextResponse.json({ ok: false, error: "Could not load topics" }, { status: 500 });
+    return apiError("Could not load topics", { status: 500 });
   }
 }

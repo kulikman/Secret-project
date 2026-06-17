@@ -1,24 +1,16 @@
 import Link from "next/link";
 
-import { ROUTES, type AppRoute } from "@/lib/constants";
+import { ROUTES } from "@/lib/constants";
+
+type SettingsRoute = typeof ROUTES.settingsApiKeys | typeof ROUTES.settingsOrg;
 
 interface NavItem {
-  href: AppRoute;
+  href: SettingsRoute;
   label: string;
   description: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    href: ROUTES.settingsBilling,
-    label: "Billing",
-    description: "Manage your plan and payment methods.",
-  },
-  {
-    href: ROUTES.settingsUsage,
-    label: "Usage",
-    description: "Monitor resource usage against your plan limits.",
-  },
   {
     href: ROUTES.settingsApiKeys,
     label: "API Keys",
@@ -36,7 +28,7 @@ export default function SettingsPage(): React.ReactElement {
     <section className="flex flex-col gap-6">
       <div>
         <h1 className="text-foreground text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Manage your account and subscription.</p>
+        <p className="text-muted-foreground mt-1 text-sm">Manage your account and workspace.</p>
       </div>
 
       <nav className="flex flex-col gap-1">

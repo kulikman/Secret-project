@@ -34,7 +34,7 @@ describe("GET /api/cron/cleanup", () => {
       new Request("http://localhost/api/cron/cleanup") as unknown as NextRequest
     );
 
-    await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
+    await expect(response.json()).resolves.toEqual({ ok: false, error: "Unauthorized" });
     expect(response.status).toBe(401);
     expect(mocks.runScheduledCleanup).not.toHaveBeenCalled();
   });
@@ -53,8 +53,10 @@ describe("GET /api/cron/cleanup", () => {
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
-      notificationsDeleted: 2,
-      expiredInvitesDeleted: 1,
+      data: {
+        notificationsDeleted: 2,
+        expiredInvitesDeleted: 1,
+      },
     });
     expect(response.status).toBe(200);
     expect(mocks.runScheduledCleanup).toHaveBeenCalledTimes(1);

@@ -19,7 +19,6 @@ const config: KnipConfig = {
   project: ["src/**/*.{ts,tsx}"],
   ignore: [
     // template-public APIs: not imported by in-repo code but exported for consumers
-    "src/components/plan-gate.tsx",
     "src/lib/analytics.ts",
     // Secret Bureau public barrels: used as stable import boundaries for agents/admin routes.
     "src/features/ai-content/index.ts",

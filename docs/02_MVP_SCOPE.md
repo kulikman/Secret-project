@@ -47,7 +47,7 @@
 - Production map based on full live Brain graph.
 - Automatic ingest with unapproved generic extraction profile.
 - Founder/private Brain project access from this app.
-- Any auth/payment/billing rewrite.
+- Any payment/billing implementation, checkout, paid plans, or subscription logic.
 
 ---
 

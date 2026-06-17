@@ -11,7 +11,7 @@ Next.js App Router (Server Components, Server Actions, Route Handlers)
   ↓                         ↓
 Supabase App DB/Auth        External Services
   - profiles                - Elaurion Brain (knowledge backend)
-  - node_projection         - Stripe scaffold
+  - node_projection
   - dossiers/slides/jobs    - Resend scaffold
   - community tables        - PostHog analytics
 ```
@@ -28,7 +28,6 @@ Core rule: public archive pages read App DB projection, never live Brain.
 | Knowledge graph source of truth | Brain                     | Access through `src/lib/brain` server-only adapter |
 | Community/events/applications   | App DB                    | App-owned tables with RLS                          |
 | Auth/session                    | Supabase + `src/proxy.ts` | Do not rewrite without approval                    |
-| Payments scaffold               | Stripe                    | Preserved, not central to MVP                      |
 | Transactional email scaffold    | Resend                    | Preserved for future notifications                 |
 
 ---
@@ -43,13 +42,12 @@ src/
 │   ├── api/
 │   │   ├── health/                   # Stateless health endpoint
 │   │   ├── cron/cleanup/             # Existing scheduled cleanup
-│   │   ├── webhooks/stripe/          # Existing Stripe webhook
 │   │   ├── topics/                   # Planned public topic API
 │   │   ├── sources/                  # Planned public source API
 │   │   ├── map/                      # Planned graph cache API
 │   │   └── applications/             # Planned application submission API
 │   ├── dashboard/                    # Existing protected dashboard scaffold
-│   ├── settings/                     # Profile/billing/org/API key scaffold
+│   ├── settings/                     # Profile/org/API key scaffold
 │   ├── page.tsx                      # Public landing page
 │   └── sitemap.ts / robots.ts        # Public metadata routes
 │
@@ -94,7 +92,7 @@ src/
 6. Manual republish is the MVP projection sync mechanism.
 7. Brain unavailable means admin ingest/republish is degraded, not that published public pages fail.
 8. Admin/editor mutations must write audit logs.
-9. Auth, payment webhooks, and billing internals are not changed without separate approval.
+9. Checkout, subscriptions, billing UI, and paid entitlements are not part of the product.
 
 ---
 
@@ -173,20 +171,6 @@ auth/callback/route.ts completes auth
   ↓
 User enters dashboard/onboarding/admin depending on state and role
 ```
-
-### Stripe Scaffold Flow
-
-```text
-User opens billing scaffold
-  ↓
-Checkout route creates Stripe Checkout Session
-  ↓
-Stripe webhook verifies signature
-  ↓
-Subscription state is upserted in App DB
-```
-
----
 
 ## Known Architectural Constraints
 

@@ -6,7 +6,7 @@ import { getServerEnv } from "@/lib/env";
  * Server-side PostHog helper.
  *
  * Use this in Server Actions and Route Handlers to track events that
- * shouldn't be faked by users (e.g. subscription upgrades, payment events).
+ * shouldn't be faked by users (e.g. moderation decisions, content publishes).
  *
  * Requires NEXT_PUBLIC_POSTHOG_KEY to be set. If absent, all calls are
  * no-ops — safe in dev/test.
@@ -15,7 +15,7 @@ import { getServerEnv } from "@/lib/env";
  *
  * @example
  *   import { trackServerEvent } from "@/lib/analytics"
- *   await trackServerEvent("subscription_upgraded", userId, { plan: "pro" })
+ *   await trackServerEvent("application_approved", userId, { source: "admin" })
  */
 export async function trackServerEvent(
   event: string,

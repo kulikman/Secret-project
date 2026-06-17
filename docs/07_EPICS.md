@@ -48,7 +48,7 @@
 - Add/confirm app env schema for Brain integration.
 - Prepare Supabase schema direction for community and projection tables.
 - Align docs/backlog with the product architecture.
-- Keep auth/payment internals unchanged unless explicitly approved.
+- Keep auth internals unchanged unless explicitly approved; do not reintroduce payment/billing scope.
 
 **Acceptance Criteria:**
 
@@ -236,7 +236,10 @@
   reports.
 - `POST /api/applications` validates and inserts public applications through
   the RLS client.
-- Admin moderation remains blocked by the approved RBAC/admin surface.
+- Backend moderation helpers now support list/detail/status transitions with
+  RBAC and audit logging.
+- Admin moderation UI now lists, filters, and submits audited status transitions.
+- Event publishing and notifications remain pending.
 
 ---
 
@@ -267,3 +270,39 @@
 - Operational runbooks added in `docs/16_RUNBOOKS.md`.
 - Full production hardening still requires deployed environments and E2E smoke
   tests.
+
+---
+
+## Epic 9: Admin Console + Member Cabinet
+
+**Status:** In Progress
+
+**Goal:** Create the operational admin cockpit for applications, generated PDF presentations, API
+connections, community members, knowledge operations, and system settings.
+
+**Scope:**
+
+- `/admin` protected shell and navigation.
+- Applications pipeline for people registering in the community.
+- Generated PDF presentation registry and admin-editable presentation prompt.
+- API/integration readiness without exposing secrets.
+- Registered member cabinet scope.
+- Admin settings: RBAC, audit, feature flags, legal, backups, prompt templates.
+
+**Current Output:**
+
+- `/admin` shell and section pages are implemented; applications now have a working moderation UI.
+- `admin_role_assignments`, read-only admin RLS policies, and server-only `requireAdminRole()` are implemented.
+- Full scope and sprint decomposition are documented in `docs/18_ADMIN_CONSOLE.md`.
+- Most real admin mutations remain blocked until each domain adds audited server actions; application status moderation now has a backend action.
+
+**Acceptance Criteria:**
+
+- [x] Admin modules and settings are decomposed.
+- [x] Protected `/admin` shell exists.
+- [x] PDF, not PPTX, is documented as the presentation output.
+- [x] Admin-editable presentation prompt is documented.
+- [x] Approved admin RBAC exists.
+- [x] Application moderation can change status with audit logging.
+- [ ] Presentation prompt can be edited and versioned in App DB.
+- [ ] Member cabinet reads only the current member's permitted data.

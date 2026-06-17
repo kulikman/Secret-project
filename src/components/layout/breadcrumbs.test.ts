@@ -7,7 +7,7 @@ describe("getBreadcrumbItems()", () => {
     expect(getBreadcrumbItems("/")).toEqual([]);
     expect(getBreadcrumbItems("/dashboard")).toEqual([]);
     expect(getBreadcrumbItems("/settings")).toEqual([]);
-    expect(getBreadcrumbItems("/settings/billing")).toEqual([]);
+    expect(getBreadcrumbItems("/settings/api-keys")).toEqual([]);
   });
 
   it("does not render on first-level list pages", () => {

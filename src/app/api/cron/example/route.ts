@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { apiOkEmpty, apiUnauthorized } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -26,12 +27,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   if (!env.CRON_SECRET || auth !== `Bearer ${env.CRON_SECRET}`) {
     logger.warn("cron unauthorized", { hasSecret: !!env.CRON_SECRET });
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   // Replace with your scheduled work — sending digests, cleaning up
   // expired sessions, syncing 3rd-party data, etc.
   logger.info("cron tick", { route: "example" });
 
-  return NextResponse.json({ ok: true });
+  return apiOkEmpty();
 }

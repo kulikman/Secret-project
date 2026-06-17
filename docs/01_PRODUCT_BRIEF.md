@@ -47,14 +47,13 @@
 
 ## Business Model
 
-Монетизация не зафиксирована в текущем MVP. В репозитории сохранен Stripe scaffold, но он рассматривается как инфраструктурная возможность, а не обязательное условие первого запуска.
+Оплат и платных тарифов в продукте не будет. Тайное Бюро запускается как архивно-community платформа без checkout, подписок и billing UI.
 
-Potential models to decide later:
+Допустимые будущие модели без встроенной оплаты:
 
 - Membership / donation.
-- Paid reports or presentations.
 - Partner/community sponsorship.
-- Subscription for advanced editorial tools.
+- Offline partnerships or grants.
 
 ## Success Metrics
 
@@ -79,5 +78,5 @@ Potential models to decide later:
 - Не строим публичные страницы напрямую на Brain API.
 - Не запускаем full graph/map production UX до Brain neighbors/subgraph contracts.
 - Не публикуем AI-контент без машинной проверки `source_refs`.
-- Не меняем auth, billing и payment internals без отдельного подтверждения.
+- Не вводим checkout, подписки, billing UI или тарифные ограничения.
 - Не реализуем mobile app в MVP.

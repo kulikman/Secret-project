@@ -30,14 +30,16 @@
 
 ### Added
 
+- Admin console shell at `/admin` with sections for applications, PDF presentations, API/integrations, community cabinet, knowledge operations, and settings
+- Admin scope/decomposition document in `docs/18_ADMIN_CONSOLE.md`
+- Admin RBAC foundation with role assignments, read-only admin RLS policies, and `/admin` role gate
+- Payment runtime/schema removed: no Stripe checkout/portal/webhook routes, pricing page, billing/usage pages, plan limits, payment email templates, Stripe env vars, Stripe dependency, `public.subscriptions`, or `profiles.stripe_customer_id`
 - Initial project setup from SaaS template
 - User authentication (email + OAuth)
 - Onboarding wizard
-- Subscription management (Stripe)
 - In-app notifications
 - API key management
 - Organization / team management
-- Usage metrics page
 - Cron-based cleanup job
 
 ---

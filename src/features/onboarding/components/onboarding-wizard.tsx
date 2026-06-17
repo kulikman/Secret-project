@@ -110,53 +110,53 @@ function WorkspaceStep(): React.ReactElement {
   );
 }
 
-/** Step 3 — Plan selection (placeholder; hook up to Stripe in billing feature) */
-function PlanStep(): React.ReactElement {
-  const plans = [
+/** Step 3 — Participation focus. No paid plans are part of the product. */
+function FocusStep(): React.ReactElement {
+  const options = [
     {
-      id: "free",
-      name: "Free",
-      price: "$0/mo",
-      features: ["Up to 3 projects", "5 GB storage", "Community support"],
+      id: "explorer",
+      name: "Explorer",
+      description: "I want to read the archive, follow releases, and learn the system.",
+      features: ["Public archive", "Community updates", "Personal dashboard"],
     },
     {
-      id: "pro",
-      name: "Pro",
-      price: "$12/mo",
-      features: ["Unlimited projects", "50 GB storage", "Priority support"],
+      id: "contributor",
+      name: "Contributor",
+      description: "I want to submit materials, help curate, or join moderated work.",
+      features: ["Community applications", "Knowledge submissions", "Admin-reviewed access"],
       recommended: true,
     },
   ];
 
   return (
     <div className="space-y-3">
-      {plans.map((plan) => (
+      {options.map((option) => (
         <label
-          key={plan.id}
+          key={option.id}
           className={[
             "relative flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
-            plan.recommended ? "border-primary/50 bg-primary/5" : "border-border",
+            option.recommended ? "border-primary/50 bg-primary/5" : "border-border",
           ].join(" ")}
         >
           <input
             type="radio"
-            name="plan"
-            value={plan.id}
-            defaultChecked={plan.id === "free"}
+            name="focus"
+            value={option.id}
+            defaultChecked={option.id === "explorer"}
             className="accent-primary mt-0.5"
           />
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-foreground text-sm font-semibold">{plan.name}</span>
-              {plan.recommended && (
+              <span className="text-foreground text-sm font-semibold">{option.name}</span>
+              {option.recommended && (
                 <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
                   Recommended
                 </span>
               )}
-              <span className="text-muted-foreground ml-auto text-sm">{plan.price}</span>
             </div>
+            <p className="text-muted-foreground text-xs">{option.description}</p>
             <ul className="text-muted-foreground space-y-0.5 text-xs">
-              {plan.features.map((f) => (
+              {option.features.map((f) => (
                 <li key={f} className="flex items-center gap-1.5">
                   <span className="text-primary">✓</span> {f}
                 </li>
@@ -186,7 +186,7 @@ const STEP_COMPONENTS: Record<number, React.ReactElement> = {
   0: <WelcomeStep />,
   1: <ProfileStep />,
   2: <WorkspaceStep />,
-  3: <PlanStep />,
+  3: <FocusStep />,
   4: <DoneStep />,
 };
 

@@ -2,7 +2,10 @@
 
 ## Overview
 
-Тайное Бюро uses Supabase Auth as the current identity layer. The target admin model uses an app role field such as `profiles.role`, but the current migrations do not add that column yet. RBAC migration is intentionally deferred because auth changes require separate confirmation.
+Тайное Бюро uses Supabase Auth as the identity layer. Admin roles are stored in
+`admin_role_assignments` instead of `profiles` so the globally readable profile
+table does not expose role assignments or allow profile self-update policies to
+become privilege escalation paths.
 
 RLS policies must enforce database boundaries; UI checks are convenience only.
 
@@ -27,7 +30,8 @@ Any unauthenticated visitor.
 
 ### Description
 
-Authenticated user in the current Supabase scaffold. A future RBAC migration can map this to `profiles.role = 'user'`.
+Authenticated user in the current Supabase scaffold. Members have no row in
+`admin_role_assignments` by default.
 
 ### Permissions
 
@@ -43,7 +47,9 @@ Authenticated user in the current Supabase scaffold. A future RBAC migration can
 
 ### Description
 
-Operational community role for city/event/application moderation. This is target behavior and should be implemented only after the RBAC migration is approved.
+Operational community role for city/event/application moderation. The role can
+read moderation data after RBAC assignment; write actions still require audited
+server actions.
 
 ### Permissions
 
@@ -58,7 +64,9 @@ Operational community role for city/event/application moderation. This is target
 
 ### Description
 
-Editorial role for knowledge authoring and source-first content review. This is target behavior and should be implemented only after the RBAC migration is approved.
+Editorial role for knowledge authoring and source-first content review. The role
+can read AI content/prompt templates after RBAC assignment; write actions still
+require audited server actions.
 
 ### Permissions
 
@@ -85,10 +93,14 @@ Internal operator with access to editorial and community administration.
 
 ### How to assign
 
-Blocked until the RBAC migration adds an app role column.
+Use trusted service-role SQL or a future super-admin-only role assignment action.
+Do not expose role assignment to client code.
 
 ```sql
-UPDATE profiles SET role = 'admin' WHERE id = '<user-id>';
+INSERT INTO public.admin_role_assignments (user_id, role, reason)
+VALUES ('<user-id>', 'admin', 'manual bootstrap')
+ON CONFLICT (user_id)
+DO UPDATE SET role = excluded.role, reason = excluded.reason;
 ```
 
 ---
@@ -108,10 +120,13 @@ Project owner with full system access.
 
 ### How to assign
 
-Blocked until the RBAC migration adds an app role column.
+Use trusted service-role SQL or a future owner-only bootstrap action.
 
 ```sql
-UPDATE profiles SET role = 'super_admin' WHERE id = '<user-id>';
+INSERT INTO public.admin_role_assignments (user_id, role, reason)
+VALUES ('<user-id>', 'super_admin', 'owner bootstrap')
+ON CONFLICT (user_id)
+DO UPDATE SET role = excluded.role, reason = excluded.reason;
 ```
 
 ---
@@ -149,15 +164,16 @@ CREATE POLICY "applications_owner_read" ON public.applications
   FOR SELECT USING (auth.uid() = user_id);
 ```
 
-Admins can manage moderation tables:
+Admins can read moderation tables. Mutations should still go through audited
+server actions:
 
 ```sql
--- Target policy after an approved RBAC migration adds profiles.role.
-CREATE POLICY "applications_admin_all" ON public.applications
-  FOR ALL USING (
+CREATE POLICY "Curators can read applications" ON public.applications
+  FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() AND role IN ('admin', 'super_admin')
+      SELECT 1 FROM public.admin_role_assignments
+      WHERE user_id = auth.uid()
+        AND role IN ('curator', 'admin', 'super_admin')
     )
   );
 ```

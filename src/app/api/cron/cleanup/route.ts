@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { runScheduledCleanup } from "@/features/maintenance";
+import { apiOk, apiUnauthorized } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -24,9 +25,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   if (!env.CRON_SECRET || auth !== `Bearer ${env.CRON_SECRET}`) {
     logger.warn("cron/cleanup: unauthorized request");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const results = await runScheduledCleanup();
-  return NextResponse.json({ ok: true, ...results });
+  return apiOk(results);
 }

@@ -24,6 +24,99 @@ Work through tasks **one at a time**. Before starting a task:
 
 ---
 
+### BE-00: Backend audit docs sync
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Align backend contracts and route inventory with the actual code before implementing more backend epics.
+
+**Acceptance Criteria:**
+
+- [x] Backend audit exists in `docs/19_BACKEND_AUDIT_EPICS.md`.
+- [x] `docs/06_API_CONTRACTS.md` documents current route inventory.
+- [x] Implemented public route params and response shapes match docs.
+- [x] Future/scaffold routes are explicitly marked.
+
+---
+
+### BE-02A: Rate limit public application intake
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Protect `POST /api/applications` against basic spam before adding admin moderation.
+
+**Acceptance Criteria:**
+
+- [x] Public application submissions are rate limited by client IP and normalized email.
+- [x] Throttled requests return `429` and do not touch Supabase.
+- [x] Route tests cover successful, invalid, and rate-limited submissions.
+- [x] API contract documents the rate limit.
+
+---
+
+### BE-02B: Add application moderation backend actions
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add the server-only backend layer for curator/admin application moderation without wiring UI or public admin API routes yet.
+
+**Acceptance Criteria:**
+
+- [x] Curator/admin/super_admin can list and filter applications through `requireAdminRole(APPLICATION_MODERATION_ROLES)`.
+- [x] Curator/admin/super_admin can read one application detail through the RLS client.
+- [x] Status changes use the service-role client only after admin role verification.
+- [x] Status changes store reviewer/reviewed timestamp and write `admin.application_status_changed`.
+- [x] Tests prove denied users do not reach Supabase writes.
+
+---
+
+### BE-02C: Wire application moderation admin UI
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Connect the RBAC-gated moderation helpers to `/admin/applications` without adding a separate admin JSON API route yet.
+
+**Acceptance Criteria:**
+
+- [x] `/admin/applications` lists applications for curator/admin/super_admin.
+- [x] Admin can filter applications by status.
+- [x] Admin can view application detail fields in the list card.
+- [x] Admin can submit status transitions with a decision reason.
+- [x] Viewers without moderation role see a restricted state instead of application data.
+
+---
+
+### BE-02D: Add privacy-safe application duplicate handling
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Avoid duplicate public application rows for the same email/city/event without exposing whether an email already applied.
+
+**Acceptance Criteria:**
+
+- [x] Public application route checks for an existing normalized email + city + event before insert.
+- [x] Duplicate submissions return the same successful response shape as fresh submissions.
+- [x] Duplicate submissions do not call the RLS insert path again.
+- [x] Route tests cover duplicate handling and email normalization.
+
+---
+
+### BE-03A: Add shared API response helpers for API routes
+
+**Priority:** P1 | **Status:** Done
+
+**Description:** Start API contract standardization after payment runtime routes are removed from product scope.
+
+**Acceptance Criteria:**
+
+- [x] Shared Route Handler response helpers exist in `src/lib/api-response.ts`.
+- [x] Public archive, applications, cron, and org routes use `{ ok, data/error }` envelopes.
+- [x] `/api/orgs` returns JSON `401` instead of redirecting to login.
+- [x] Zod validation errors can include issue summaries.
+- [x] Route/helper tests cover success, unauthenticated, invalid input, not found, and errors for the updated scope.
+
+---
+
 ### BRAIN-001: Confirm live Brain project for public archive
 
 **Priority:** P0 | **Status:** Blocked
@@ -144,7 +237,7 @@ Work through tasks **one at a time**. Before starting a task:
 - [x] Product docs describe Тайное Бюро instead of a generic SaaS template.
 - [x] App DB docs cover Secret Bureau read models and community tables.
 - [x] API contracts document planned public/admin Secret Bureau routes.
-- [x] Existing auth, billing, and payment contracts are preserved as scaffolded infrastructure.
+- [x] Existing auth contracts are preserved; payment/billing contracts are removed from product scope.
 
 ---
 
@@ -236,6 +329,76 @@ Work through tasks **one at a time**. Before starting a task:
 
 ---
 
+### APP-009: Add admin console shell and decomposition
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Create a safe admin console shell and document the full admin scope before enabling
+real moderation, PDF generation, prompt editing, or integration controls.
+
+**Acceptance Criteria:**
+
+- [x] `/admin` protected shell exists.
+- [x] Admin sections cover applications, PDF presentations, API/integrations, community cabinet, knowledge ops, and settings.
+- [x] Scope includes the user cabinet for a registered community member.
+- [x] Presentation output is PDF, not PPTX.
+- [x] Presentation prompt is planned as admin-editable.
+- [x] Missing operational concerns are documented.
+- [x] No auth, CI, or secret logic is changed.
+
+---
+
+### APP-010: Implement admin RBAC and audit foundation
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add real admin/editor/curator role enforcement before any admin mutation is exposed.
+
+**Acceptance Criteria:**
+
+- [x] Role storage strategy is approved.
+- [x] Server-only admin role helper exists.
+- [x] RLS policies protect admin reads; writes remain closed until audited server actions.
+- [x] Admin audit action types are reserved for future mutations.
+- [x] Tests prove regular authenticated users without an assignment cannot access admin roles.
+
+---
+
+### APP-011: Implement application moderation
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Let curators/admins process community applications now that RBAC foundation exists.
+
+**Acceptance Criteria:**
+
+- [x] Backend can list and filter applications.
+- [x] Backend can view one application detail.
+- [x] Backend can change status with a decision reason in audit metadata.
+- [x] Status changes are auditable.
+- [x] Public/authenticated non-admin users cannot reach moderation writes.
+- [x] Admin UI exposes list/detail/status change.
+- [x] Optional duplicate handling by email/event/city is added.
+- [x] Optional notification trigger is skipped by owner request.
+
+---
+
+### APP-012: Implement PDF presentation prompt and export pipeline
+
+**Priority:** P0 | **Status:** Blocked
+
+**Description:** Add admin-editable `presentation_pdf` prompt templates and source-first PDF export.
+
+**Acceptance Criteria:**
+
+- [x] `ai_prompt_templates` schema is approved and migrated.
+- [ ] Prompt versions are visible in admin.
+- [ ] Generation creates `ai_jobs` and draft presentation rows.
+- [ ] Slides without `source_refs` cannot be published.
+- [ ] Export produces PDF artifacts, not PPTX.
+
+---
+
 ## Infrastructure Setup Tasks
 
 ---
@@ -261,24 +424,23 @@ Work through tasks **one at a time**. Before starting a task:
 
 ---
 
-### SETUP-002: Configure Stripe
+### SETUP-002: Payment Setup Removed From Scope
 
-**Priority:** P0 | **Status:** Todo
+**Priority:** P0 | **Status:** Done
 
-**Description:** Connect Stripe for payments.
+**Description:** Payments will not exist in the product. Stripe/checkout/portal/webhook setup is intentionally removed.
 
 **Steps:**
 
-1. Create products and prices in Stripe dashboard
-2. Set env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-3. Set `STRIPE_PRODUCT_ID_PRO`, `STRIPE_PRICE_ID_PRO` (and team if needed)
-4. Add webhook endpoint in Stripe after production domain is chosen: `/api/webhooks/stripe`
-5. Test with Stripe CLI: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
+1. Do not create payment products, prices, checkout flows, or webhook endpoints.
+2. Do not add Stripe env vars to `.env.local` or Vercel.
+3. Keep pricing, subscription, billing UI, and entitlement gates out of MVP scope.
 
 **Acceptance Criteria:**
 
-- [ ] Checkout flow completes successfully
-- [ ] Webhook updates `subscriptions` table
+- [x] Runtime payment routes are absent.
+- [x] Stripe env vars are absent from `.env.example` and env validation.
+- [x] Stripe dependency is absent from `package.json`.
 
 ---
 

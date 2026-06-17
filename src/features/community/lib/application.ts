@@ -20,7 +20,7 @@ export function createApplicationInsert(input: PublicApplicationInput, userId?: 
     city_id: input.cityId ?? null,
     event_id: input.eventId ?? null,
     full_name: input.fullName,
-    email: input.email,
+    email: input.email.toLowerCase(),
     telegram: input.telegram ?? null,
     motivation: input.motivation ?? null,
     selected_topic: input.selectedTopic ?? null,

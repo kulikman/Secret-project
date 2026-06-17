@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getPublishedTopicBySlug } from "@/features/knowledge";
+import { apiError, apiOk, apiValidationError } from "@/lib/api-response";
 
 interface RouteContext {
   params: Promise<{
@@ -12,18 +13,18 @@ export async function GET(_request: NextRequest, context: RouteContext): Promise
   const { slug } = await context.params;
 
   if (!slug) {
-    return NextResponse.json({ ok: false, error: "Topic slug is required" }, { status: 422 });
+    return apiValidationError("Topic slug is required");
   }
 
   try {
     const topic = await getPublishedTopicBySlug(slug);
 
     if (!topic) {
-      return NextResponse.json({ ok: false, error: "Topic not found" }, { status: 404 });
+      return apiError("Topic not found", { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, data: { topic } });
+    return apiOk({ topic });
   } catch {
-    return NextResponse.json({ ok: false, error: "Could not load topic" }, { status: 500 });
+    return apiError("Could not load topic", { status: 500 });
   }
 }

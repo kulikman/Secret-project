@@ -4,10 +4,6 @@
  * Solo-founder pattern: ship half-finished features behind a `false`
  * flag, flip via Vercel env in seconds without redeploying.
  *
- * Usage:
- *   import { flags } from "@/lib/flags"
- *   if (flags.billing) return <BillingPanel />
- *
  * Each flag reads its own `NEXT_PUBLIC_FF_<NAME>` env var. Keys are
  * spelled out literally so Next.js can statically inline them on the
  * client at build time — dynamic `process.env[key]` access is NOT
@@ -24,7 +20,6 @@ function isOn(value: string | undefined): boolean {
 }
 
 export const flags = {
-  billing: isOn(process.env.NEXT_PUBLIC_FF_BILLING),
   ai: isOn(process.env.NEXT_PUBLIC_FF_AI),
   analytics: isOn(process.env.NEXT_PUBLIC_FF_ANALYTICS),
   onboarding: isOn(process.env.NEXT_PUBLIC_FF_ONBOARDING),

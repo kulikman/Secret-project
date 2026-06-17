@@ -29,6 +29,8 @@ Fill it in when starting a new project. Keep it updated as the project evolves.
 | `15_DECISIONS_LOG.md`       | Architectural decision records                  | When a meaningful choice is made  |
 | `16_RUNBOOKS.md`            | Operational guardrails and runbooks             | During hardening                  |
 | `17_EXTERNAL_SETUP.md`      | External access/provisioning handoff            | Before connecting live services   |
+| `18_ADMIN_CONSOLE.md`       | Admin console scope, settings, epics, blockers  | Before admin mutations            |
+| `19_BACKEND_AUDIT_EPICS.md` | Backend audit findings and epic decomposition   | Before backend sprint planning    |
 
 ---
 

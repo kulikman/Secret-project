@@ -31,17 +31,6 @@ const serverSchema = z
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
     NEXT_PUBLIC_GTM_ID: z.string().optional(),
 
-    // Payments (optional)
-    STRIPE_SECRET_KEY: z.string().optional(),
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
-    STRIPE_WEBHOOK_SECRET: z.string().optional(),
-    // Stripe product IDs — map to plan tiers in plan-limits.ts
-    STRIPE_PRODUCT_ID_PRO: z.string().optional(),
-    STRIPE_PRODUCT_ID_TEAM: z.string().optional(),
-    // Price IDs — used by BillingCard checkout buttons
-    STRIPE_PRICE_ID_PRO: z.string().optional(),
-    STRIPE_PRICE_ID_TEAM: z.string().optional(),
-
     // AI (optional)
     ANTHROPIC_API_KEY: z.string().optional(),
     OPENAI_API_KEY: z.string().optional(),
@@ -105,7 +94,6 @@ const clientSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().default("Тайное Бюро"),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_GTM_ID: z.string().optional(),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
@@ -217,7 +205,6 @@ export function getClientEnv(): ClientEnv {
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

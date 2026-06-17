@@ -2,7 +2,7 @@
 
 ## Database
 
-Supabase Postgres is the App DB for Тайное Бюро. Brain owns the live knowledge graph; App DB owns public read projections, generated content, community data, audit logs, auth profiles, billing scaffold, and operational state.
+Supabase Postgres is the App DB for Тайное Бюро. Brain owns the live knowledge graph; App DB owns public read projections, generated content, community data, audit logs, auth profiles, and operational state.
 
 **Rules:**
 
@@ -18,8 +18,8 @@ Supabase Postgres is the App DB for Тайное Бюро. Brain owns the live k
 
 These tables already exist in the template and remain part of the platform foundation:
 
-- `profiles`: Supabase Auth profile extension. Current migrations do not yet include app roles.
-- `subscriptions`: Stripe subscription state.
+- `profiles`: Supabase Auth profile extension. Does not store admin roles.
+- `admin_role_assignments`: internal RBAC assignment table for admin/editor/curator/support/viewer roles.
 - `orgs` and `org_members`: organization scaffold.
 - `notifications`: in-app notification scaffold.
 - `api_keys`: optional public API key scaffold.
@@ -27,8 +27,33 @@ These tables already exist in the template and remain part of the platform found
 
 Prefer extending or reusing `profiles` and `audit_logs` instead of creating parallel `users` or `audit_log` tables.
 
-Admin/editor RBAC requires a future approved migration, for example adding an
-app role column to `profiles`. This pass does not change auth schema.
+Admin/editor RBAC uses `admin_role_assignments` instead of `profiles.role`
+because profiles are broadly readable by authenticated users in the scaffold.
+Only trusted service-role code should write role assignments.
+
+Payment-related template schema was removed by
+`supabase/migrations/20260617124704_remove_payment_schema.sql`: the final schema
+does not include `public.subscriptions` or `profiles.stripe_customer_id`.
+
+### admin_role_assignments
+
+Stores one admin role per user.
+
+Key fields:
+
+- `id uuid primary key`
+- `user_id uuid references auth.users(id)`
+- `role admin_role not null`
+- `granted_by uuid references auth.users(id)`
+- `reason text`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+RLS:
+
+- authenticated users can read only their own admin assignment;
+- service role can write assignments;
+- other admin tables use this table for read-policy checks.
 
 ---
 

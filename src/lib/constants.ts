@@ -24,16 +24,20 @@ export const APP_NAME: string = siteConfig.name;
  */
 export const ROUTES = {
   home: "/",
-  pricing: "/pricing",
   login: "/login",
   signup: "/signup",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
+  admin: "/admin",
+  adminApi: "/admin/api",
+  adminApplications: "/admin/applications",
+  adminCommunity: "/admin/community",
+  adminKnowledge: "/admin/knowledge",
+  adminPresentations: "/admin/presentations",
+  adminSettings: "/admin/settings",
   dashboard: "/dashboard",
   onboarding: "/onboarding",
   settings: "/settings",
-  settingsBilling: "/settings/billing",
-  settingsUsage: "/settings/usage",
   settingsApiKeys: "/settings/api-keys",
   settingsOrg: "/settings/org",
 } as const;

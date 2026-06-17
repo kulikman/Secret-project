@@ -31,9 +31,9 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: "Name your workspace — you can change this later.",
   },
   {
-    id: "plan",
-    title: "Choose a plan",
-    description: "Start free, upgrade any time.",
+    id: "role",
+    title: "Choose your focus",
+    description: "Pick how you want to participate first.",
   },
   {
     id: "done",

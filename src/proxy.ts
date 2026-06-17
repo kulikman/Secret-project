@@ -35,7 +35,7 @@ export const config = {
    *   - _next/static, _next/image  — static assets / image optimization
    *   - favicon.ico, sitemap.xml, robots.txt, opengraph-image, icon — file conventions
    *   - api/webhooks/*             — external webhooks have no cookies; refreshing
-   *                                  Supabase session on every Stripe event wastes
+   *                                  Supabase session on every webhook event wastes
    *                                  a roundtrip and can race with the cookie store
    *   - api/cron/*                 — internal scheduled jobs use CRON_SECRET, not session
    *   - common static file extensions

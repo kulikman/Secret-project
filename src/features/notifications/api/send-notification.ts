@@ -11,10 +11,10 @@ import type { NotificationKind } from "../lib/types";
  *
  * @example
  *   await sendNotification(userId, {
- *     title: "Payment received",
- *     body: "Your subscription is now active.",
+ *     title: "Application approved",
+ *     body: "Welcome to the community.",
  *     kind: "success",
- *     href: "/settings/billing",
+ *     href: "/dashboard",
  *   })
  */
 export async function sendNotification(

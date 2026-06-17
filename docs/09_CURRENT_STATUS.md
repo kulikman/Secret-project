@@ -8,7 +8,7 @@
 
 ## Last Updated
 
-2026-06-16
+2026-06-17
 
 ## Current Phase
 
@@ -29,7 +29,7 @@ graph/ingest gaps, RBAC approval, or production deployment context.
 
 ## Completed
 
-- [x] Template scaffolded (Next.js 16, Supabase, Stripe, email, onboarding, notifications, API keys, orgs)
+- [x] Template scaffolded (Next.js 16, Supabase, email, onboarding, notifications, API keys, orgs)
 - [x] Project renamed to Тайное Бюро
 - [x] Local Brain code reviewed for capabilities C1-C10
 - [x] Brain discovery matrix created in `docs/10_BRAIN_DISCOVERY.md`
@@ -51,8 +51,17 @@ graph/ingest gaps, RBAC approval, or production deployment context.
 - [x] Community tables and public application submission route added
 - [x] Epic guardrail script and operational runbooks added
 - [x] External setup handoff documented in `docs/17_EXTERNAL_SETUP.md`
+- [x] Admin console shell and decomposition added in `/admin` and `docs/18_ADMIN_CONSOLE.md`
+- [x] Admin RBAC foundation added with `admin_role_assignments`, read-only RLS policies, and `requireAdminRole()`
+- [x] Backend audit and epic decomposition documented in `docs/19_BACKEND_AUDIT_EPICS.md`
+- [x] Backend API contracts synced with current route inventory
+- [x] Public application intake rate limiting added
+- [x] Application moderation backend actions added with RBAC and audit logging
+- [x] `/admin/applications` wired to list/filter applications and submit audited status transitions
+- [x] Public application duplicate handling added for normalized email + city + event
+- [x] API response helpers added and API routes partially standardized
+- [x] Payment runtime and schema removed from product scope: no Stripe checkout, portal, webhook, pricing page, billing page, usage plan limits, Stripe env validation, or subscriptions table
 - [ ] Supabase project connected (SETUP-001)
-- [ ] Stripe configured (SETUP-002)
 - [ ] Resend configured (SETUP-003)
 - [ ] Core feature implemented
 
@@ -74,15 +83,16 @@ graph/ingest gaps, RBAC approval, or production deployment context.
 - [ ] Epic 5 model/provider generation and PDF presentation export remain unimplemented
 - [ ] Epic 5 presentation prompt admin editor remains unimplemented
 - [ ] Epic 6 Graph Map remains blocked by deploying Brain C6/C7/C10 and connecting app-side graph cache/UI
-- [ ] Epic 7 admin moderation/event publishing remains blocked by RBAC/admin surface approval
+- [ ] Epic 7 event publishing remains unimplemented
+- [ ] Most domain admin mutations remain blocked; application status backend/UI is implemented, but admin JSON API route is not implemented
+- [ ] Member cabinet data model remains blocked until profile/community membership scope is approved
+- [ ] Backend audit found Supabase security-definer hardening, Brain adapter wiring, request IDs, API contract tests, and RLS scenario tests as remaining backend priorities
 
 ---
 
 ## Next Step
 
-Resolve blockers: live Brain project/token, deploy/version Brain C1-C10
-changes, connect Supabase, approve RBAC/admin surface, and wire app adapter
-consumption.
+Continue backend epics from `docs/19_BACKEND_AUDIT_EPICS.md`: Resend notifications and BE-01 are skipped by owner request. Continue BE-03 with request IDs and remaining API contract tests.
 
 ---
 
@@ -93,7 +103,6 @@ These areas must not be changed without explicit discussion:
 - `supabase/migrations/` — no manual edits, only new migration files
 - `src/lib/supabase/admin.ts` — never import from client-side code
 - `src/proxy.ts` — auth + security headers wiring
-- Payment webhook logic (`src/app/api/webhooks/stripe/`)
 - Auth callback logic (`src/app/auth/callback/`)
 
 ---
@@ -118,6 +127,14 @@ These areas must not be changed without explicit discussion:
 - 2026-06-16: Brain bulk merge C8 should be consumed through SDK `mergeNodes({ primaryNodeId, duplicateNodeIds })` or `POST /nodes/:id/merge` with `{ duplicateIds }` once deployed; legacy single merge remains supported.
 - 2026-06-16: Brain profiled ingest C9 should be consumed through SDK `ingest({ source, content, profile: "source_studies_archive" })` or `POST /ingest` with `profile` once deployed; profile is persisted in ingest metadata and used by the worker prompt.
 - 2026-06-16: Brain graph subset C10 should be consumed through SDK `getGraphSubset({ rootNodeId, depth })` or `GET /nodes/:id/subgraph` once deployed; production Graph Map must not depend on full `/graph`.
+- 2026-06-16: Admin console starts as a protected read-only shell; real mutations require RBAC/RLS/audit first. Presentation output remains PDF, and `presentation_pdf` prompt editing is a future admin-managed feature.
+- 2026-06-17: Admin roles are stored in `admin_role_assignments`, not `profiles`, to avoid leaking roles through broadly readable profile rows. `/admin` requires `requireAdminRole()`; most domain mutations still need audited server actions.
+- 2026-06-17: Application status moderation has backend helpers with RBAC and audit logging; separate admin JSON API route wiring remains pending.
+- 2026-06-17: `/admin/applications` now lists and filters applications and submits status transitions through the audited backend helper. A separate admin JSON API route is still not implemented.
+- 2026-06-17: Public application duplicate handling is privacy-safe: duplicate normalized email/city/event submissions return the same `{ ok: true }` shape and do not insert a second row.
+- 2026-06-17: Resend/notification trigger is intentionally skipped by owner request.
+- 2026-06-17: `src/lib/api-response.ts` and `src/lib/api-auth.ts` start BE-03. Public archive, applications, cron, and org routes use standard JSON helpers.
+- 2026-06-17: Payments are removed from product scope. Stripe checkout/portal/webhook routes, pricing/billing/usage pages, plan limits, payment email templates, Stripe env vars, the Stripe package dependency, `public.subscriptions`, and `profiles.stripe_customer_id` are removed.
 
 ---
 

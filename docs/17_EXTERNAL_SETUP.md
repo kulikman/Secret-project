@@ -111,7 +111,7 @@ pnpm build
 
 ### 4. Optional Integrations
 
-Stripe, Resend, PostHog, and Sentry are scaffolded but not required for the
+Resend, PostHog, and Sentry are scaffolded but not required for the
 first archive smoke unless a release decision says otherwise.
 
 ---

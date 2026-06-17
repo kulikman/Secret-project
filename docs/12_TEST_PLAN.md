@@ -38,14 +38,14 @@
 
 ---
 
-### Flow 3: Stripe Checkout
+### Flow 3: Community Application
 
-| Step | Action                                    | Expected                                   |
-| ---- | ----------------------------------------- | ------------------------------------------ |
-| 1    | Click "Upgrade to Pro"                    | Stripe Checkout opens                      |
-| 2    | Complete payment with test card `4242...` | `checkout.session.completed` webhook fires |
-| 3    | Return to app                             | `subscriptions` row has `status = active`  |
-| 4    | Feature gate is lifted                    | `<PlanGate>` content visible               |
+| Step | Action                                  | Expected                              |
+| ---- | --------------------------------------- | ------------------------------------- |
+| 1    | Submit public application form          | `{ ok: true }` response               |
+| 2    | Submit duplicate email/city/event combo | Same `{ ok: true }`, no second insert |
+| 3    | Admin filters applications              | Matching rows are listed             |
+| 4    | Admin changes status with reason        | Status updates and audit log is kept |
 
 **Status:** ⬜ Not tested
 
@@ -74,7 +74,6 @@
 
 ### To Write for Your Features
 
-- [ ] `src/lib/plan-limits.test.ts` — Plan limits per product ID
 - [ ] `src/lib/validations.test.ts` — Zod schemas for your domain
 - [ ] `src/features/[feature]/lib/*.test.ts` — Business logic
 
@@ -85,8 +84,6 @@
 - [ ] Server Actions return correct data for valid input
 - [ ] Server Actions throw for invalid input (Zod validation)
 - [ ] Server Actions throw for unauthenticated requests
-- [ ] Stripe webhook handler verifies signature
-- [ ] Stripe webhook handler rejects invalid events
 - [ ] API key verification rejects unknown keys
 - [ ] Cron endpoint rejects missing CRON_SECRET
 

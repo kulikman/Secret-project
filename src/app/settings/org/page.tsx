@@ -40,7 +40,7 @@ export default async function OrgPage(): Promise<React.ReactElement> {
       <div>
         <h1 className="text-foreground text-2xl font-semibold tracking-tight">Organizations</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Manage your teams. Each org has its own members and billing.
+          Manage your teams. Each org has its own members and roles.
         </p>
       </div>
 
