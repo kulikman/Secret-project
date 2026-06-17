@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/kulikman/Secret-project/compare/v1.2.0...v1.3.0) (2026-06-17)
+
+### ✨ Features
+
+* add awakening map presentation foundation ([7b3c29b](https://github.com/kulikman/Secret-project/commit/7b3c29b378ae5f7e122728b32408eef52544520f))
+* add request ids to api responses ([f230f76](https://github.com/kulikman/Secret-project/commit/f230f7680b4d32e18a8145beb14c0b66d898a67b))
+
 ## [1.2.0](https://github.com/kulikman/Secret-project/compare/v1.1.1...v1.2.0) (2026-06-17)
 
 ### ✨ Features
