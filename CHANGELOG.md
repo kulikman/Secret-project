@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/kulikman/Secret-project/compare/v1.1.1...v1.2.0) (2026-06-17)
+
+### ✨ Features
+
+* add admin moderation and remove payments ([109679a](https://github.com/kulikman/Secret-project/commit/109679aab4467e5ad4e42c3f51ab14e70054ee35))
+
 ## [1.1.1](https://github.com/kulikman/Secret-project/compare/v1.1.0...v1.1.1) (2026-06-16)
 
 ### 🐛 Bug Fixes
