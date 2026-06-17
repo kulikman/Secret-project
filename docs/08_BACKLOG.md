@@ -117,6 +117,22 @@ Work through tasks **one at a time**. Before starting a task:
 
 ---
 
+### BE-03B: Add request IDs to standardized API responses
+
+**Priority:** P1 | **Status:** Done
+
+**Description:** Add request correlation IDs to standardized Route Handler envelopes and logs.
+
+**Acceptance Criteria:**
+
+- [x] API helpers add `requestId` to success/error envelopes.
+- [x] API helpers set the `X-Request-Id` response header.
+- [x] Safe inbound `x-request-id` values are preserved; missing/unsafe values generate a UUID.
+- [x] Cron/org log paths include the same request id used in the response.
+- [x] Route/helper tests cover request id propagation.
+
+---
+
 ### BRAIN-001: Confirm live Brain project for public archive
 
 **Priority:** P0 | **Status:** Blocked
@@ -392,10 +408,30 @@ real moderation, PDF generation, prompt editing, or integration controls.
 **Acceptance Criteria:**
 
 - [x] `ai_prompt_templates` schema is approved and migrated.
+- [x] Presentation schema supports 20-25 pages, prompt version, text provider, visual provider, stored PDF artifact, and cache key.
+- [x] Generation planning helpers split Claude-compatible text generation and visual slide generation jobs.
 - [ ] Prompt versions are visible in admin.
 - [ ] Generation creates `ai_jobs` and draft presentation rows.
 - [ ] Slides without `source_refs` cannot be published.
 - [ ] Export produces PDF artifacts, not PPTX.
+
+---
+
+### APP-013: Add Awakening Map topic suggestion foundation
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add the App DB and admin-shell foundation for the Awakening Map: all published topics remain in `node_projection`, and new ideas enter a moderated suggestion queue before publication or merge.
+
+**Acceptance Criteria:**
+
+- [x] New migration creates `awakening_topic_suggestions` without editing old migrations.
+- [x] Public/authenticated inserts are limited to `pending` suggestions by RLS.
+- [x] Admin/editor/curator review policies exist for reading/updating suggestions.
+- [x] TypeScript database contract includes suggestion rows and presentation cache fields.
+- [x] Zod helpers validate topic suggestion drafts and review payloads.
+- [x] `/admin/awakening-map` shell documents capabilities, dependencies, and next actions.
+- [x] No Brain writes, provider SDKs, secrets, auth changes, or payments are added.
 
 ---
 
@@ -444,15 +480,15 @@ real moderation, PDF generation, prompt editing, or integration controls.
 
 ---
 
-### SETUP-003: Configure Resend email
+### SETUP-003: Resend email setup skipped
 
-**Priority:** P1 | **Status:** Todo
+**Priority:** P1 | **Status:** Done
 
 **Steps:**
 
-1. Add domain in Resend dashboard and verify DNS
-2. Set `RESEND_API_KEY` and `RESEND_FROM_EMAIL` in `.env.local`
-3. Test welcome email on signup
+1. Do not add Resend as a required production dependency.
+2. Keep current in-app notification scaffold separate from email delivery.
+3. If notifications return later, design a provider-neutral layer and re-approve scope.
 
 ---
 

@@ -29,6 +29,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   admin: "Админка",
   api: "API",
   applications: "Заявки",
+  "awakening-map": "Карта пробуждения",
   community: "Сообщество",
   knowledge: "Знания",
   presentations: "Презентации",

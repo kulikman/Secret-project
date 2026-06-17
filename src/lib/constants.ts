@@ -31,6 +31,7 @@ export const ROUTES = {
   admin: "/admin",
   adminApi: "/admin/api",
   adminApplications: "/admin/applications",
+  adminAwakeningMap: "/admin/awakening-map",
   adminCommunity: "/admin/community",
   adminKnowledge: "/admin/knowledge",
   adminPresentations: "/admin/presentations",

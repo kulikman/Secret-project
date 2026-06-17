@@ -57,6 +57,11 @@ export const adminNavItems = [
     description: "Регистрация людей и модерация вступления.",
   },
   {
+    href: ROUTES.adminAwakeningMap,
+    label: "Карта пробуждения",
+    description: "Темы, предложения и проверка новых узлов.",
+  },
+  {
     href: ROUTES.adminPresentations,
     label: "PDF-презентации",
     description: "Сгенерированные материалы, промпты и версии.",
@@ -99,7 +104,7 @@ export const adminOverviewMetrics = [
   {
     label: "Презентации",
     value: "PDF",
-    note: "Не PPTX: нужен PDF export и админ-редактор промпта.",
+    note: "20-25 страниц, cache/download PDF, Claude для текста и отдельный visual provider.",
     tone: "emerald",
   },
   {
@@ -123,6 +128,17 @@ export const adminWorkstreams = [
     ],
   },
   {
+    href: ROUTES.adminAwakeningMap,
+    title: "Карта пробуждения",
+    summary: "Все опубликованные темы, связи и очередь предложений после проверки админом.",
+    status: "planned",
+    bullets: [
+      "Публичные темы читаются из `node_projection`; live Brain не нужен для рендера.",
+      "Новые темы попадают в `awakening_topic_suggestions` со статусом pending.",
+      "Админ может approved/rejected/merged только через будущий audited action.",
+    ],
+  },
+  {
     href: ROUTES.adminPresentations,
     title: "Сгенерированные PDF-презентации",
     summary: "Реестр PDF, версии, source_refs и редактируемый промпт.",
@@ -136,7 +152,7 @@ export const adminWorkstreams = [
   {
     href: ROUTES.adminApi,
     title: "API и интеграции",
-    summary: "Статусы Brain, Supabase, Resend, Vercel, аналитики и webhooks.",
+    summary: "Статусы Brain, Supabase, Vercel, AI providers, аналитики и webhooks.",
     status: "planned",
     bullets: [
       "Показывать только masked ключи и readiness, не значения секретов.",
@@ -151,7 +167,7 @@ export const adminWorkstreams = [
     status: "planned",
     bullets: [
       "Показывать статус заявки и доступные действия участника.",
-      "События, города бюро, уведомления и privacy preferences.",
+      "События, города бюро, согласия и privacy preferences.",
       "Доступ к опубликованным PDF и материалам сообщества.",
     ],
   },
@@ -190,11 +206,10 @@ export const adminSectionDetails = {
       "Фильтр по статусу; backend helper уже поддерживает город, событие, тему и период.",
       "Статусный pipeline: new, in_review, approved, rejected, waitlisted.",
       "Причина решения сохраняется в audit metadata; заметки куратора требуют будущего schema решения.",
-      "Уведомления участнику после решения через email/Telegram-интеграцию, когда она будет подключена.",
+      "Уведомления участнику намеренно не подключены в текущем scope; решение можно смотреть в кабинете.",
       "CSV export для ручной сверки и offline-операций.",
     ],
     settings: [
-      "Шаблоны писем для approved/rejected/waitlisted.",
       "Rate limit и антиспам-правила для публичной формы.",
       "Обязательные согласия: privacy, communications, photo/video consent.",
     ],
@@ -204,32 +219,65 @@ export const adminSectionDetails = {
       "Подключенный Supabase project с примененными migrations.",
     ],
     nextActions: [
-      "Добавить уведомления после Resend/notification setup.",
+      "Решить, нужен ли provider-neutral notification layer позже; Resend пропущен по решению владельца.",
       "Решить, нужны ли curator notes, assigned curator и follow-up date в схеме.",
       "Описать retention policy для заявок и персональных данных.",
+    ],
+  },
+  awakeningMap: {
+    title: "Карта пробуждения",
+    eyebrow: "knowledge map",
+    summary:
+      "Операционный слой для всех публичных тем, соседних узлов и предложений новых тем после админской проверки.",
+    status: "planned",
+    capabilities: [
+      "Реестр опубликованных тем из `node_projection` без обращения к live Brain на публичном рендере.",
+      "Очередь новых предложений: title, summary, related_node_refs, source_refs и suggested_by.",
+      "Статусы модерации: pending, approved, rejected, merged.",
+      "Merge в существующую тему хранит связь с `promoted_node_projection_id`.",
+      "Будущий graph view показывает соседние темы, источники и gaps без публикации непроверенных идей.",
+      "Публичное добавление тем возможно только как pending; публикация требует админа.",
+    ],
+    settings: [
+      "Порог качества: минимум summary/description/source_refs перед отправкой.",
+      "Кто может проверять темы: super_admin, admin, editor, curator.",
+      "Правила slug, source_refs и merge-дубликатов.",
+    ],
+    dependencies: [
+      "`awakening_topic_suggestions` schema добавляет очередь предложений и RLS.",
+      "`node_projection` остаётся read model для опубликованных тем.",
+      "Brain C6/C7/C10 нужны позже для живых neighbors/intersections/root graph.",
+    ],
+    nextActions: [
+      "Собрать admin list/detail для pending предложений.",
+      "Собрать audited approve/reject/merge action с записью audit log.",
+      "После Brain access подключить graph subset cache и публичный map UI.",
     ],
   },
   presentations: {
     title: "PDF-презентации и промпты",
     eyebrow: "ai content",
     summary:
-      "Реестр сгенерированных PDF-презентаций, версий, source_refs и админ-редактора промптов.",
+      "Реестр сгенерированных PDF-презентаций на 20-25 страниц, версий, source_refs и админ-редактора промптов.",
     status: "planned",
     capabilities: [
       "Список презентаций: тема, статус, версия, дата генерации, автор, качество source_refs.",
       "Просмотр структуры: слайды, speaker notes, источники на каждом слайде.",
       "Редактируемый промпт `presentation_pdf` прямо в админке с версионированием.",
+      "Схема поддерживает Claude-compatible text step: narrative_text и speaker notes.",
+      "Схема поддерживает отдельный visual provider step: layout/visual_prompt/visual_asset.",
+      "Cache key позволит скачать уже созданный PDF по теме вместо повторной генерации.",
       "Regenerate flow: новая draft-версия связана с parent_version.",
       "Export/download PDF и история экспортов.",
       "Блокировка публикации, если хотя бы один слайд не имеет source_refs.",
     ],
     settings: [
-      "Prompt template, system instructions, tone, slide count, visual style.",
+      "Prompt template, system instructions, tone, page count 20-25, visual style.",
       "PDF renderer configuration и storage bucket для артефактов.",
       "Лимиты генерации, retry policy и cost caps.",
     ],
     dependencies: [
-      "Выбор model/provider и безопасное хранение API keys в env/Vercel.",
+      "Claude/text provider и отдельный visual provider выбираются через env/Vercel без raw secret UI.",
       "`ai_prompt_templates` уже есть; audited editor action ещё не реализован.",
       "PDF renderer/export pipeline; PPTX не входит в MVP.",
     ],
@@ -245,7 +293,7 @@ export const adminSectionDetails = {
     summary: "Единый экран состояния внешних сервисов и внутренних API без раскрытия секретов.",
     status: "planned",
     capabilities: [
-      "Readiness cards для Brain, Supabase, Resend, Vercel, PostHog и Sentry.",
+      "Readiness cards для Brain, Supabase, Vercel, AI providers, PostHog и Sentry.",
       "Masked status API keys: configured/missing/rotating, но никогда не raw value.",
       "Webhook delivery health, retries, last success/error and dead-letter queue notes.",
       "User API keys отдельно от service credentials: owner, prefix, last_used_at, expires_at.",
@@ -277,17 +325,17 @@ export const adminSectionDetails = {
       "Статус заявки и история коммуникации: new, in_review, approved, rejected, waitlisted.",
       "Мероприятия: регистрация, посещения, QR/check-in в будущем.",
       "Сохраненные темы архива, подборки и доступные PDF-презентации.",
-      "Уведомления, digest preferences, privacy controls и export/delete request.",
+      "Privacy controls, consent settings и export/delete request.",
     ],
     settings: [
       "Community visibility: public/private profile fields.",
-      "Notification channels and consent text.",
       "Access tiers for materials and closed events.",
+      "Consent text for privacy, communications and photo/video permissions.",
     ],
     dependencies: [
       "Связь `profiles` с community membership state.",
       "RLS для участника: видеть только свои заявки и разрешенные материалы.",
-      "Email/notification templates after Resend setup.",
+      "Provider-neutral notification layer remains out of scope unless re-approved.",
     ],
     nextActions: [
       "Согласовать модель member_status и city/event registration.",
@@ -407,7 +455,7 @@ export const communityCabinetScope = [
   },
   {
     title: "Уведомления",
-    description: "Digest, приглашения, системные сообщения и privacy controls.",
+    description: "Отложены: если вернутся, делать provider-neutral и без Resend-зависимости.",
   },
 ] as const satisfies readonly CabinetItem[];
 

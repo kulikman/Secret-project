@@ -1,4 +1,16 @@
 export {
+  createPresentationCacheKey,
+  createPresentationJobInputs,
+  normalizePresentationGenerationPlan,
+  presentationGenerationPlanSchema,
+  presentationPageCountSchema,
+} from "./lib/presentation-plan";
+export type {
+  PresentationGenerationPlan,
+  PresentationGenerationPlanInput,
+  PresentationJobInput,
+} from "./lib/presentation-plan";
+export {
   SourceFirstValidationError,
   assertCanPublishGeneratedContent,
   createRegenerationDraft,

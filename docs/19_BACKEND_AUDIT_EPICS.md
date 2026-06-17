@@ -86,13 +86,13 @@ codebase already proves it.
 
 ### P2: Hardening / Production Quality
 
-1. No trace/request IDs in API responses/log context.
+1. Request IDs exist in standardized API responses and selected log paths; full trace propagation across all future admin/server actions is still pending.
 2. No webhook delivery log/dead-letter model.
 3. No application retention policy.
 4. No PDF artifact storage policy.
 5. No seed data for admin, applications, prompt templates, and public archive smoke tests.
 6. No E2E coverage for admin RBAC, application moderation, and public archive.
-7. No dedicated readiness dashboard for Brain/Supabase/Resend/Vercel/Sentry/PostHog.
+7. No dedicated readiness dashboard for Brain/Supabase/Vercel/AI providers/Sentry/PostHog.
 
 ## Epic Decomposition
 
@@ -162,7 +162,7 @@ Tasks:
 - Introduce shared JSON response helpers for Route Handlers.
 - Replace redirects inside API routes with JSON `401` where route is API-only. Done for `/api/orgs`.
 - Normalize validation errors with Zod issue summaries. Done for helper + `/api/orgs`.
-- Add request ID support in responses and logs.
+- Add request ID support in responses and logs. Done for standardized API helpers/routes.
 - Decide whether public APIs use page/limit or cursor; update docs and code consistently. Done for current public archive docs/code.
 
 Acceptance criteria:
@@ -175,6 +175,7 @@ Current implementation:
 
 - `src/lib/api-response.ts` centralizes success/error/validation/unauthorized responses.
 - `src/lib/api-auth.ts` gives API routes a non-redirecting Supabase user check.
+- Standardized API responses include `requestId` and `X-Request-Id`; safe inbound `x-request-id` values are preserved, otherwise a UUID is generated.
 - Public archive, public applications, cron, and org routes use shared helpers.
 - Payment routes were removed from product scope and are not part of BE-03.
 
@@ -229,7 +230,7 @@ Tasks:
 - Add event registration model if event participation is in MVP.
 - Add saved topics/material access model.
 - Add privacy/export/delete request entry points.
-- Add notification preferences.
+- Add provider-neutral notification preferences only if notifications are re-approved.
 
 Acceptance criteria:
 
@@ -243,7 +244,7 @@ Goal: make external dependencies observable and controllable without exposing se
 
 Tasks:
 
-- Add read-only readiness checks for Supabase, Brain, Resend, PostHog, Sentry, Vercel env.
+- Add read-only readiness checks for Supabase, Brain, Vercel env, AI providers, PostHog, and Sentry.
 - Add masked integration status model.
 - Add webhook delivery log and retry/dead-letter design.
 - Wire `verifyApiKey()` into first real external API route or remove user-facing API key feature from MVP.
@@ -326,8 +327,8 @@ Acceptance criteria:
 
 BE-00, BE-02, and the first BE-03 response-helper slice are complete. Continue with:
 
-1. Add request ID support in API responses/log context.
-2. Add remaining API contract tests.
-3. Continue admin/backend epics without reintroducing payment scope.
+1. Add remaining API contract tests for any standardized route gaps.
+2. Continue admin/backend epics without reintroducing payment scope.
+3. Move to BE-04 only after live Brain access/deployed C2-C10 contracts are available.
 
 This sequence reduces abuse/security risk before adding more admin write actions.

@@ -36,6 +36,7 @@ describe("ROUTES <-> SEGMENT_LABELS sync", () => {
       "admin",
       "api",
       "applications",
+      "awakening-map",
       "community",
       "knowledge",
       "presentations",

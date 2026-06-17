@@ -89,6 +89,37 @@ CREATE INDEX idx_node_projection_type_status ON public.node_projection(node_type
 CREATE INDEX idx_node_projection_slug ON public.node_projection(slug) WHERE slug IS NOT NULL;
 ```
 
+### awakening_topic_suggestions
+
+Queue of new Awakening Map topic ideas submitted by users or admins. Public
+submissions are never published directly; they remain `pending` until an admin
+reviews them.
+
+Key fields:
+
+- `id uuid primary key`
+- `title text not null`
+- `slug text`
+- `summary text`
+- `description text`
+- `related_node_refs jsonb not null default '[]'`
+- `source_refs jsonb not null default '[]'`
+- `status text not null default 'pending'`
+- `suggested_by uuid references auth.users(id)`
+- `reviewed_by uuid references auth.users(id)`
+- `reviewed_at timestamptz`
+- `decision_reason text`
+- `promoted_node_projection_id uuid references node_projection(id)`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+RLS:
+
+- anon/authenticated can insert only `pending` suggestions;
+- authenticated users can read their own suggestions;
+- super_admin/admin/editor/curator can read and review suggestions;
+- service role keeps full operational access for audited server actions.
+
 ---
 
 ## AI Content Tables
@@ -121,6 +152,21 @@ Key fields:
 - `dossier_id uuid references dossiers(id)`
 - `status text not null`
 - `title text not null`
+- `page_count integer not null default 20` (`20..25`)
+- `prompt_template_id uuid references ai_prompt_templates(id)`
+- `prompt_template_version integer`
+- `text_provider text not null default 'anthropic_claude'`
+- `text_model text`
+- `visual_provider text not null default 'visual_ai_pending'`
+- `visual_model text`
+- `generation_input jsonb not null default '{}'`
+- `narrative_text text`
+- `artifact_storage_path text`
+- `artifact_url text`
+- `artifact_mime_type text` (`application/pdf` when present)
+- `cache_key text unique when present`
+- `generated_at timestamptz`
+- `exported_at timestamptz`
 - `parent_version uuid references presentations(id)`
 - `created_by uuid references profiles(id)`
 - `created_at timestamptz not null default now()`
@@ -138,6 +184,9 @@ Key fields:
 - `title text not null`
 - `body jsonb not null default '{}'`
 - `speaker_notes text`
+- `layout jsonb not null default '{}'`
+- `visual_prompt text`
+- `visual_asset jsonb not null default '{}'`
 - `source_refs jsonb not null default '[]'`
 
 ### ai_jobs
@@ -149,10 +198,15 @@ Key fields:
 - `id uuid primary key`
 - `job_type text not null`
 - `topic_node_id text`
+- `presentation_id uuid references presentations(id)`
+- `provider text`
+- `model text`
 - `status text not null`
 - `input jsonb not null default '{}'`
 - `output jsonb not null default '{}'`
 - `error text`
+- `started_at timestamptz`
+- `finished_at timestamptz`
 - `created_by uuid references profiles(id)`
 - `created_at timestamptz not null default now()`
 - `updated_at timestamptz not null default now()`

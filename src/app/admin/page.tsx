@@ -19,7 +19,7 @@ export default function AdminPage(): React.ReactElement {
           operational control room
         </p>
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          Админка Тайного Бюро: заявки, PDF-презентации, API, знания и кабинет участника.
+          Админка Тайного Бюро: заявки, карта пробуждения, PDF-презентации, API и кабинет участника.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-300">
           Это безопасный слой: карта функций и RBAC-защищенные страницы без рискованных

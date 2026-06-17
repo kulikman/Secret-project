@@ -23,7 +23,8 @@
 
 All currently safe app-side epic foundations are complete or documented as
 blocked. Remaining work needs external environment setup, remaining Brain
-graph/ingest gaps, RBAC approval, or production deployment context.
+graph/ingest gaps, AI provider selection, PDF renderer/storage, or production
+deployment context.
 
 ---
 
@@ -60,9 +61,12 @@ graph/ingest gaps, RBAC approval, or production deployment context.
 - [x] `/admin/applications` wired to list/filter applications and submit audited status transitions
 - [x] Public application duplicate handling added for normalized email + city + event
 - [x] API response helpers added and API routes partially standardized
+- [x] Request IDs added to standardized API envelopes, `X-Request-Id` headers, and cron/org log paths
 - [x] Payment runtime and schema removed from product scope: no Stripe checkout, portal, webhook, pricing page, billing page, usage plan limits, Stripe env validation, or subscriptions table
+- [x] Awakening Map foundation added with moderated topic suggestions and `/admin/awakening-map`
+- [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [ ] Supabase project connected (SETUP-001)
-- [ ] Resend configured (SETUP-003)
+- [x] Resend setup skipped by owner request; notifications remain provider-neutral/future only
 - [ ] Core feature implemented
 
 ---
@@ -82,17 +86,21 @@ graph/ingest gaps, RBAC approval, or production deployment context.
 - [ ] Epic 3 ingest/review remains blocked by deploying Brain C9 and connecting app adapter/admin ingest flow
 - [ ] Epic 5 model/provider generation and PDF presentation export remain unimplemented
 - [ ] Epic 5 presentation prompt admin editor remains unimplemented
+- [ ] Awakening Map admin list/detail and approve/reject/merge actions remain unimplemented
+- [ ] Presentation text/visual generation workers and PDF storage/download routes remain unimplemented
 - [ ] Epic 6 Graph Map remains blocked by deploying Brain C6/C7/C10 and connecting app-side graph cache/UI
 - [ ] Epic 7 event publishing remains unimplemented
 - [ ] Most domain admin mutations remain blocked; application status backend/UI is implemented, but admin JSON API route is not implemented
 - [ ] Member cabinet data model remains blocked until profile/community membership scope is approved
-- [ ] Backend audit found Supabase security-definer hardening, Brain adapter wiring, request IDs, API contract tests, and RLS scenario tests as remaining backend priorities
+- [ ] Backend audit found Supabase security-definer hardening, Brain adapter wiring, remaining API contract tests, and RLS scenario tests as remaining backend priorities
 
 ---
 
 ## Next Step
 
-Continue backend epics from `docs/19_BACKEND_AUDIT_EPICS.md`: Resend notifications and BE-01 are skipped by owner request. Continue BE-03 with request IDs and remaining API contract tests.
+Continue with the next safe app-side slice: build `/admin/awakening-map` list/detail
+for pending suggestions, then add audited approve/reject/merge actions. Claude/text
+and visual AI provider calls should wait until provider/env choices are confirmed.
 
 ---
 
@@ -135,6 +143,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-17: Resend/notification trigger is intentionally skipped by owner request.
 - 2026-06-17: `src/lib/api-response.ts` and `src/lib/api-auth.ts` start BE-03. Public archive, applications, cron, and org routes use standard JSON helpers.
 - 2026-06-17: Payments are removed from product scope. Stripe checkout/portal/webhook routes, pricing/billing/usage pages, plan limits, payment email templates, Stripe env vars, the Stripe package dependency, `public.subscriptions`, and `profiles.stripe_customer_id` are removed.
+- 2026-06-17: Standardized API responses include `requestId` and `X-Request-Id`; safe inbound `x-request-id` values are preserved, and cron/org logs include the response request id.
 
 ---
 
