@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { apiOkEmpty, apiUnauthorized } from "@/lib/api-response";
+import { apiOkEmpty, apiUnauthorized, createApiRequestContext } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -22,17 +22,21 @@ import { logger } from "@/lib/logger";
  *   crons: [{ path: "/api/cron/example", schedule: "0 0 * * *" }]
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const apiContext = createApiRequestContext(request);
   const env = getServerEnv();
   const auth = request.headers.get("authorization");
 
   if (!env.CRON_SECRET || auth !== `Bearer ${env.CRON_SECRET}`) {
-    logger.warn("cron unauthorized", { hasSecret: !!env.CRON_SECRET });
-    return apiUnauthorized();
+    logger.warn("cron unauthorized", {
+      hasSecret: !!env.CRON_SECRET,
+      requestId: apiContext.requestId,
+    });
+    return apiUnauthorized("Unauthorized", apiContext);
   }
 
   // Replace with your scheduled work — sending digests, cleaning up
   // expired sessions, syncing 3rd-party data, etc.
-  logger.info("cron tick", { route: "example" });
+  logger.info("cron tick", { requestId: apiContext.requestId, route: "example" });
 
-  return apiOkEmpty();
+  return apiOkEmpty(undefined, apiContext);
 }

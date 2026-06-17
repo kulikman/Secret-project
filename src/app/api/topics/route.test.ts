@@ -22,15 +22,21 @@ describe("GET /api/topics", () => {
       pagination: { page: 1, limit: 20, total: 1, hasMore: false },
     });
 
-    const response = await GET(new NextRequest("http://localhost/api/topics?page=1&limit=20"));
+    const response = await GET(
+      new NextRequest("http://localhost/api/topics?page=1&limit=20", {
+        headers: { "x-request-id": "topics-list-1" },
+      })
+    );
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: "topics-list-1",
       data: {
         items: [{ id: "topic-1", title: "Гиперборея" }],
         pagination: { page: 1, limit: 20, total: 1, hasMore: false },
       },
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-Request-Id")).toBe("topics-list-1");
   });
 });

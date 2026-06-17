@@ -23,12 +23,18 @@ describe("GET /api/sources/:id", () => {
       title: "Архивный документ",
     });
 
-    const response = await GET(new NextRequest("http://localhost/api/sources/brain-source-1"), {
-      params: Promise.resolve({ id: "brain-source-1" }),
-    });
+    const response = await GET(
+      new NextRequest("http://localhost/api/sources/brain-source-1", {
+        headers: { "x-request-id": "source-detail-1" },
+      }),
+      {
+        params: Promise.resolve({ id: "brain-source-1" }),
+      }
+    );
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: "source-detail-1",
       data: {
         source: {
           id: "source-1",
@@ -38,5 +44,6 @@ describe("GET /api/sources/:id", () => {
       },
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-Request-Id")).toBe("source-detail-1");
   });
 });

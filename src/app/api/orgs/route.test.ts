@@ -38,9 +38,13 @@ describe("/api/orgs", () => {
   it("returns JSON 401 instead of redirecting when unauthenticated", async () => {
     mocks.getApiUser.mockResolvedValueOnce(null);
 
-    const response = await GET();
+    const response = await GET(new NextRequest("http://localhost/api/orgs"));
 
-    await expect(response.json()).resolves.toEqual({ ok: false, error: "Unauthorized" });
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      requestId: expect.any(String),
+      error: "Unauthorized",
+    });
     expect(response.status).toBe(401);
     expect(mocks.getUserOrgs).not.toHaveBeenCalled();
   });
@@ -48,14 +52,20 @@ describe("/api/orgs", () => {
   it("lists orgs in the standard API envelope", async () => {
     mocks.getUserOrgs.mockResolvedValueOnce([{ orgId: "org-1", orgName: "Бюро", role: "owner" }]);
 
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost/api/orgs", {
+        headers: { "x-request-id": "org-list-1" },
+      })
+    );
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: "org-list-1",
       data: {
         orgs: [{ orgId: "org-1", orgName: "Бюро", role: "owner" }],
       },
     });
+    expect(response.headers.get("X-Request-Id")).toBe("org-list-1");
   });
 
   it("creates an org for the current API user", async () => {
@@ -70,6 +80,7 @@ describe("/api/orgs", () => {
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: expect.any(String),
       data: { org: { id: "org-1", slug: "bureau" } },
     });
     expect(response.status).toBe(201);
@@ -91,6 +102,7 @@ describe("/api/orgs", () => {
     const body = await response.json();
     expect(body).toMatchObject({
       ok: false,
+      requestId: expect.any(String),
       error: expect.any(String),
       issues: expect.arrayContaining([expect.any(String)]),
     });
@@ -109,14 +121,19 @@ describe("/api/orgs", () => {
     const response = await POST(
       new NextRequest("http://localhost/api/orgs", {
         method: "POST",
+        headers: { "x-request-id": "org-create-fail-1" },
         body: JSON.stringify({ name: "Бюро", slug: "bureau" }),
       })
     );
 
     await expect(response.json()).resolves.toEqual({
       ok: false,
+      requestId: "org-create-fail-1",
       error: "That slug is already taken.",
     });
     expect(response.status).toBe(409);
+    expect(mocks.logger.error).toHaveBeenCalledWith("org create failed", error, {
+      requestId: "org-create-fail-1",
+    });
   });
 });

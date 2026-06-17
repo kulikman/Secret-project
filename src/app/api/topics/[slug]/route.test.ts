@@ -23,12 +23,18 @@ describe("GET /api/topics/:slug", () => {
       title: "Гиперборея",
     });
 
-    const response = await GET(new NextRequest("http://localhost/api/topics/hyperborea"), {
-      params: Promise.resolve({ slug: "hyperborea" }),
-    });
+    const response = await GET(
+      new NextRequest("http://localhost/api/topics/hyperborea", {
+        headers: { "x-request-id": "topic-detail-1" },
+      }),
+      {
+        params: Promise.resolve({ slug: "hyperborea" }),
+      }
+    );
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: "topic-detail-1",
       data: {
         topic: {
           id: "topic-1",
@@ -38,6 +44,7 @@ describe("GET /api/topics/:slug", () => {
       },
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-Request-Id")).toBe("topic-detail-1");
   });
 
   it("returns 404 for missing topics", async () => {
@@ -47,7 +54,11 @@ describe("GET /api/topics/:slug", () => {
       params: Promise.resolve({ slug: "missing" }),
     });
 
-    await expect(response.json()).resolves.toEqual({ ok: false, error: "Topic not found" });
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      requestId: expect.any(String),
+      error: "Topic not found",
+    });
     expect(response.status).toBe(404);
   });
 });

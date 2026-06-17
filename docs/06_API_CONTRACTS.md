@@ -20,14 +20,18 @@ Current implementation status:
 Success:
 
 ```json
-{ "ok": true, "data": {} }
+{ "ok": true, "requestId": "req_...", "data": {} }
 ```
 
 Error:
 
 ```json
-{ "ok": false, "error": "Human-readable message" }
+{ "ok": false, "requestId": "req_...", "error": "Human-readable message" }
 ```
+
+Standardized routes also return the same value in the `X-Request-Id` response
+header. If a safe inbound `x-request-id` header exists, it is reused; otherwise
+the API helper generates one.
 
 Backend Epic BE-03 tracks the remaining response envelope standardization.
 
@@ -35,18 +39,18 @@ Backend Epic BE-03 tracks the remaining response envelope standardization.
 
 ## Route Inventory
 
-| Route                  | Method   | Auth                 | Data Source                               | Status                       | Test Coverage                             |
-| ---------------------- | -------- | -------------------- | ----------------------------------------- | ---------------------------- | ----------------------------------------- |
-| `/api/health`          | GET      | public               | stateless                                 | implemented                  | no dedicated test                         |
-| `/api/topics`          | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/route.test.ts`        |
-| `/api/topics/:slug`    | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/[slug]/route.test.ts` |
-| `/api/sources/:id`     | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/sources/[id]/route.test.ts`  |
-| `/api/applications`    | POST     | public/authenticated | service-role duplicate check + RLS insert | implemented                  | `src/app/api/applications/route.test.ts`  |
-| `/api/orgs`            | GET/POST | authenticated        | org feature + Supabase                    | implemented                  | `src/app/api/orgs/route.test.ts`          |
-| `/api/cron/cleanup`    | GET      | `CRON_SECRET` bearer | maintenance feature + service role        | implemented                  | `src/app/api/cron/cleanup/route.test.ts`  |
-| `/api/cron/example`    | GET      | `CRON_SECRET` bearer | stateless log                             | scaffold-only, not scheduled | envelope helper only                      |
-| `/api/map/graph`       | GET      | public               | future graph cache/projection             | not implemented              | none                                      |
-| `/api/admin/*`         | mixed    | admin role           | future server actions                     | not implemented              | feature-level moderation tests only       |
+| Route               | Method   | Auth                 | Data Source                               | Status                       | Test Coverage                             |
+| ------------------- | -------- | -------------------- | ----------------------------------------- | ---------------------------- | ----------------------------------------- |
+| `/api/health`       | GET      | public               | stateless                                 | implemented                  | no dedicated test                         |
+| `/api/topics`       | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/route.test.ts`        |
+| `/api/topics/:slug` | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/[slug]/route.test.ts` |
+| `/api/sources/:id`  | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/sources/[id]/route.test.ts`  |
+| `/api/applications` | POST     | public/authenticated | service-role duplicate check + RLS insert | implemented                  | `src/app/api/applications/route.test.ts`  |
+| `/api/orgs`         | GET/POST | authenticated        | org feature + Supabase                    | implemented                  | `src/app/api/orgs/route.test.ts`          |
+| `/api/cron/cleanup` | GET      | `CRON_SECRET` bearer | maintenance feature + service role        | implemented                  | `src/app/api/cron/cleanup/route.test.ts`  |
+| `/api/cron/example` | GET      | `CRON_SECRET` bearer | stateless log                             | scaffold-only, not scheduled | envelope helper only                      |
+| `/api/map/graph`    | GET      | public               | future graph cache/projection             | not implemented              | none                                      |
+| `/api/admin/*`      | mixed    | admin role           | future server actions                     | not implemented              | feature-level moderation tests only       |
 
 ---
 

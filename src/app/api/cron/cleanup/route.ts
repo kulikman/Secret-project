@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { runScheduledCleanup } from "@/features/maintenance";
-import { apiOk, apiUnauthorized } from "@/lib/api-response";
+import { apiOk, apiUnauthorized, createApiRequestContext } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -20,14 +20,15 @@ import { logger } from "@/lib/logger";
  * every cron-triggered request. Set CRON_SECRET in your Vercel project env.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const apiContext = createApiRequestContext(request);
   const env = getServerEnv();
   const auth = request.headers.get("authorization");
 
   if (!env.CRON_SECRET || auth !== `Bearer ${env.CRON_SECRET}`) {
-    logger.warn("cron/cleanup: unauthorized request");
-    return apiUnauthorized();
+    logger.warn("cron/cleanup: unauthorized request", { requestId: apiContext.requestId });
+    return apiUnauthorized("Unauthorized", apiContext);
   }
 
   const results = await runScheduledCleanup();
-  return apiOk(results);
+  return apiOk(results, undefined, apiContext);
 }

@@ -71,6 +71,7 @@ describe("POST /api/applications", () => {
     const response = await POST(
       new NextRequest("http://localhost/api/applications", {
         method: "POST",
+        headers: { "x-request-id": "app-create-1" },
         body: JSON.stringify({
           fullName: "Иван Иванов",
           email: "ivan@example.com",
@@ -79,8 +80,9 @@ describe("POST /api/applications", () => {
       })
     );
 
-    await expect(response.json()).resolves.toEqual({ ok: true });
+    await expect(response.json()).resolves.toEqual({ ok: true, requestId: "app-create-1" });
     expect(response.status).toBe(201);
+    expect(response.headers.get("X-Request-Id")).toBe("app-create-1");
     expect(mocks.limit).toHaveBeenCalledWith("applications:203.0.113.10:ivan@example.com", {
       limit: 5,
       windowMs: 60 * 60 * 1000,
@@ -110,8 +112,9 @@ describe("POST /api/applications", () => {
       })
     );
 
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       ok: false,
+      requestId: expect.any(String),
       error: "Invalid application payload",
     });
     expect(response.status).toBe(422);
@@ -137,8 +140,9 @@ describe("POST /api/applications", () => {
       })
     );
 
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       ok: false,
+      requestId: expect.any(String),
       error: "Too many application attempts",
     });
     expect(response.status).toBe(429);
@@ -158,6 +162,7 @@ describe("POST /api/applications", () => {
     const response = await POST(
       new NextRequest("http://localhost/api/applications", {
         method: "POST",
+        headers: { "x-request-id": "app-dupe-1" },
         body: JSON.stringify({
           cityId: "22222222-2222-4222-8222-222222222222",
           eventId: "33333333-3333-4333-8333-333333333333",
@@ -167,8 +172,9 @@ describe("POST /api/applications", () => {
       })
     );
 
-    await expect(response.json()).resolves.toEqual({ ok: true });
+    await expect(response.json()).resolves.toEqual({ ok: true, requestId: "app-dupe-1" });
     expect(response.status).toBe(201);
+    expect(response.headers.get("X-Request-Id")).toBe("app-dupe-1");
     expect(duplicateQuery.eq).toHaveBeenCalledWith("email", "ivan@example.com");
     expect(duplicateQuery.eq).toHaveBeenCalledWith(
       "city_id",

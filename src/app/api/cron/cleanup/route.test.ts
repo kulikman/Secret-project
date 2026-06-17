@@ -31,11 +31,20 @@ describe("GET /api/cron/cleanup", () => {
 
   it("rejects unauthorized requests before cleanup work", async () => {
     const response = await GET(
-      new Request("http://localhost/api/cron/cleanup") as unknown as NextRequest
+      new Request("http://localhost/api/cron/cleanup", {
+        headers: { "x-request-id": "cron-denied-1" },
+      }) as unknown as NextRequest
     );
 
-    await expect(response.json()).resolves.toEqual({ ok: false, error: "Unauthorized" });
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      requestId: "cron-denied-1",
+      error: "Unauthorized",
+    });
     expect(response.status).toBe(401);
+    expect(mocks.logger.warn).toHaveBeenCalledWith("cron/cleanup: unauthorized request", {
+      requestId: "cron-denied-1",
+    });
     expect(mocks.runScheduledCleanup).not.toHaveBeenCalled();
   });
 
@@ -47,18 +56,20 @@ describe("GET /api/cron/cleanup", () => {
 
     const response = await GET(
       new Request("http://localhost/api/cron/cleanup", {
-        headers: { authorization: "Bearer secret" },
+        headers: { authorization: "Bearer secret", "x-request-id": "cron-cleanup-1" },
       }) as unknown as NextRequest
     );
 
     await expect(response.json()).resolves.toEqual({
       ok: true,
+      requestId: "cron-cleanup-1",
       data: {
         notificationsDeleted: 2,
         expiredInvitesDeleted: 1,
       },
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-Request-Id")).toBe("cron-cleanup-1");
     expect(mocks.runScheduledCleanup).toHaveBeenCalledTimes(1);
   });
 });
