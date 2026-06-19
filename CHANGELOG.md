@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/kulikman/Secret-project/compare/v1.5.0...v1.6.0) (2026-06-19)
+
+### ✨ Features
+
+* **awakening-map:** add original reference layer ([deafbe6](https://github.com/kulikman/Secret-project/commit/deafbe675e3767e813556930e5e8d3ece7e8a8e8))
+
 ## [1.5.0](https://github.com/kulikman/Secret-project/compare/v1.4.0...v1.5.0) (2026-06-19)
 
 ### ✨ Features
