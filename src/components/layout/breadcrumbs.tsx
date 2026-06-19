@@ -23,6 +23,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   team: "Team",
   projects: "Projects",
   onboarding: "Onboarding",
+  topics: "Темы",
+  sources: "Источники",
   analytics: "Analytics",
   companies: "Companies",
   orgs: "Organizations",
@@ -34,6 +36,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   knowledge: "Знания",
   presentations: "Презентации",
   users: "Users",
+  awakening: "Пробуждение",
+  map: "Карта",
 };
 
 export interface BreadcrumbItem {

@@ -41,6 +41,8 @@ describe("ROUTES <-> SEGMENT_LABELS sync", () => {
       "knowledge",
       "presentations",
       "users",
+      "awakening",
+      "map",
     ]);
 
     const SPECIAL_DYNAMIC = new Set(["edit", "new"]);

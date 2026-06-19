@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({
+  createAdminClient: vi.fn(),
   createClient: vi.fn(),
   requireAdminRole: vi.fn(),
+  writeAuditLog: vi.fn(),
 }));
 
 vi.mock("@/lib/admin-auth", () => ({
@@ -16,10 +18,25 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: mocks.createClient,
 }));
 
-import { getAwakeningTopicSuggestion, listAwakeningTopicSuggestions } from "./moderation";
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: mocks.createAdminClient,
+}));
+
+vi.mock("@/lib/audit", () => ({
+  writeAuditLog: mocks.writeAuditLog,
+}));
+
+import {
+  approveAwakeningTopicSuggestion,
+  getAwakeningTopicSuggestion,
+  listAwakeningTopicSuggestions,
+  mergeAwakeningTopicSuggestion,
+  rejectAwakeningTopicSuggestion,
+} from "./moderation";
 
 const suggestionId = "11111111-1111-4111-8111-111111111111";
 const reviewerId = "22222222-2222-4222-8222-222222222222";
+const projectionId = "33333333-3333-4333-8333-333333333333";
 
 const suggestionRow = {
   created_at: "2026-06-19T08:00:00.000Z",
@@ -39,20 +56,45 @@ const suggestionRow = {
   updated_at: "2026-06-19T08:00:00.000Z",
 };
 
-function createQuery(response: unknown) {
+function createQuery(
+  response:
+    | unknown
+    | {
+        limit?: unknown;
+        maybeSingle?: unknown;
+        single?: unknown;
+      }
+) {
+  const responses =
+    response &&
+    typeof response === "object" &&
+    ("limit" in response || "maybeSingle" in response || "single" in response)
+      ? (response as { limit?: unknown; maybeSingle?: unknown; single?: unknown })
+      : {
+          limit: response,
+          maybeSingle: response,
+          single: response,
+        };
+
   const query = {
     eq: vi.fn(),
+    insert: vi.fn(),
     limit: vi.fn(),
     maybeSingle: vi.fn(),
     order: vi.fn(),
     select: vi.fn(),
+    single: vi.fn(),
+    update: vi.fn(),
   };
 
   query.eq.mockReturnValue(query);
+  query.insert.mockReturnValue(query);
   query.order.mockReturnValue(query);
   query.select.mockReturnValue(query);
-  query.limit.mockResolvedValue(response);
-  query.maybeSingle.mockResolvedValue(response);
+  query.update.mockReturnValue(query);
+  query.limit.mockResolvedValue(responses.limit);
+  query.maybeSingle.mockResolvedValue(responses.maybeSingle);
+  query.single.mockResolvedValue(responses.single);
 
   return query;
 }
@@ -112,5 +154,203 @@ describe("awakening map moderation backend", () => {
     await expect(listAwakeningTopicSuggestions()).rejects.toThrow("Admin access denied");
 
     expect(mocks.createClient).not.toHaveBeenCalled();
+  });
+
+  it("approves a pending suggestion into node_projection and audits the decision", async () => {
+    const approvedRow = {
+      ...suggestionRow,
+      decision_reason: "Источники проверены редактором.",
+      promoted_node_projection_id: projectionId,
+      reviewed_at: "2026-06-19T09:00:00.000Z",
+      reviewed_by: reviewerId,
+      status: "approved",
+    };
+    const readQuery = createQuery({
+      maybeSingle: { data: suggestionRow, error: null },
+    });
+    const projectionQuery = createQuery({
+      single: { data: { id: projectionId }, error: null },
+    });
+    const updateQuery = createQuery({
+      single: { data: approvedRow, error: null },
+    });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(readQuery)
+      .mockReturnValueOnce(projectionQuery)
+      .mockReturnValueOnce(updateQuery);
+    mocks.createAdminClient.mockReturnValue({ from });
+
+    await expect(
+      approveAwakeningTopicSuggestion({
+        decisionReason: "Источники проверены редактором.",
+        suggestionId,
+      })
+    ).resolves.toMatchObject({
+      promoted_node_projection_id: projectionId,
+      status: "approved",
+    });
+
+    expect(from).toHaveBeenNthCalledWith(1, "awakening_topic_suggestions");
+    expect(from).toHaveBeenNthCalledWith(2, "node_projection");
+    expect(from).toHaveBeenNthCalledWith(3, "awakening_topic_suggestions");
+    expect(projectionQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        brain_node_id: `awakening-suggestion:${suggestionId}`,
+        node_type: "topic",
+        slug: "awakening-map",
+        source_refs: suggestionRow.source_refs,
+        status: "review",
+        title: "Карта пробуждения",
+      })
+    );
+    expect(updateQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        decision_reason: "Источники проверены редактором.",
+        promoted_node_projection_id: projectionId,
+        reviewed_by: reviewerId,
+        status: "approved",
+      })
+    );
+    expect(mocks.writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "admin.awakening_topic_reviewed",
+        resource: `awakening-topic-suggestion:${suggestionId}`,
+        userId: reviewerId,
+      })
+    );
+  });
+
+  it("rejects a pending suggestion without creating a projection", async () => {
+    const rejectedRow = {
+      ...suggestionRow,
+      decision_reason: "Недостаточно проверяемых источников.",
+      reviewed_at: "2026-06-19T09:00:00.000Z",
+      reviewed_by: reviewerId,
+      status: "rejected",
+    };
+    const readQuery = createQuery({
+      maybeSingle: { data: suggestionRow, error: null },
+    });
+    const updateQuery = createQuery({
+      single: { data: rejectedRow, error: null },
+    });
+    const from = vi.fn().mockReturnValueOnce(readQuery).mockReturnValueOnce(updateQuery);
+    mocks.createAdminClient.mockReturnValue({ from });
+
+    await expect(
+      rejectAwakeningTopicSuggestion({
+        decisionReason: "Недостаточно проверяемых источников.",
+        suggestionId,
+      })
+    ).resolves.toMatchObject({
+      promoted_node_projection_id: null,
+      status: "rejected",
+    });
+
+    expect(from).toHaveBeenCalledTimes(2);
+    expect(from).not.toHaveBeenCalledWith("node_projection");
+    expect(updateQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        decision_reason: "Недостаточно проверяемых источников.",
+        promoted_node_projection_id: null,
+        reviewed_by: reviewerId,
+        status: "rejected",
+      })
+    );
+    expect(mocks.writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "admin.awakening_topic_reviewed",
+        resource: `awakening-topic-suggestion:${suggestionId}`,
+        userId: reviewerId,
+      })
+    );
+  });
+
+  it("merges a pending suggestion into an existing topic projection", async () => {
+    const mergedRow = {
+      ...suggestionRow,
+      decision_reason: "Дубль существующей темы.",
+      promoted_node_projection_id: projectionId,
+      reviewed_at: "2026-06-19T09:00:00.000Z",
+      reviewed_by: reviewerId,
+      status: "merged",
+    };
+    const readQuery = createQuery({
+      maybeSingle: { data: suggestionRow, error: null },
+    });
+    const targetQuery = createQuery({
+      maybeSingle: {
+        data: {
+          id: projectionId,
+          node_type: "topic",
+          status: "published",
+          title: "Карта пробуждения",
+        },
+        error: null,
+      },
+    });
+    const updateQuery = createQuery({
+      single: { data: mergedRow, error: null },
+    });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(readQuery)
+      .mockReturnValueOnce(targetQuery)
+      .mockReturnValueOnce(updateQuery);
+    mocks.createAdminClient.mockReturnValue({ from });
+
+    await expect(
+      mergeAwakeningTopicSuggestion({
+        decisionReason: "Дубль существующей темы.",
+        promotedNodeProjectionId: projectionId,
+        suggestionId,
+      })
+    ).resolves.toMatchObject({
+      promoted_node_projection_id: projectionId,
+      status: "merged",
+    });
+
+    expect(from).toHaveBeenNthCalledWith(2, "node_projection");
+    expect(targetQuery.eq).toHaveBeenCalledWith("id", projectionId);
+    expect(updateQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        decision_reason: "Дубль существующей темы.",
+        promoted_node_projection_id: projectionId,
+        reviewed_by: reviewerId,
+        status: "merged",
+      })
+    );
+    expect(mocks.writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "admin.awakening_topic_reviewed",
+        resource: `awakening-topic-suggestion:${suggestionId}`,
+        userId: reviewerId,
+      })
+    );
+  });
+
+  it("blocks review actions for suggestions that are no longer pending", async () => {
+    const readQuery = createQuery({
+      maybeSingle: {
+        data: {
+          ...suggestionRow,
+          status: "approved",
+        },
+        error: null,
+      },
+    });
+    const from = vi.fn().mockReturnValueOnce(readQuery);
+    mocks.createAdminClient.mockReturnValue({ from });
+
+    await expect(
+      rejectAwakeningTopicSuggestion({
+        decisionReason: "Повторное решение.",
+        suggestionId,
+      })
+    ).rejects.toThrow("Only pending suggestions can be reviewed.");
+
+    expect(from).toHaveBeenCalledTimes(1);
+    expect(mocks.writeAuditLog).not.toHaveBeenCalled();
   });
 });

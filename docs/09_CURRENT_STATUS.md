@@ -8,7 +8,7 @@
 
 ## Last Updated
 
-2026-06-17
+2026-06-19
 
 ## Current Phase
 
@@ -65,6 +65,10 @@ deployment context.
 - [x] Payment runtime and schema removed from product scope: no Stripe checkout, portal, webhook, pricing page, billing page, usage plan limits, Stripe env validation, or subscriptions table
 - [x] Awakening Map foundation added with moderated topic suggestions and `/admin/awakening-map`
 - [x] `/admin/awakening-map` read-only review list/detail added for topic suggestions
+- [x] `/admin/awakening-map` approve/reject/merge actions added with RBAC and audit logging
+- [x] Projection-backed Awakening Map Graph API added at `/api/map`, `/api/map/node/:id`, `/api/map/neighbors`, and `/api/map/search`
+- [x] Visual Awakening Map MVP added at `/awakening/map` with SVG atlas, filters, node detail, and neighbor focus
+- [x] Public topic pages upgraded to projection dossiers with mini-map, source evidence, versions, timeline, counterarguments, and unresolved tails
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
 - [ ] Supabase project connected (SETUP-001)
@@ -88,9 +92,8 @@ deployment context.
 - [ ] Epic 3 ingest/review remains blocked by deploying Brain C9 and connecting app adapter/admin ingest flow
 - [ ] Epic 5 model/provider generation and PDF presentation export remain unimplemented
 - [ ] Epic 5 presentation prompt admin editor remains unimplemented
-- [ ] Awakening Map approve/reject/merge actions remain unimplemented
 - [ ] Presentation text/visual generation workers and PDF storage/download routes remain unimplemented
-- [ ] Epic 6 Graph Map remains blocked by deploying Brain C6/C7/C10 and connecting app-side graph cache/UI
+- [ ] Epic 6 WebGL-scale Graph Map and live Brain traversal remain blocked by deploying Brain C6/C7/C10 and connecting app-side graph cache/UI
 - [ ] Epic 7 event publishing remains unimplemented
 - [ ] Most domain admin mutations remain blocked; application status backend/UI is implemented, but admin JSON API route is not implemented
 - [ ] Member cabinet data model remains blocked until profile/community membership scope is approved
@@ -100,9 +103,10 @@ deployment context.
 
 ## Next Step
 
-Continue with the next safe app-side slice: add audited approve/reject/merge actions
-for `/admin/awakening-map`. Claude/text and visual AI provider calls should wait
-until provider/env choices are confirmed.
+Continue with the next safe app-side slice: begin source archive/ingest UI over
+existing source refs, or connect the atlas to dossier deep links once URL focus
+state is added. Claude/text and visual AI provider calls should wait until
+provider/env choices are confirmed.
 
 ---
 
@@ -121,6 +125,7 @@ These areas must not be changed without explicit discussion:
 
 - Brain currently uses project scope, not the `namespace` primitive described in the product architecture.
 - Brain C1-C10 node/edge/search/neighbors/intersections/bulk-merge/profiled-ingest/subgraph contracts exist only in the local `/Users/DEV/Elaurion-Brain` checkout until deployed/released.
+- Archived Brain project deletion is app-side UI only until a real Brain/OS project delete endpoint is configured via `BRAIN_PROJECT_DELETE_ENDPOINT_TEMPLATE`.
 
 ---
 
@@ -146,6 +151,11 @@ These areas must not be changed without explicit discussion:
 - 2026-06-17: `src/lib/api-response.ts` and `src/lib/api-auth.ts` start BE-03. Public archive, applications, cron, and org routes use standard JSON helpers.
 - 2026-06-17: Payments are removed from product scope. Stripe checkout/portal/webhook routes, pricing/billing/usage pages, plan limits, payment email templates, Stripe env vars, the Stripe package dependency, `public.subscriptions`, and `profiles.stripe_customer_id` are removed.
 - 2026-06-17: Standardized API responses include `requestId` and `X-Request-Id`; safe inbound `x-request-id` values are preserved, and cron/org logs include the response request id.
+- 2026-06-19: Awakening Map suggestions now have audited approve/reject/merge actions. Approved suggestions create `node_projection` rows with status `review`, not public `published`.
+- 2026-06-19: Awakening Map Graph API is projection-backed from `node_projection`; unresolved refs are explicit reference nodes and live Brain traversal remains future work.
+- 2026-06-19: `/awakening/map` now renders a dependency-free SVG atlas over the projection-backed API. It does not include fake demo nodes when projection data is empty.
+- 2026-06-19: `/topics/[slug]` now renders a source-first projection dossier. Missing sections stay explicit empty states; no AI dossier text is generated yet.
+- 2026-06-19: `/admin/api` archive-project deletion no longer guesses a Brain endpoint. It requires explicit `BRAIN_PROJECT_DELETE_ENDPOINT_TEMPLATE` and returns a blocked result when the backend contract is absent.
 
 ---
 

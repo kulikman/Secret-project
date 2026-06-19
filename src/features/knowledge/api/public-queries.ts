@@ -6,6 +6,7 @@ import type { Json, Tables } from "@/types/database";
 export interface ProjectionPaginationInput {
   page?: number;
   limit?: number;
+  q?: string;
 }
 
 export interface ProjectionPagination {
@@ -72,14 +73,23 @@ export async function listPublishedTopics(
 ): Promise<PublishedProjectionList> {
   const supabase = await createClient();
   const { page, limit, from, to } = normalizePagination(input);
+  const queryText = input.q?.trim();
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("node_projection")
     .select(PUBLIC_PROJECTION_SELECT, { count: "exact" })
     .eq("status", "published")
     .eq("node_type", "topic")
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .range(from, to);
+    .order("published_at", { ascending: false, nullsFirst: false });
+
+  if (queryText) {
+    const escapedQuery = queryText.replace(/[,%]/g, "\\$&");
+    query = query.or(
+      `title.ilike.%${escapedQuery}%,summary.ilike.%${escapedQuery}%,slug.ilike.%${escapedQuery}%`
+    );
+  }
+
+  const { data, error, count } = await query.range(from, to);
 
   if (error) throw error;
 

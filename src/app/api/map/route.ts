@@ -1,0 +1,39 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
+
+import { listPublishedMapGraph, nodeProjectionNodeTypeSchema } from "@/features/knowledge";
+import { apiError, apiOk, apiValidationError, createApiRequestContext } from "@/lib/api-response";
+
+const nodeTypesQuerySchema = z.preprocess((value) => {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}, z.array(nodeProjectionNodeTypeSchema).max(7).optional());
+
+const mapQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).default(100),
+  nodeTypes: nodeTypesQuerySchema,
+  q: z.string().trim().min(1).max(120).optional(),
+});
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const apiContext = createApiRequestContext(request);
+  const parsed = mapQuerySchema.safeParse({
+    limit: request.nextUrl.searchParams.get("limit") ?? undefined,
+    nodeTypes: request.nextUrl.searchParams.get("nodeTypes") ?? undefined,
+    q: request.nextUrl.searchParams.get("q") ?? undefined,
+  });
+
+  if (!parsed.success) {
+    return apiValidationError(parsed.error, { status: 422 }, apiContext);
+  }
+
+  try {
+    const graph = await listPublishedMapGraph(parsed.data);
+    return apiOk({ graph }, undefined, apiContext);
+  } catch {
+    return apiError("Could not load map graph", { status: 500 }, apiContext);
+  }
+}

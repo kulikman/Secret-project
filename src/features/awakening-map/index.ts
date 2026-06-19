@@ -1,13 +1,19 @@
 export {
+  approveAwakeningTopicSuggestion,
   getAwakeningTopicSuggestion,
   getAwakeningTopicSuggestionSchema,
   listAwakeningTopicSuggestions,
   listAwakeningTopicSuggestionsSchema,
+  mergeAwakeningTopicSuggestion,
+  rejectAwakeningTopicSuggestion,
+  reviewAwakeningTopicSuggestionSchema,
 } from "./api/moderation";
+export { AwakeningMapAtlas } from "./components/awakening-map-atlas";
 export type {
   AwakeningTopicSuggestion,
   AwakeningTopicSuggestionStatus,
   ListAwakeningTopicSuggestionsInput,
+  ReviewAwakeningTopicSuggestionInput,
 } from "./api/moderation";
 export {
   awakeningRelatedNodeRefSchema,
@@ -24,3 +30,8 @@ export type {
   AwakeningTopicSuggestionInput,
   AwakeningTopicSuggestionReview,
 } from "./lib/topic-suggestions";
+export type {
+  AwakeningAtlasEdge,
+  AwakeningAtlasGraph,
+  AwakeningAtlasNode,
+} from "./lib/atlas-layout";

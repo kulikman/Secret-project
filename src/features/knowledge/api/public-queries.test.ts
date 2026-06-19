@@ -62,6 +62,26 @@ describe("public knowledge queries", () => {
     expect(range).toHaveBeenCalledWith(0, 9);
   });
 
+  it("filters published topics by query text when provided", async () => {
+    const range = vi.fn().mockResolvedValue({
+      data: [publishedRow()],
+      error: null,
+      count: 1,
+    });
+    const or = vi.fn(() => ({ range }));
+    const order = vi.fn(() => ({ or }));
+    const eqNodeType = vi.fn(() => ({ order }));
+    const eqStatus = vi.fn(() => ({ eq: eqNodeType }));
+    const select = vi.fn(() => ({ eq: eqStatus }));
+    const from = vi.fn(() => ({ select }));
+
+    mocks.createClient.mockResolvedValueOnce({ from });
+
+    await listPublishedTopics({ page: 1, limit: 10, q: "hyper" });
+
+    expect(or).toHaveBeenCalledWith("title.ilike.%hyper%,summary.ilike.%hyper%,slug.ilike.%hyper%");
+  });
+
   it("loads one published topic by slug", async () => {
     const maybeSingle = vi.fn().mockResolvedValue({
       data: publishedRow(),

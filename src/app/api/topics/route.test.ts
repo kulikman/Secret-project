@@ -39,4 +39,19 @@ describe("GET /api/topics", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("X-Request-Id")).toBe("topics-list-1");
   });
+
+  it("passes a search query to the public topics list", async () => {
+    mocks.listPublishedTopics.mockResolvedValueOnce({
+      items: [],
+      pagination: { page: 1, limit: 20, total: 0, hasMore: false },
+    });
+
+    await GET(new NextRequest("http://localhost/api/topics?page=1&limit=20&q=tesla"));
+
+    expect(mocks.listPublishedTopics).toHaveBeenCalledWith({
+      page: 1,
+      limit: 20,
+      q: "tesla",
+    });
+  });
 });

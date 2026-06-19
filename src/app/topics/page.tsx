@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Search } from "lucide-react";
 
 import { listPublishedTopics } from "@/features/knowledge";
 
@@ -10,16 +11,24 @@ export const metadata: Metadata = {
   description: "Опубликованные темы Тайного Бюро из App DB projection.",
 };
 
-async function loadTopics() {
+interface PageProps {
+  searchParams?: Promise<{
+    q?: string;
+  }>;
+}
+
+async function loadTopics(query?: string) {
   try {
-    return await listPublishedTopics({ limit: 24 });
+    return await listPublishedTopics({ limit: 24, q: query });
   } catch {
     return null;
   }
 }
 
-export default async function TopicsPage(): Promise<React.ReactElement> {
-  const result = await loadTopics();
+export default async function TopicsPage({ searchParams }: PageProps): Promise<React.ReactElement> {
+  const params = (await searchParams) ?? {};
+  const query = params.q?.trim() ?? "";
+  const result = await loadTopics(query);
   const topics = result?.items ?? [];
 
   return (
@@ -34,6 +43,43 @@ export default async function TopicsPage(): Promise<React.ReactElement> {
             Эти страницы читают опубликованную App DB projection и не вызывают live Brain.
           </p>
         </div>
+
+        <form action="/topics" className="mb-8 flex flex-col gap-3 sm:flex-row">
+          <label className="relative flex-1">
+            <Search
+              aria-hidden="true"
+              className="text-muted-foreground absolute top-1/2 left-4 size-4 -translate-y-1/2"
+            />
+            <input
+              type="search"
+              name="q"
+              defaultValue={query}
+              placeholder="Поиск по названию, summary или slug"
+              className="border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-2xl border py-3 pr-4 pl-11 text-sm outline-none focus-visible:ring-3"
+            />
+          </label>
+          <button
+            type="submit"
+            className="bg-foreground text-background rounded-2xl px-5 py-3 text-sm font-medium"
+          >
+            Найти
+          </button>
+          {query ? (
+            <Link
+              href="/topics"
+              className="border-border hover:bg-muted rounded-2xl border px-5 py-3 text-sm transition-colors"
+            >
+              Сбросить
+            </Link>
+          ) : null}
+        </form>
+
+        {query ? (
+          <p className="text-muted-foreground mb-6 text-sm">
+            Найдено: <span className="text-foreground font-medium">{topics.length}</span> по запросу{" "}
+            <span className="text-foreground font-medium">&ldquo;{query}&rdquo;</span>
+          </p>
+        ) : null}
 
         {topics.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
@@ -62,10 +108,13 @@ export default async function TopicsPage(): Promise<React.ReactElement> {
           </div>
         ) : (
           <div className="border-border bg-muted/30 rounded-2xl border p-8">
-            <h2 className="text-xl font-semibold">Пока нет опубликованных тем</h2>
+            <h2 className="text-xl font-semibold">
+              {query ? "По запросу ничего не найдено" : "Пока нет опубликованных тем"}
+            </h2>
             <p className="text-muted-foreground mt-2 leading-7">
-              Опубликуйте первую тему через manual republish, когда Brain project/token и projection
-              flow будут готовы.
+              {query
+                ? "Попробуйте изменить формулировку запроса или очистить фильтр."
+                : "Опубликуйте первую тему через manual republish, когда Brain project/token и projection flow будут готовы."}
             </p>
           </div>
         )}

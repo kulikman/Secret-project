@@ -39,18 +39,21 @@ Backend Epic BE-03 tracks the remaining response envelope standardization.
 
 ## Route Inventory
 
-| Route               | Method   | Auth                 | Data Source                               | Status                       | Test Coverage                             |
-| ------------------- | -------- | -------------------- | ----------------------------------------- | ---------------------------- | ----------------------------------------- |
-| `/api/health`       | GET      | public               | stateless                                 | implemented                  | no dedicated test                         |
-| `/api/topics`       | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/route.test.ts`        |
-| `/api/topics/:slug` | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/[slug]/route.test.ts` |
-| `/api/sources/:id`  | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/sources/[id]/route.test.ts`  |
-| `/api/applications` | POST     | public/authenticated | service-role duplicate check + RLS insert | implemented                  | `src/app/api/applications/route.test.ts`  |
-| `/api/orgs`         | GET/POST | authenticated        | org feature + Supabase                    | implemented                  | `src/app/api/orgs/route.test.ts`          |
-| `/api/cron/cleanup` | GET      | `CRON_SECRET` bearer | maintenance feature + service role        | implemented                  | `src/app/api/cron/cleanup/route.test.ts`  |
-| `/api/cron/example` | GET      | `CRON_SECRET` bearer | stateless log                             | scaffold-only, not scheduled | envelope helper only                      |
-| `/api/map/graph`    | GET      | public               | future graph cache/projection             | not implemented              | none                                      |
-| `/api/admin/*`      | mixed    | admin role           | future server actions                     | not implemented              | feature-level moderation tests only       |
+| Route                | Method   | Auth                 | Data Source                               | Status                       | Test Coverage                             |
+| -------------------- | -------- | -------------------- | ----------------------------------------- | ---------------------------- | ----------------------------------------- |
+| `/api/health`        | GET      | public               | stateless                                 | implemented                  | no dedicated test                         |
+| `/api/topics`        | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/route.test.ts`        |
+| `/api/topics/:slug`  | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/topics/[slug]/route.test.ts` |
+| `/api/sources/:id`   | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/sources/[id]/route.test.ts`  |
+| `/api/map`           | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/map/route.test.ts`           |
+| `/api/map/node/:id`  | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/map/node/[id]/route.test.ts` |
+| `/api/map/neighbors` | GET      | public               | `node_projection` refs                    | implemented                  | `src/app/api/map/neighbors/route.test.ts` |
+| `/api/map/search`    | GET      | public               | `node_projection`                         | implemented                  | `src/app/api/map/search/route.test.ts`    |
+| `/api/applications`  | POST     | public/authenticated | service-role duplicate check + RLS insert | implemented                  | `src/app/api/applications/route.test.ts`  |
+| `/api/orgs`          | GET/POST | authenticated        | org feature + Supabase                    | implemented                  | `src/app/api/orgs/route.test.ts`          |
+| `/api/cron/cleanup`  | GET      | `CRON_SECRET` bearer | maintenance feature + service role        | implemented                  | `src/app/api/cron/cleanup/route.test.ts`  |
+| `/api/cron/example`  | GET      | `CRON_SECRET` bearer | stateless log                             | scaffold-only, not scheduled | envelope helper only                      |
+| `/api/admin/*`       | mixed    | admin role           | future server actions                     | not implemented              | feature-level moderation tests only       |
 
 ---
 
@@ -102,20 +105,64 @@ Response:
 
 Reads one published source projection by App DB id or Brain node id, depending on implementation.
 
-### GET /api/map/graph
+### GET /api/map
 
 **Auth:** public
 
-**Status:** not implemented.
+Returns a projection-backed graph for the Awakening Map.
 
-Reads graph cache/projection, not live Brain.
+Reads published rows from `node_projection`, not live Brain. Edges are derived
+from `content.related_node_refs` and `source_refs`. Unresolved refs are returned
+as `reference` nodes with `isProjected: false`.
 
 Query params:
 
-- `root`
-- `depth`
+- `limit` default `100`, max `200`
+- `q` optional title/summary/slug filter
+- `nodeTypes` optional comma-separated projection node types
 
-If Brain graph subset support is missing, this route must return cached App DB data or a graceful unavailable state.
+Response:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "graph": {
+      "nodes": [],
+      "edges": []
+    }
+  }
+}
+```
+
+### GET /api/map/node/:id
+
+**Auth:** public
+
+Reads one published map node by App DB projection id or Brain node id.
+
+### GET /api/map/neighbors
+
+**Auth:** public
+
+Returns one root node plus direct neighbors resolved from projection refs.
+
+Query params:
+
+- `id` required App DB projection id or Brain node id
+- `limit` default `25`, max `100`
+
+### GET /api/map/search
+
+**Auth:** public
+
+Searches projected map nodes only. Reference placeholders are not returned here.
+
+Query params:
+
+- `q` required
+- `limit` default `20`, max `50`
+- `nodeTypes` optional comma-separated projection node types
 
 ---
 

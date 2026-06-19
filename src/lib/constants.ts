@@ -36,6 +36,8 @@ export const ROUTES = {
   adminKnowledge: "/admin/knowledge",
   adminPresentations: "/admin/presentations",
   adminSettings: "/admin/settings",
+  awakening: "/awakening",
+  awakeningMap: "/awakening/map",
   dashboard: "/dashboard",
   onboarding: "/onboarding",
   settings: "/settings",

@@ -452,6 +452,81 @@ real moderation, PDF generation, prompt editing, or integration controls.
 
 ---
 
+### APP-015: Add Awakening Map audited review actions
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add the minimal moderated lifecycle for topic suggestions:
+approve into the projection review queue, reject, or merge with an existing
+topic projection.
+
+**Acceptance Criteria:**
+
+- [x] `approve` only accepts pending suggestions and creates a `node_projection` row with status `review`.
+- [x] `reject` only accepts pending suggestions and does not create a projection row.
+- [x] `merge` only accepts pending suggestions and requires an existing topic projection.
+- [x] All decisions store reviewer, reviewed timestamp, decision reason, and promoted projection id where relevant.
+- [x] All decisions write `admin.awakening_topic_reviewed` audit entries.
+- [x] `/admin/awakening-map` exposes approve/reject/merge forms for pending suggestions.
+- [x] Tests cover approve, reject, merge, denied access, and non-pending protection.
+
+---
+
+### APP-016: Add projection-backed Awakening Map Graph API
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add the first public Graph API over the App DB projection read
+model so the UI can render a map without depending on live Brain graph endpoints.
+
+**Acceptance Criteria:**
+
+- [x] `GET /api/map` returns nodes and edges from published `node_projection` rows.
+- [x] `GET /api/map/node/:id` reads one projected node by projection id or Brain node id.
+- [x] `GET /api/map/neighbors` returns a direct-neighbor graph from projection refs.
+- [x] `GET /api/map/search` searches projected map nodes.
+- [x] Unresolved refs are explicit `reference` nodes with `isProjected: false`.
+- [x] API routes use standardized `{ ok, requestId, data/error }` envelopes.
+- [x] Tests cover graph derivation and route handlers.
+
+---
+
+### APP-017: Add Awakening Map visual atlas MVP
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add the first product-grade visual consumer for the projection-backed
+map API without introducing a graph-rendering dependency yet.
+
+**Acceptance Criteria:**
+
+- [x] `/awakening/map` renders a visual map from published projection graph data.
+- [x] The atlas has search, node-type filters, selected-node detail, and neighbor focus.
+- [x] Published nodes and unresolved reference tails are visually distinct.
+- [x] The page handles empty projection data without fake demo content.
+- [x] The public nav exposes the map entry point.
+- [x] Layout logic has unit coverage.
+
+---
+
+### APP-018: Upgrade public topic pages into projection dossiers
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Turn `/topics/[slug]` from a simple projection page into a
+source-first dossier view connected to the Awakening Map.
+
+**Acceptance Criteria:**
+
+- [x] Topic pages use a dedicated projection parsing helper instead of ad-hoc page parsing.
+- [x] The page shows a dossier header with source/relation/tail metrics.
+- [x] The page separates facts, versions, timeline, people, organizations, events, counterarguments, sources, and unresolved tails.
+- [x] The page includes a mini-map of direct neighbors from the projection-backed map API.
+- [x] The UI does not invent AI-generated content when projection fields are absent.
+- [x] Parsing helper has unit coverage.
+
+---
+
 ## Infrastructure Setup Tasks
 
 ---

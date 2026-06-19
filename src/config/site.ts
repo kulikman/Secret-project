@@ -38,6 +38,7 @@ export const siteConfig = {
   nav: [
     { title: "Главная", href: "/" },
     { title: "Архив", href: "/topics" },
+    { title: "Карта", href: "/awakening/map" },
     { title: "Кабинет", href: "/dashboard" },
   ],
 } as const satisfies SiteConfig;

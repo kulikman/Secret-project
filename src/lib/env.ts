@@ -26,6 +26,8 @@ const serverSchema = z
     BRAIN_API_KEY: z.string().min(1).optional(),
     BRAIN_PROJECT_ID: z.string().min(1).optional(),
     BRAIN_PROJECT_SLUG: z.string().min(1).optional(),
+    BRAIN_ADMIN_API_KEY: z.string().min(1).optional(),
+    BRAIN_PROJECT_DELETE_ENDPOINT_TEMPLATE: z.string().min(1).optional(),
 
     // Analytics (optional)
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),

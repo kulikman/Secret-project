@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import type { Metadata } from "next";
 
 import { Button } from "@/components/ui/button";
 import {
   awakeningTopicSuggestionStatuses,
+  approveAwakeningTopicSuggestion,
   getAwakeningTopicSuggestion,
   listAwakeningTopicSuggestions,
+  mergeAwakeningTopicSuggestion,
+  rejectAwakeningTopicSuggestion,
   type AwakeningTopicSuggestion,
   type AwakeningTopicSuggestionStatus,
 } from "@/features/awakening-map";
@@ -56,6 +60,46 @@ function formatDate(value: string): string {
 
 function countJsonArray(value: unknown): number {
   return Array.isArray(value) ? value.length : 0;
+}
+
+function getRequiredFormString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`Missing required form field: ${key}`);
+  }
+
+  return value.trim();
+}
+
+async function approveSuggestionAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await approveAwakeningTopicSuggestion({
+    decisionReason: getRequiredFormString(formData, "decisionReason"),
+    suggestionId: getRequiredFormString(formData, "suggestionId"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
+}
+
+async function rejectSuggestionAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await rejectAwakeningTopicSuggestion({
+    decisionReason: getRequiredFormString(formData, "decisionReason"),
+    suggestionId: getRequiredFormString(formData, "suggestionId"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
+}
+
+async function mergeSuggestionAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await mergeAwakeningTopicSuggestion({
+    decisionReason: getRequiredFormString(formData, "decisionReason"),
+    promotedNodeProjectionId: getRequiredFormString(formData, "promotedNodeProjectionId"),
+    suggestionId: getRequiredFormString(formData, "suggestionId"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
 }
 
 function StatusPill({ status }: { status: AwakeningTopicSuggestionStatus }): React.ReactElement {
@@ -151,7 +195,8 @@ function DetailPanel({
         </p>
         <h2 className="mt-3 text-xl font-semibold tracking-tight">Выберите тему</h2>
         <p className="text-muted-foreground mt-2 text-sm leading-6">
-          Детальная проверка пока read-only: approve/reject/merge будет следующим audited action.
+          Здесь откроется карточка редакторского решения: принять в карту, отклонить или смержить с
+          уже существующей темой.
         </p>
       </aside>
     );
@@ -210,6 +255,88 @@ function DetailPanel({
           </dd>
         </div>
       </dl>
+      {suggestion.status === "pending" ? (
+        <div className="mt-6 space-y-4">
+          <form
+            action={approveSuggestionAction}
+            className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4"
+          >
+            <input name="suggestionId" type="hidden" value={suggestion.id} />
+            <label className="text-sm font-semibold">
+              Причина принятия
+              <textarea
+                className="border-input bg-background mt-2 min-h-24 w-full rounded-md border px-3 py-2 text-sm"
+                maxLength={1000}
+                minLength={3}
+                name="decisionReason"
+                placeholder="Например: источники проверены, тема готова к редакторской проекции."
+                required
+              />
+            </label>
+            <Button className="mt-3 w-full" type="submit">
+              Принять в карту
+            </Button>
+          </form>
+
+          <form
+            action={mergeSuggestionAction}
+            className="rounded-2xl border border-sky-500/20 bg-sky-500/10 p-4"
+          >
+            <input name="suggestionId" type="hidden" value={suggestion.id} />
+            <label className="text-sm font-semibold">
+              ID существующей темы `node_projection`
+              <input
+                className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                name="promotedNodeProjectionId"
+                placeholder="uuid существующей topic-проекции"
+                required
+              />
+            </label>
+            <label className="mt-3 block text-sm font-semibold">
+              Причина merge
+              <textarea
+                className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                maxLength={1000}
+                minLength={3}
+                name="decisionReason"
+                placeholder="Например: дубль существующей темы, оставляем каноническую карточку."
+                required
+              />
+            </label>
+            <Button className="mt-3 w-full" type="submit" variant="outline">
+              Смержить
+            </Button>
+          </form>
+
+          <form
+            action={rejectSuggestionAction}
+            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4"
+          >
+            <input name="suggestionId" type="hidden" value={suggestion.id} />
+            <label className="text-sm font-semibold">
+              Причина отклонения
+              <textarea
+                className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                maxLength={1000}
+                minLength={3}
+                name="decisionReason"
+                placeholder="Например: недостаточно источников или тема уже разобрана в другой карточке."
+                required
+              />
+            </label>
+            <Button className="mt-3 w-full" type="submit" variant="destructive">
+              Отклонить
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <div className="bg-muted/40 mt-6 rounded-2xl p-4 text-sm">
+          <p className="font-semibold">Решение уже принято</p>
+          <p className="text-muted-foreground mt-1 leading-6">
+            Повторный approve/reject/merge заблокирован на сервере, чтобы не ломать audit trail.
+          </p>
+        </div>
+      )}
     </aside>
   );
 }
@@ -254,8 +381,8 @@ export default async function AdminAwakeningMapPage({
           <div>
             <h1 className="text-4xl font-semibold tracking-tight">Карта пробуждения</h1>
             <p className="mt-4 max-w-3xl text-lg leading-8 text-stone-700 dark:text-stone-300">
-              Read-only очередь предложенных тем: админ проверяет контекст, источники и связи перед
-              будущим approve/reject/merge action.
+              Очередь предложенных тем: админ проверяет контекст, источники и связи, затем принимает
+              тему в `node_projection`, отклоняет её или мержит с канонической карточкой.
             </p>
           </div>
           <div className="rounded-2xl bg-white/70 p-4 text-sm shadow-sm dark:bg-white/10">
