@@ -453,6 +453,11 @@ real moderation, PDF generation, prompt editing, or integration controls.
 4. Run `pnpm supabase link --project-ref <id>`
 5. Run `pnpm supabase db push` to apply migrations
 
+Known project:
+
+- URL: `https://wtfrvaifeaovywzaejul.supabase.co`
+- Project ref: `wtfrvaifeaovywzaejul`
+
 **Acceptance Criteria:**
 
 - [ ] `pnpm dev` connects to Supabase without errors

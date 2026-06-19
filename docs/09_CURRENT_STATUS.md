@@ -65,6 +65,7 @@ deployment context.
 - [x] Payment runtime and schema removed from product scope: no Stripe checkout, portal, webhook, pricing page, billing page, usage plan limits, Stripe env validation, or subscriptions table
 - [x] Awakening Map foundation added with moderated topic suggestions and `/admin/awakening-map`
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
+- [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
 - [ ] Supabase project connected (SETUP-001)
 - [x] Resend setup skipped by owner request; notifications remain provider-neutral/future only
 - [ ] Core feature implemented

@@ -65,7 +65,8 @@ pnpm test -- src/lib/brain
 Required:
 
 - Supabase project for Тайное Бюро.
-- Project URL.
+- Project URL: `https://wtfrvaifeaovywzaejul.supabase.co`.
+- Project ref: `wtfrvaifeaovywzaejul`.
 - Anon key.
 - Service role key.
 - Linked local CLI project.
