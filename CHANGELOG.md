@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/kulikman/Secret-project/compare/v1.4.0...v1.5.0) (2026-06-19)
+
+### ✨ Features
+
+* add awakening map graph and dossiers ([c5a7323](https://github.com/kulikman/Secret-project/commit/c5a732326b6c3513952daecd03e25d37074556e2))
+
 ## [1.4.0](https://github.com/kulikman/Secret-project/compare/v1.3.0...v1.4.0) (2026-06-19)
 
 ### ✨ Features
