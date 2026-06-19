@@ -249,7 +249,6 @@ export const adminSectionDetails = {
       "Brain C6/C7/C10 нужны позже для живых neighbors/intersections/root graph.",
     ],
     nextActions: [
-      "Собрать admin list/detail для pending предложений.",
       "Собрать audited approve/reject/merge action с записью audit log.",
       "После Brain access подключить graph subset cache и публичный map UI.",
     ],

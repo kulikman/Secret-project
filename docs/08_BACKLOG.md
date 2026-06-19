@@ -435,6 +435,23 @@ real moderation, PDF generation, prompt editing, or integration controls.
 
 ---
 
+### APP-014: Wire Awakening Map admin review list
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Replace the Awakening Map planning shell with a read-only RBAC-gated admin review queue for topic suggestions.
+
+**Acceptance Criteria:**
+
+- [x] `/admin/awakening-map` lists suggested topics from `awakening_topic_suggestions`.
+- [x] Admin/editor/curator access uses `requireAdminRole()` and the RLS client.
+- [x] Admin can filter suggestions by moderation status.
+- [x] Admin can open one suggestion detail in the same page via query params.
+- [x] No approve/reject/merge mutation is exposed yet.
+- [x] Tests cover list/detail access and denied-role short circuit.
+
+---
+
 ## Infrastructure Setup Tasks
 
 ---

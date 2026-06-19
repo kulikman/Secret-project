@@ -21,6 +21,13 @@ export const APPLICATION_MODERATION_ROLES = [
   "curator",
 ] as const satisfies readonly AdminRole[];
 
+export const AWAKENING_MAP_REVIEW_ROLES = [
+  "super_admin",
+  "admin",
+  "editor",
+  "curator",
+] as const satisfies readonly AdminRole[];
+
 export const PROMPT_TEMPLATE_EDITOR_ROLES = [
   "super_admin",
   "admin",

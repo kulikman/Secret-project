@@ -39,7 +39,7 @@ The admin console is the operational cockpit for Тайное Бюро:
 | ------------------ | ------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------- |
 | Admin Overview     | Shows workstreams, blockers, readiness, and "forgotten" risks.                        | Shell ready    | None beyond auth session                           |
 | Applications       | Reviews community registrations and event applications.                               | UI ready       | retention policy, optional curator fields          |
-| Awakening Map      | Tracks published topics and verifies new suggested topics before publish/merge.       | Schema ready   | admin list/detail, audited review actions          |
+| Awakening Map      | Tracks published topics and verifies new suggested topics before publish/merge.       | UI ready       | audited review actions                             |
 | PDF Presentations  | Tracks 20-25 page PDFs, slide/source validation, prompt versions, cache/download.     | Schema ready   | model/provider, PDF renderer, prompt editor action |
 | API / Integrations | Shows Brain/Supabase/Vercel/AI provider/PostHog/Sentry readiness and webhooks.        | Planned        | safe readiness helpers, no secret exposure         |
 | Community Cabinet  | Defines registered user profile, application status, events, saved archive materials. | Planned        | member state schema, RLS                           |
@@ -206,7 +206,7 @@ Current implemented slice:
 
 - `awakening_topic_suggestions` schema and RLS are added.
 - Zod helper validates suggestion drafts and review payloads.
-- `/admin/awakening-map` shell documents the module.
+- `/admin/awakening-map` lists and filters suggestions and opens one detail read-only.
 
 ### Epic D: Prompt Templates + PDF Presentations
 

@@ -64,6 +64,7 @@ deployment context.
 - [x] Request IDs added to standardized API envelopes, `X-Request-Id` headers, and cron/org log paths
 - [x] Payment runtime and schema removed from product scope: no Stripe checkout, portal, webhook, pricing page, billing page, usage plan limits, Stripe env validation, or subscriptions table
 - [x] Awakening Map foundation added with moderated topic suggestions and `/admin/awakening-map`
+- [x] `/admin/awakening-map` read-only review list/detail added for topic suggestions
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
 - [ ] Supabase project connected (SETUP-001)
@@ -87,7 +88,7 @@ deployment context.
 - [ ] Epic 3 ingest/review remains blocked by deploying Brain C9 and connecting app adapter/admin ingest flow
 - [ ] Epic 5 model/provider generation and PDF presentation export remain unimplemented
 - [ ] Epic 5 presentation prompt admin editor remains unimplemented
-- [ ] Awakening Map admin list/detail and approve/reject/merge actions remain unimplemented
+- [ ] Awakening Map approve/reject/merge actions remain unimplemented
 - [ ] Presentation text/visual generation workers and PDF storage/download routes remain unimplemented
 - [ ] Epic 6 Graph Map remains blocked by deploying Brain C6/C7/C10 and connecting app-side graph cache/UI
 - [ ] Epic 7 event publishing remains unimplemented
@@ -99,9 +100,9 @@ deployment context.
 
 ## Next Step
 
-Continue with the next safe app-side slice: build `/admin/awakening-map` list/detail
-for pending suggestions, then add audited approve/reject/merge actions. Claude/text
-and visual AI provider calls should wait until provider/env choices are confirmed.
+Continue with the next safe app-side slice: add audited approve/reject/merge actions
+for `/admin/awakening-map`. Claude/text and visual AI provider calls should wait
+until provider/env choices are confirmed.
 
 ---
 
