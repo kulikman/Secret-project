@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import {
@@ -25,6 +26,12 @@ import {
   type AwakeningAtlasLayoutNode,
   type AwakeningAtlasNode,
 } from "../lib/atlas-layout";
+import {
+  getAwakeningMapThemeGroup,
+  getRelatedAwakeningReferenceClusters,
+  matchAwakeningReferenceClusters,
+  type AwakeningReferenceClusterMatch,
+} from "../lib/reference-map";
 
 type ApiEnvelope<TData> =
   | {
@@ -102,6 +109,9 @@ const EMPTY_GRAPH: AwakeningAtlasGraph = {
   nodes: [],
 };
 const EMPTY_NODE_ID_SET = new Set<string>();
+const REFERENCE_MAP_IMAGE_SRC = "/awakening/reference-map.jpg";
+
+type AwakeningMapViewMode = "atlas" | "reference" | "compare";
 
 function getNodeVisual(nodeType: string) {
   return NODE_VISUALS[nodeType] ?? FALLBACK_NODE_VISUAL;
@@ -146,6 +156,28 @@ function getNodeTypes(graph: AwakeningAtlasGraph): string[] {
   );
 }
 
+function getReferenceClusterMatches(graph: AwakeningAtlasGraph): AwakeningReferenceClusterMatch[] {
+  return matchAwakeningReferenceClusters(graph)
+    .filter((entry) => entry.matchedNodeIds.length > 0)
+    .sort((left, right) => right.matchedNodeIds.length - left.matchedNodeIds.length);
+}
+
+function getClusterMatchById(
+  clusterMatches: AwakeningReferenceClusterMatch[],
+  clusterId: string | null
+): AwakeningReferenceClusterMatch | null {
+  if (!clusterId) return null;
+  return clusterMatches.find((entry) => entry.cluster.id === clusterId) ?? null;
+}
+
+function getClusterMatchForNode(
+  clusterMatches: AwakeningReferenceClusterMatch[],
+  nodeId: string | null
+): AwakeningReferenceClusterMatch | null {
+  if (!nodeId) return null;
+  return clusterMatches.find((entry) => entry.matchedNodeIds.includes(nodeId)) ?? null;
+}
+
 function getConnectedEdges(
   graph: AwakeningAtlasGraph,
   nodeId: string | null
@@ -182,6 +214,73 @@ function NodeTypePill({
       )}
     >
       {children}
+    </button>
+  );
+}
+
+function ClusterPill({
+  active,
+  count,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  count: number;
+  label: string;
+  onClick: () => void;
+}): React.ReactElement {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        active
+          ? "border-teal-300/70 bg-teal-300/15 text-teal-100"
+          : "border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/25 hover:text-white"
+      )}
+    >
+      <span>{label}</span>
+      <span
+        className={cn(
+          "rounded-full px-2 py-0.5 text-[10px]",
+          active ? "bg-teal-100/15 text-teal-50" : "bg-white/10 text-stone-400"
+        )}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function ViewModeButton({
+  active,
+  description,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  description: string;
+  label: string;
+  onClick: () => void;
+}): React.ReactElement {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex min-w-[10rem] flex-1 flex-col rounded-[1.4rem] border px-4 py-3 text-left transition-colors",
+        active
+          ? "border-amber-300/50 bg-amber-300/10 text-amber-50"
+          : "border-white/10 bg-white/[0.04] text-stone-200 hover:border-white/20 hover:bg-white/[0.07]"
+      )}
+    >
+      <span className="text-sm font-semibold">{label}</span>
+      <span
+        className={cn("mt-1 text-xs leading-5", active ? "text-amber-100/80" : "text-stone-500")}
+      >
+        {description}
+      </span>
     </button>
   );
 }
@@ -345,16 +444,105 @@ function AtlasSvg({
   );
 }
 
+function ReferenceMapStage({
+  clusterMatches,
+  selectedCluster,
+  onSelectCluster,
+}: {
+  clusterMatches: AwakeningReferenceClusterMatch[];
+  onSelectCluster: (clusterId: string) => void;
+  selectedCluster: AwakeningReferenceClusterMatch | null;
+}): React.ReactElement {
+  return (
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/30">
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.18),transparent_34%)]" />
+      <Image
+        alt="Оригинальная карта Great Awakening с интерактивными секторами"
+        className="relative z-0 block h-auto w-full"
+        height={4203}
+        sizes="(max-width: 1279px) 100vw, 50vw"
+        src={REFERENCE_MAP_IMAGE_SRC}
+        width={3300}
+      />
+
+      <div className="absolute inset-0 z-10">
+        {clusterMatches.map((entry) => {
+          const active = selectedCluster?.cluster.id === entry.cluster.id;
+          const { bounds } = entry.cluster;
+
+          return (
+            <button
+              key={entry.cluster.id}
+              type="button"
+              aria-label={`Выбрать сектор ${entry.cluster.label}`}
+              className={cn(
+                "absolute rounded-[1.6rem] border transition-all",
+                active
+                  ? "border-teal-300 bg-teal-300/18 shadow-[0_0_0_1px_rgba(94,234,212,0.35),0_0_40px_rgba(45,212,191,0.22)]"
+                  : "border-white/10 bg-white/[0.03] hover:border-teal-200/60 hover:bg-teal-200/10"
+              )}
+              style={{
+                height: `${bounds.height * 100}%`,
+                left: `${bounds.x * 100}%`,
+                top: `${bounds.y * 100}%`,
+                width: `${bounds.width * 100}%`,
+              }}
+              onClick={() => onSelectCluster(entry.cluster.id)}
+            >
+              <span className="absolute inset-x-2 top-2 rounded-full bg-stone-950/80 px-2 py-1 text-left font-mono text-[10px] tracking-[0.14em] text-teal-50 uppercase backdrop-blur">
+                {entry.cluster.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="absolute right-3 bottom-3 left-3 z-20 rounded-[1.6rem] border border-white/10 bg-stone-950/82 p-4 text-stone-100 backdrop-blur">
+        {selectedCluster ? (
+          <div>
+            <p className="font-mono text-[11px] tracking-[0.22em] text-teal-100 uppercase">
+              original map sector
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <p className="text-base font-semibold">{selectedCluster.cluster.label}</p>
+              <span className="rounded-full border border-teal-300/20 bg-teal-300/10 px-2.5 py-1 text-[11px] text-teal-50">
+                {selectedCluster.matchedNodeIds.length} atlas nodes
+              </span>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-stone-300">
+              {selectedCluster.cluster.summary}
+            </p>
+          </div>
+        ) : (
+          <div>
+            <p className="font-mono text-[11px] tracking-[0.22em] text-teal-100 uppercase">
+              original map sector
+            </p>
+            <p className="mt-2 text-sm leading-6 text-stone-300">
+              Выбери крупный сектор поверх оригинальной карты, чтобы подсветить связанные узлы в
+              атласе и прочитать схему по большим темам.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SelectedNodePanel({
+  activeCluster,
   graph,
   isLoadingNeighbors,
   node,
+  onSelectCluster,
   onLoadNeighbors,
   onReset,
 }: {
+  activeCluster: AwakeningReferenceClusterMatch | null;
   graph: AwakeningAtlasGraph;
   isLoadingNeighbors: boolean;
   node: AwakeningAtlasNode | null;
+  onSelectCluster: (clusterId: string) => void;
   onLoadNeighbors: (node: AwakeningAtlasNode) => void;
   onReset: () => void;
 }): React.ReactElement {
@@ -372,6 +560,10 @@ function SelectedNodePanel({
 
   const href = getNodeHref(node);
   const connectedEdges = getConnectedEdges(graph, node.id);
+  const group = activeCluster ? getAwakeningMapThemeGroup(activeCluster.cluster.groupId) : null;
+  const relatedClusters = activeCluster
+    ? getRelatedAwakeningReferenceClusters(activeCluster.cluster.id)
+    : [];
 
   return (
     <aside className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 text-stone-100 shadow-2xl shadow-black/30 backdrop-blur">
@@ -398,6 +590,47 @@ function SelectedNodePanel({
             ? "У проекции пока нет summary, но она уже опубликована в карте."
             : "Этот хвост найден в связях, но отдельная опубликованная карточка ещё не создана.")}
       </p>
+
+      {activeCluster ? (
+        <div className="mt-5 rounded-2xl border border-teal-300/20 bg-teal-300/10 p-4">
+          <p className="font-mono text-[11px] tracking-[0.22em] text-teal-100 uppercase">
+            reference cluster
+          </p>
+          <p className="mt-2 text-base font-semibold text-white">{activeCluster.cluster.label}</p>
+          <p className="mt-2 text-sm leading-6 text-stone-300">{activeCluster.cluster.summary}</p>
+          <p className="mt-3 text-xs text-stone-400">
+            {group?.label ?? activeCluster.cluster.groupId} · {activeCluster.matchedNodeIds.length}{" "}
+            связанных atlas-узлов
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {activeCluster.cluster.keyTopics.map((topic) => (
+              <span
+                key={topic}
+                className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-stone-200"
+              >
+                {topic}
+              </span>
+            ))}
+          </div>
+          {relatedClusters.length > 0 ? (
+            <div className="mt-4">
+              <p className="mb-2 text-xs text-stone-400">Мосты к соседним секторам</p>
+              <div className="flex flex-wrap gap-2">
+                {relatedClusters.map((cluster) => (
+                  <button
+                    key={cluster.id}
+                    type="button"
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-stone-200 transition-colors hover:border-teal-200/60 hover:text-white"
+                    onClick={() => onSelectCluster(cluster.id)}
+                  >
+                    {cluster.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
@@ -477,12 +710,18 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(() =>
     getDefaultAtlasNodeId(initialGraph)
   );
+  const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<AwakeningMapViewMode>("atlas");
   const [query, setQuery] = useState("");
   const [nodeTypeFilter, setNodeTypeFilter] = useState("all");
   const [isLoadingNeighbors, setIsLoadingNeighbors] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query);
   const visibleGraph = getVisibleGraph({ graph, nodeTypeFilter, query: deferredQuery });
+  const clusterMatches = getReferenceClusterMatches(graph);
+  const explicitCluster = getClusterMatchById(clusterMatches, selectedClusterId);
+  const inferredCluster = getClusterMatchForNode(clusterMatches, selectedNodeId);
+  const activeCluster = explicitCluster ?? inferredCluster;
   const layout = createAwakeningAtlasLayout(visibleGraph, selectedNodeId);
   const selectedNode =
     visibleGraph.nodes.find((node) => node.id === layout.selectedNodeId) ??
@@ -490,10 +729,41 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
     null;
   const nodeTypes = getNodeTypes(graph);
   const matchingNodeIds = new Set(visibleGraph.nodes.map((node) => node.id));
+  const clusterNodeIds = activeCluster
+    ? new Set(
+        activeCluster.matchedNodeIds.filter((nodeId) =>
+          visibleGraph.nodes.some((node) => node.id === nodeId)
+        )
+      )
+    : EMPTY_NODE_ID_SET;
   const highlightedNodeIds =
-    deferredQuery || nodeTypeFilter !== "all" ? matchingNodeIds : EMPTY_NODE_ID_SET;
+    deferredQuery || nodeTypeFilter !== "all"
+      ? matchingNodeIds
+      : activeCluster
+        ? clusterNodeIds
+        : EMPTY_NODE_ID_SET;
   const projectedCount = graph.nodes.filter((node) => node.isProjected).length;
   const unresolvedCount = graph.nodes.length - projectedCount;
+
+  function selectCluster(clusterId: string): void {
+    const nextCluster = getClusterMatchById(clusterMatches, clusterId);
+
+    setSelectedClusterId(clusterId);
+    setStatusMessage(`Выбран сектор ${nextCluster?.cluster.label ?? clusterId}.`);
+
+    const nextNodeId = nextCluster?.matchedNodeIds.find((nodeId) =>
+      visibleGraph.nodes.some((node) => node.id === nodeId)
+    );
+    if (nextNodeId) {
+      setSelectedNodeId(nextNodeId);
+    }
+  }
+
+  function selectNode(nodeId: string): void {
+    setSelectedNodeId(nodeId);
+    const nextCluster = getClusterMatchForNode(clusterMatches, nodeId);
+    setSelectedClusterId(nextCluster?.cluster.id ?? null);
+  }
 
   async function loadNeighbors(node: AwakeningAtlasNode): Promise<void> {
     if (!node.isProjected) {
@@ -521,6 +791,7 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
 
       setGraph(payload.data.graph);
       setSelectedNodeId(node.id);
+      setSelectedClusterId(getClusterMatchForNode(clusterMatches, node.id)?.cluster.id ?? null);
       setNodeTypeFilter("all");
       setQuery("");
       setStatusMessage("Показаны прямые соседи выбранного узла.");
@@ -534,6 +805,7 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
   function resetGraph(): void {
     setGraph(initialGraph.nodes.length > 0 ? initialGraph : EMPTY_GRAPH);
     setSelectedNodeId(getDefaultAtlasNodeId(initialGraph));
+    setSelectedClusterId(null);
     setNodeTypeFilter("all");
     setQuery("");
     setStatusMessage(null);
@@ -554,6 +826,9 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-stone-300">
                   projection-backed
+                </span>
+                <span className="rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs text-teal-50">
+                  original map linked
                 </span>
               </div>
               <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">
@@ -606,6 +881,27 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
             </Button>
           </div>
 
+          <div className="mb-4 flex flex-wrap gap-3">
+            <ViewModeButton
+              active={viewMode === "atlas"}
+              description="Чистый структурный граф с орбитами и связями."
+              label="Атлас"
+              onClick={() => setViewMode("atlas")}
+            />
+            <ViewModeButton
+              active={viewMode === "reference"}
+              description="Исходная карта с крупными интерактивными секторами."
+              label="Оригинал"
+              onClick={() => setViewMode("reference")}
+            />
+            <ViewModeButton
+              active={viewMode === "compare"}
+              description="Слева оригинал, справа atlas с общей selection state."
+              label="Сопоставление"
+              onClick={() => setViewMode("compare")}
+            />
+          </div>
+
           <div className="mb-4 flex flex-wrap gap-2">
             <NodeTypePill
               active={nodeTypeFilter === "all"}
@@ -624,46 +920,119 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
             ))}
           </div>
 
-          <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
-            {visibleGraph.nodes.length > 0 ? (
-              <AtlasSvg
-                graph={visibleGraph}
-                highlightedNodeIds={highlightedNodeIds}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={setSelectedNodeId}
+          {clusterMatches.length > 0 ? (
+            <div className="mb-4 rounded-[2rem] border border-white/10 bg-white/[0.04] p-4">
+              <p className="font-mono text-xs tracking-[0.22em] text-teal-100 uppercase">
+                reference clusters
+              </p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-400">
+                Крупные сектора исходной карты. Выбор кластера подсвечивает связанные узлы и
+                помогает читать карту по большим темам.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {clusterMatches.map((entry) => (
+                  <ClusterPill
+                    key={entry.cluster.id}
+                    active={activeCluster?.cluster.id === entry.cluster.id}
+                    count={entry.matchedNodeIds.length}
+                    label={entry.cluster.label}
+                    onClick={() => selectCluster(entry.cluster.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {viewMode === "reference" ? (
+            <ReferenceMapStage
+              clusterMatches={clusterMatches}
+              onSelectCluster={selectCluster}
+              selectedCluster={activeCluster}
+            />
+          ) : viewMode === "compare" ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              <ReferenceMapStage
+                clusterMatches={clusterMatches}
+                onSelectCluster={selectCluster}
+                selectedCluster={activeCluster}
               />
-            ) : (
-              <div className="flex min-h-[560px] items-center justify-center p-8 text-center">
-                <div className="max-w-md">
-                  <Sparkles className="mx-auto size-10 text-amber-200" />
-                  <h3 className="mt-4 text-2xl font-semibold">
-                    Карта ждёт первые опубликованные узлы
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-stone-400">
-                    Когда темы появятся в `node_projection` со статусом `published`, они станут
-                    созвездием здесь.
-                  </p>
+              <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
+                {visibleGraph.nodes.length > 0 ? (
+                  <AtlasSvg
+                    graph={visibleGraph}
+                    highlightedNodeIds={highlightedNodeIds}
+                    selectedNodeId={selectedNodeId}
+                    onSelectNode={selectNode}
+                  />
+                ) : (
+                  <div className="flex min-h-[560px] items-center justify-center p-8 text-center">
+                    <div className="max-w-md">
+                      <Sparkles className="mx-auto size-10 text-amber-200" />
+                      <h3 className="mt-4 text-2xl font-semibold">
+                        Карта ждёт первые опубликованные узлы
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-stone-400">
+                        Когда темы появятся в `node_projection` со статусом `published`, они станут
+                        созвездием здесь.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-stone-950/75 p-4 backdrop-blur lg:block">
+                  <AtlasLegend />
                 </div>
               </div>
-            )}
-
-            <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-stone-950/75 p-4 backdrop-blur lg:block">
-              <AtlasLegend />
             </div>
+          ) : (
+            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
+              {visibleGraph.nodes.length > 0 ? (
+                <AtlasSvg
+                  graph={visibleGraph}
+                  highlightedNodeIds={highlightedNodeIds}
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={selectNode}
+                />
+              ) : (
+                <div className="flex min-h-[560px] items-center justify-center p-8 text-center">
+                  <div className="max-w-md">
+                    <Sparkles className="mx-auto size-10 text-amber-200" />
+                    <h3 className="mt-4 text-2xl font-semibold">
+                      Карта ждёт первые опубликованные узлы
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-stone-400">
+                      Когда темы появятся в `node_projection` со статусом `published`, они станут
+                      созвездием здесь.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            {statusMessage ? (
-              <div className="absolute right-4 bottom-4 max-w-sm rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-50 backdrop-blur">
-                {statusMessage}
+              <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-stone-950/75 p-4 backdrop-blur lg:block">
+                <AtlasLegend />
               </div>
-            ) : null}
-          </div>
+
+              {statusMessage ? (
+                <div className="absolute right-4 bottom-4 max-w-sm rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-50 backdrop-blur">
+                  {statusMessage}
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {viewMode !== "atlas" && statusMessage ? (
+            <div className="mt-4 max-w-sm rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-50 backdrop-blur">
+              {statusMessage}
+            </div>
+          ) : null}
         </div>
 
         <div className="border-t border-white/10 p-4 sm:p-6 xl:border-t-0 xl:border-l">
           <SelectedNodePanel
+            activeCluster={activeCluster}
             graph={graph}
             isLoadingNeighbors={isLoadingNeighbors}
             node={selectedNode}
+            onSelectCluster={selectCluster}
             onLoadNeighbors={loadNeighbors}
             onReset={resetGraph}
           />

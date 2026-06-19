@@ -68,6 +68,7 @@ deployment context.
 - [x] `/admin/awakening-map` approve/reject/merge actions added with RBAC and audit logging
 - [x] Projection-backed Awakening Map Graph API added at `/api/map`, `/api/map/node/:id`, `/api/map/neighbors`, and `/api/map/search`
 - [x] Visual Awakening Map MVP added at `/awakening/map` with SVG atlas, filters, node detail, and neighbor focus
+- [x] Awakening Map reference layer added with curated sector taxonomy, original-map hotspots, and compare mode
 - [x] Public topic pages upgraded to projection dossiers with mini-map, source evidence, versions, timeline, counterarguments, and unresolved tails
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
@@ -154,6 +155,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-19: Awakening Map suggestions now have audited approve/reject/merge actions. Approved suggestions create `node_projection` rows with status `review`, not public `published`.
 - 2026-06-19: Awakening Map Graph API is projection-backed from `node_projection`; unresolved refs are explicit reference nodes and live Brain traversal remains future work.
 - 2026-06-19: `/awakening/map` now renders a dependency-free SVG atlas over the projection-backed API. It does not include fake demo nodes when projection data is empty.
+- 2026-06-19: `/awakening/map` now includes curated reference sectors for the original Great Awakening poster, plus `Атлас / Оригинал / Сопоставление` modes and sector-to-atlas linking.
 - 2026-06-19: `/topics/[slug]` now renders a source-first projection dossier. Missing sections stay explicit empty states; no AI dossier text is generated yet.
 - 2026-06-19: `/admin/api` archive-project deletion no longer guesses a Brain endpoint. It requires explicit `BRAIN_PROJECT_DELETE_ENDPOINT_TEMPLATE` and returns a blocked result when the backend contract is absent.
 

@@ -35,3 +35,22 @@ export type {
   AwakeningAtlasGraph,
   AwakeningAtlasNode,
 } from "./lib/atlas-layout";
+export {
+  awakeningMapThemeGroupIdSchema,
+  awakeningMapThemeGroupIds,
+  awakeningMapThemeGroups,
+  awakeningReferenceBoundsSchema,
+  awakeningReferenceClusterSchema,
+  awakeningReferenceClusters,
+  getAwakeningMapThemeGroup,
+  getAwakeningReferenceCluster,
+  getRelatedAwakeningReferenceClusters,
+  matchAwakeningReferenceClusters,
+} from "./lib/reference-map";
+export type {
+  AwakeningMapThemeGroup,
+  AwakeningMapThemeGroupId,
+  AwakeningReferenceBounds,
+  AwakeningReferenceCluster,
+  AwakeningReferenceClusterMatch,
+} from "./lib/reference-map";
