@@ -30,3 +30,7 @@ For session state → read `.claude/memory/project-state.md`.
 Run `cat node_modules/next/package.json | grep version` to confirm the installed
 major. Read `node_modules/next/dist/esm/lib/...` or `https://nextjs.org/docs` for
 the current API. **Do not invent APIs from memory.**
+
+## Repo Safety Addendum
+
+Before editing, also read `.claude/rules/repo-safety.md` for this repository's stack-specific safety rules.

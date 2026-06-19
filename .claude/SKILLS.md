@@ -288,3 +288,16 @@ SEO статья / блог                   /content [тема + ключ]
 - Архитектурное решение → `/db` или описание задачи
 
 Скилл нужен когда нужен **артефакт** (код, файл, конфиг), а не объяснение.
+
+---
+
+## Superpowers Workflow Skills
+
+Local evidence-first workflow skills:
+
+- `/verify` -> `.claude/skills/verification/SKILL.md`
+- `/debug` -> `.claude/skills/systematic-debugging/SKILL.md`
+- `/plan` -> `.claude/skills/implementation-plan/SKILL.md`
+- `/tdd` -> `.claude/skills/test-driven-development/SKILL.md`
+
+Use these before completion claims, debugging fixes, multi-step implementation, and behavior changes.
