@@ -1,3 +1,13 @@
+## [1.4.0](https://github.com/kulikman/Secret-project/compare/v1.3.0...v1.4.0) (2026-06-19)
+
+### ✨ Features
+
+* add awakening map review list ([4d0b38f](https://github.com/kulikman/Secret-project/commit/4d0b38fa6ad7f6b8ca3b67953e9f924bec819865))
+
+### 📝 Docs
+
+* record supabase project reference ([eb75be7](https://github.com/kulikman/Secret-project/commit/eb75be784e7b581240e2aba503045b5003ad85b8))
+
 ## [1.3.0](https://github.com/kulikman/Secret-project/compare/v1.2.0...v1.3.0) (2026-06-17)
 
 ### ✨ Features
