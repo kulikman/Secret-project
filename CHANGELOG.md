@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/kulikman/Secret-project/compare/v1.6.0...v1.7.0) (2026-06-20)
+
+### ✨ Features
+
+* restore dark bureau home screen ([9269e13](https://github.com/kulikman/Secret-project/commit/9269e1317387b178214e0564ab66298b6dcdace4))
+
 ## [1.6.0](https://github.com/kulikman/Secret-project/compare/v1.5.0...v1.6.0) (2026-06-19)
 
 ### ✨ Features
