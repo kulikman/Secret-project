@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
 import { PostHogProvider, PageviewTracker } from "@/components/analytics/posthog-provider";
@@ -16,14 +15,12 @@ import { PostHogProvider, PageviewTracker } from "@/components/analytics/posthog
 export function Providers({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
     <PostHogProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        {/* PageviewTracker uses useSearchParams, which requires Suspense */}
-        <Suspense fallback={null}>
-          <PageviewTracker />
-        </Suspense>
-        {children}
-        <Toaster position="top-right" richColors closeButton />
-      </ThemeProvider>
+      {/* PageviewTracker uses useSearchParams, which requires Suspense */}
+      <Suspense fallback={null}>
+        <PageviewTracker />
+      </Suspense>
+      {children}
+      <Toaster position="top-right" richColors closeButton />
     </PostHogProvider>
   );
 }
