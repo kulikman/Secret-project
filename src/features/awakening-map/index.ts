@@ -50,7 +50,6 @@ export {
 export type {
   AwakeningMapThemeGroup,
   AwakeningMapThemeGroupId,
-  AwakeningReferenceBounds,
   AwakeningReferenceCluster,
   AwakeningReferenceClusterMatch,
 } from "./lib/reference-map";
