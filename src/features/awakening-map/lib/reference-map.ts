@@ -41,7 +41,6 @@ export const awakeningReferenceClusterSchema = z.object({
 });
 
 export type AwakeningMapThemeGroupId = z.infer<typeof awakeningMapThemeGroupIdSchema>;
-export type AwakeningReferenceBounds = z.infer<typeof awakeningReferenceBoundsSchema>;
 export type AwakeningReferenceCluster = z.infer<typeof awakeningReferenceClusterSchema>;
 
 export interface AwakeningMapThemeGroup {
