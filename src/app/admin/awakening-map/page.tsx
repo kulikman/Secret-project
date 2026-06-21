@@ -5,17 +5,22 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import {
   awakeningGraphEdgeStatusSchema,
+  awakeningMapProjectionStatusSchema,
   createAwakeningGraphEdge,
   awakeningTopicSuggestionStatuses,
   listAwakeningGraphEdges,
+  listAwakeningMapProjections,
   approveAwakeningTopicSuggestion,
   getAwakeningTopicSuggestion,
   listAwakeningTopicSuggestions,
   mergeAwakeningTopicSuggestion,
   rejectAwakeningTopicSuggestion,
   updateAwakeningGraphEdge,
+  updateAwakeningMapProjection,
   type AwakeningGraphEdge,
   type AwakeningGraphEdgeStatus,
+  type AwakeningMapProjection,
+  type AwakeningMapProjectionStatus,
   type AwakeningTopicSuggestion,
   type AwakeningTopicSuggestionStatus,
 } from "@/features/awakening-map";
@@ -65,6 +70,20 @@ const GRAPH_EDGE_STATUSES: AwakeningGraphEdgeStatus[] = [
   "archived",
 ];
 
+const MAP_PROJECTION_STATUS_LABEL: Record<AwakeningMapProjectionStatus, string> = {
+  archived: "В архиве",
+  draft: "Черновик",
+  published: "Опубликован",
+  review: "На проверке",
+};
+
+const MAP_PROJECTION_STATUSES: AwakeningMapProjectionStatus[] = [
+  "draft",
+  "review",
+  "published",
+  "archived",
+];
+
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -98,6 +117,14 @@ function getRequiredFormString(formData: FormData, key: string): string {
   }
 
   return value.trim();
+}
+
+function getOptionalFormString(formData: FormData, key: string): string | null {
+  const value = formData.get(key);
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 function getOptionalSourceRefsFormValue(formData: FormData, key: string): SourceRef[] {
@@ -137,6 +164,21 @@ async function updateGraphEdgeAction(formData: FormData): Promise<void> {
     strength: Number(getRequiredFormString(formData, "strength")),
   });
   revalidatePath(ROUTES.adminAwakeningMap);
+}
+
+async function updateMapProjectionAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await updateAwakeningMapProjection({
+    projectionId: getRequiredFormString(formData, "projectionId"),
+    slug: getOptionalFormString(formData, "slug"),
+    sourceRefs: getOptionalSourceRefsFormValue(formData, "sourceRefs"),
+    status: awakeningMapProjectionStatusSchema.parse(getRequiredFormString(formData, "status")),
+    summary: getOptionalFormString(formData, "summary"),
+    title: getRequiredFormString(formData, "title"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
+  revalidatePath(ROUTES.awakeningMap);
 }
 
 async function approveSuggestionAction(formData: FormData): Promise<void> {
@@ -184,6 +226,20 @@ function GraphEdgeStatusPill({ status }: { status: AwakeningGraphEdgeStatus }): 
       className={`rounded-full border px-3 py-1 text-xs font-medium ${GRAPH_EDGE_STATUS_CLASS[status]}`}
     >
       {GRAPH_EDGE_STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+function MapProjectionStatusPill({
+  status,
+}: {
+  status: AwakeningMapProjectionStatus;
+}): React.ReactElement {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-medium ${GRAPH_EDGE_STATUS_CLASS[status]}`}
+    >
+      {MAP_PROJECTION_STATUS_LABEL[status]}
     </span>
   );
 }
@@ -623,6 +679,136 @@ function GraphEdgesPanel({ edges }: { edges: AwakeningGraphEdge[] }): React.Reac
   );
 }
 
+function MapProjectionsPanel({
+  projections,
+}: {
+  projections: AwakeningMapProjection[];
+}): React.ReactElement {
+  return (
+    <section className="space-y-4">
+      <div className="border-border bg-muted/30 rounded-3xl border p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs tracking-[0.24em] text-amber-700 uppercase dark:text-amber-300">
+              node projection registry
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight">Узлы карты</h2>
+            <p className="text-muted-foreground mt-1 text-sm leading-6">
+              Здесь можно отредактировать карточку и перевести ее в `published` или `archived`.
+              Сервер дополнительно проверит slug и source refs перед публикацией.
+            </p>
+          </div>
+          <span className="rounded-2xl bg-white/70 px-4 py-2 text-2xl font-semibold dark:bg-white/10">
+            {projections.length}
+          </span>
+        </div>
+      </div>
+
+      {projections.length === 0 ? (
+        <div className="border-border bg-card text-muted-foreground rounded-3xl border p-6 text-sm">
+          `node_projection` пока пуст. Сначала примите предложение или примените seed для карты.
+        </div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          {projections.map((projection) => (
+            <form
+              action={updateMapProjectionAction}
+              className="border-border bg-card rounded-3xl border p-5 shadow-sm"
+              key={projection.id}
+            >
+              <input name="projectionId" type="hidden" value={projection.id} />
+              <div className="flex flex-wrap items-center gap-3">
+                <MapProjectionStatusPill status={projection.status} />
+                <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-xs">
+                  {projection.nodeType}
+                </span>
+                {projection.isStale ? (
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-200">
+                    stale
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_12rem]">
+                <label className="text-sm font-semibold">
+                  Title
+                  <input
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={projection.title}
+                    maxLength={240}
+                    name="title"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold">
+                  Status
+                  <select
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={projection.status}
+                    name="status"
+                  >
+                    {MAP_PROJECTION_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {MAP_PROJECTION_STATUS_LABEL[status]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="mt-3 block text-sm font-semibold">
+                Slug
+                <input
+                  className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                  defaultValue={projection.slug ?? ""}
+                  maxLength={160}
+                  name="slug"
+                  placeholder="required for published topic/source"
+                />
+              </label>
+
+              <label className="mt-3 block text-sm font-semibold">
+                Summary
+                <textarea
+                  className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                  defaultValue={projection.summary ?? ""}
+                  maxLength={2000}
+                  name="summary"
+                />
+              </label>
+
+              <label className="mt-3 block text-sm font-semibold">
+                Source refs JSON
+                <textarea
+                  className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                  defaultValue={JSON.stringify(projection.sourceRefs, null, 2)}
+                  name="sourceRefs"
+                />
+              </label>
+
+              <div className="text-muted-foreground mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                <span>ID: {projection.id}</span>
+                <span>Brain: {projection.brainNodeId}</span>
+                <span>Обновлено: {formatDate(projection.updatedAt)}</span>
+                <span>
+                  Опубликовано:{" "}
+                  {projection.publishedAt ? formatDate(projection.publishedAt) : "нет"}
+                </span>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button type="submit" variant="outline">
+                  Сохранить узел
+                </Button>
+              </div>
+            </form>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default async function AdminAwakeningMapPage({
   searchParams,
 }: {
@@ -635,6 +821,7 @@ export default async function AdminAwakeningMapPage({
   let suggestions: AwakeningTopicSuggestion[] = [];
   let selectedSuggestion: AwakeningTopicSuggestion | null = null;
   let graphEdges: AwakeningGraphEdge[] = [];
+  let mapProjections: AwakeningMapProjection[] = [];
   let accessDenied = false;
 
   try {
@@ -644,6 +831,7 @@ export default async function AdminAwakeningMapPage({
     });
     selectedSuggestion = selectedId ? await getAwakeningTopicSuggestion(selectedId) : null;
     graphEdges = await listAwakeningGraphEdges({ limit: 25 });
+    mapProjections = await listAwakeningMapProjections({ limit: 50 });
   } catch (error) {
     if (error instanceof AdminAccessDeniedError) {
       accessDenied = true;
@@ -704,6 +892,8 @@ export default async function AdminAwakeningMapPage({
       </form>
 
       <GraphEdgesPanel edges={graphEdges} />
+
+      <MapProjectionsPanel projections={mapProjections} />
 
       {suggestions.length === 0 ? (
         <EmptyState statusFilter={statusFilter} />

@@ -25,6 +25,19 @@ export type {
   ListAwakeningGraphEdgesInput,
   UpdateAwakeningGraphEdgeInput,
 } from "./api/graph-edges";
+export {
+  awakeningMapProjectionStatusSchema,
+  listAwakeningMapProjections,
+  listAwakeningMapProjectionsSchema,
+  updateAwakeningMapProjection,
+  updateAwakeningMapProjectionSchema,
+} from "./api/projections";
+export type {
+  AwakeningMapProjection,
+  AwakeningMapProjectionStatus,
+  ListAwakeningMapProjectionsInput,
+  UpdateAwakeningMapProjectionInput,
+} from "./api/projections";
 export { AwakeningMapAtlas } from "./components/awakening-map-atlas";
 export type {
   AwakeningTopicSuggestion,

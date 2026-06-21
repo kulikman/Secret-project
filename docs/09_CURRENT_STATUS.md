@@ -166,6 +166,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-21: `/awakening-map` is the canonical public map route; `/awakening/map` remains a legacy-compatible URL. Projection node types now include `document` and `video`, and relation refs use the Awakening Map vocabulary from the TЗ.
 - 2026-06-21: Awakening Map edges now have an explicit App DB read model in `graph_edges`; public map APIs read published edges first and fall back to legacy `related_node_refs`/`source_refs` while live Brain traversal remains future work.
 - 2026-06-21: `/admin/awakening-map` can create and update curated `graph_edges` after RBAC checks; publishing an edge is blocked unless both endpoint projections are already published.
+- 2026-06-21: `/admin/awakening-map` can edit, publish, and archive `node_projection` map cards after RBAC checks; publishing topic/source rows requires a slug and publishing claim rows requires at least one source ref.
 
 ---
 

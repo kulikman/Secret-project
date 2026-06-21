@@ -269,8 +269,6 @@ Acceptance criteria:
 
 ## Current Safe Next Step
 
-Next safe slice: add `edit`/`publish`/`archive` map operations and a safer merge
-picker for existing `node_projection` topics. Apply pending Supabase migrations
-and regenerate `src/types/database.ts` once Docker or remote Supabase CLI access
-is available. Provider calls for Claude/text and visual AI should wait until
-environment/provider choices are confirmed.
+Next safe slice: add a safer merge picker for existing `node_projection` topics
+and assess the manual Brain republish contract. Provider calls for Claude/text
+and visual AI should wait until environment/provider choices are confirmed.

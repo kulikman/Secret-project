@@ -532,6 +532,26 @@ relations can be created and adjusted without editing JSON refs manually.
 
 ---
 
+### APP-017B: Add Awakening Map projection publishing controls
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add a minimal admin workflow for `node_projection` rows that
+lets reviewers edit projected map cards and move them through review,
+publication, and archive states.
+
+**Acceptance Criteria:**
+
+- [x] Admin/editor/curator access uses `requireAdminRole()` before service-role writes.
+- [x] Admin can list recent `node_projection` rows for the map registry.
+- [x] Admin can edit title, slug, summary, status, and source refs.
+- [x] Publishing topic/source rows is blocked unless a slug is present.
+- [x] Publishing claim rows is blocked unless at least one source ref is present.
+- [x] Update actions write audit log entries.
+- [x] Tests cover list, edit/publish, publish guard, and archive.
+
+---
+
 ### APP-018: Upgrade public topic pages into projection dossiers
 
 **Priority:** P0 | **Status:** Done
