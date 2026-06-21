@@ -61,6 +61,8 @@ The admin console is the operational cockpit for Тайное Бюро:
 ## Awakening Map Functionality
 
 - Published topic registry reads `node_projection` and never needs live Brain for public rendering.
+- Public map edges read published `graph_edges` first and fall back to `related_node_refs`/`source_refs`.
+- Admin edge curation can create/update curated `graph_edges` after RBAC checks and audit logging.
 - Suggestion queue stores `title`, `summary`, `description`, `related_node_refs`, `source_refs`, and `suggested_by`.
 - Public/authenticated users can add only `pending` suggestions.
 - Admin/editor/curator can review suggestions as `approved`, `rejected`, or `merged`.
@@ -206,7 +208,9 @@ Current implemented slice:
 
 - `awakening_topic_suggestions` schema and RLS are added.
 - Zod helper validates suggestion drafts and review payloads.
-- `/admin/awakening-map` lists and filters suggestions and opens one detail read-only.
+- `/admin/awakening-map` lists and filters suggestions, opens one detail, and exposes audited approve/reject/merge actions for pending suggestions.
+- Public map route contract is canonical `/awakening-map`; legacy `/awakening/map` remains available.
+- `/admin/awakening-map` includes a graph edge curation panel for creating/updating `graph_edges`.
 
 ### Epic D: Prompt Templates + PDF Presentations
 
@@ -265,6 +269,8 @@ Acceptance criteria:
 
 ## Current Safe Next Step
 
-Next safe slice: build `/admin/awakening-map` list/detail for pending suggestions,
-then add audited approve/reject/merge actions. Provider calls for Claude/text and
-visual AI should wait until environment/provider choices are confirmed.
+Next safe slice: add `edit`/`publish`/`archive` map operations and a safer merge
+picker for existing `node_projection` topics. Apply pending Supabase migrations
+and regenerate `src/types/database.ts` once Docker or remote Supabase CLI access
+is available. Provider calls for Claude/text and visual AI should wait until
+environment/provider choices are confirmed.

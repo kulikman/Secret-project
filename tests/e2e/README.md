@@ -27,7 +27,7 @@ The 80/20 of E2E for this template:
 1. **Login flow** — happy path + invalid credentials
 2. **Protected route redirect** — visiting `/dashboard` while signed out
    redirects to `/login`
-3. **Theme persistence** — toggle theme, reload, verify class on `<html>`
+3. **Public archive smoke** — `/awakening-map`, `/topics`, and public read pages render with placeholder backend env
 
 Skip exhaustive UI coverage — Vitest already covers utilities and pure
 logic; Playwright should only chase the bugs that only a real browser

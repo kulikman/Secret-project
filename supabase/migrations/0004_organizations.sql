@@ -156,7 +156,7 @@ create table if not exists public.org_invites (
   invited_by  uuid not null references auth.users(id) on delete cascade,
   email       text not null check (email ~* '^[^@]+@[^@]+\.[^@]+$'),
   role        public.org_role not null default 'member',
-  token       text unique not null default encode(gen_random_bytes(32), 'hex'),
+  token       text unique not null default encode(extensions.gen_random_bytes(32), 'hex'),
   expires_at  timestamptz not null default now() + interval '7 days',
   accepted_at timestamptz,
   created_at  timestamptz not null default now(),

@@ -67,6 +67,11 @@ const NODE_VISUALS: Record<string, NodeVisual> = {
     label: "fill-orange-200",
     stroke: "#fb923c",
   },
+  document: {
+    glow: "rgba(129, 140, 248, 0.26)",
+    label: "fill-indigo-200",
+    stroke: "#818cf8",
+  },
   event: {
     glow: "rgba(248, 113, 113, 0.28)",
     label: "fill-rose-200",
@@ -101,6 +106,11 @@ const NODE_VISUALS: Record<string, NodeVisual> = {
     glow: "rgba(245, 158, 11, 0.34)",
     label: "fill-amber-100",
     stroke: "#f59e0b",
+  },
+  video: {
+    glow: "rgba(244, 114, 182, 0.24)",
+    label: "fill-pink-200",
+    stroke: "#f472b6",
   },
 };
 
@@ -286,7 +296,16 @@ function ViewModeButton({
 }
 
 function AtlasLegend(): React.ReactElement {
-  const items = ["topic", "person", "organization", "event", "source", "reference"];
+  const items = [
+    "topic",
+    "person",
+    "organization",
+    "event",
+    "source",
+    "document",
+    "video",
+    "reference",
+  ];
 
   return (
     <div className="grid gap-2 text-xs text-stone-300 sm:grid-cols-2">
@@ -1058,7 +1077,7 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
               </p>
               <p className="flex items-center gap-2">
                 <GitBranch className="size-4 text-amber-200" />
-                Связи строятся из `related_node_refs` и `source_refs`.
+                Связи читаются из `graph_edges`, затем дополняются refs из карточек.
               </p>
             </div>
           </div>

@@ -483,11 +483,12 @@ model so the UI can render a map without depending on live Brain graph endpoints
 
 - [x] `GET /api/map` returns nodes and edges from published `node_projection` rows.
 - [x] `GET /api/map/node/:id` reads one projected node by projection id or Brain node id.
-- [x] `GET /api/map/neighbors` returns a direct-neighbor graph from projection refs.
+- [x] `GET /api/map/neighbors` returns a direct-neighbor graph from explicit `graph_edges` and projection refs.
 - [x] `GET /api/map/search` searches projected map nodes.
 - [x] Unresolved refs are explicit `reference` nodes with `isProjected: false`.
+- [x] Published `graph_edges` provide moderated edge snapshots with fallback to legacy JSON refs.
 - [x] API routes use standardized `{ ok, requestId, data/error }` envelopes.
-- [x] Tests cover graph derivation and route handlers.
+- [x] Tests cover graph derivation, `graph_edges` fallback, and route handlers.
 
 ---
 
@@ -500,12 +501,34 @@ map API without introducing a graph-rendering dependency yet.
 
 **Acceptance Criteria:**
 
-- [x] `/awakening/map` renders a visual map from published projection graph data.
+- [x] `/awakening-map` renders a visual map from published projection graph data.
+- [x] Legacy `/awakening/map` remains available for existing links.
+- [x] Projection node filters include the full MVP node-type contract, including `document` and `video`.
+- [x] Related refs use the typed Awakening Map relation vocabulary.
 - [x] The atlas has search, node-type filters, selected-node detail, and neighbor focus.
 - [x] Published nodes and unresolved reference tails are visually distinct.
 - [x] The page handles empty projection data without fake demo content.
 - [x] The public nav exposes the map entry point.
-- [x] Layout logic has unit coverage.
+- [x] Layout logic has unit coverage and Playwright smoke coverage.
+
+---
+
+### APP-017A: Add Awakening Map admin edge curation
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Add a minimal admin workflow for curated `graph_edges` so map
+relations can be created and adjusted without editing JSON refs manually.
+
+**Acceptance Criteria:**
+
+- [x] Admin/editor/curator access uses `requireAdminRole()` before service-role writes.
+- [x] Admin can list recent `graph_edges` with endpoint projection labels.
+- [x] Admin can create a graph edge between two projection ids.
+- [x] Admin can update relation type, status, strength, and edge-level source refs.
+- [x] Publishing an edge is blocked unless both endpoint projections are `published`.
+- [x] Create/update actions write audit log entries.
+- [x] Tests cover list, missing-table fallback, create, publish guard, and update.
 
 ---
 

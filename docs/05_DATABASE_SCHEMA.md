@@ -63,23 +63,23 @@ RLS:
 
 Public archive read model written by manual republish or future Brain webhook sync.
 
-| Field         | Type        | Required | Notes                                                                |
-| ------------- | ----------- | :------: | -------------------------------------------------------------------- |
-| id            | uuid        |    ✅    | App DB primary key                                                   |
-| brain_node_id | text        |    ✅    | Unique soft reference to Brain node                                  |
-| node_type     | text        |    ✅    | `topic`, `source`, `claim`, `person`, `organization`, `event`, `tag` |
-| slug          | text        |          | Public URL slug for topics/sources                                   |
-| title         | text        |    ✅    | Public title                                                         |
-| summary       | text        |          | Short public summary                                                 |
-| content       | jsonb       |    ✅    | Renderable snapshot, e.g. localized body/source refs                 |
-| status        | text        |    ✅    | `draft`, `review`, `published`, `archived`                           |
-| credibility   | text        |          | Source credibility, e.g. `A`, `B`, `C`, `D`                          |
-| claim_status  | text        |          | `supported`, `disputed`, `weak`, `unknown`, `needs_source`           |
-| source_refs   | jsonb       |    ✅    | Source/claim ids used by the published snapshot                      |
-| is_stale      | boolean     |    ✅    | Republish needed                                                     |
-| published_at  | timestamptz |          | First/latest publish time                                            |
-| created_at    | timestamptz |    ✅    |                                                                      |
-| updated_at    | timestamptz |    ✅    |                                                                      |
+| Field         | Type        | Required | Notes                                                                                     |
+| ------------- | ----------- | :------: | ----------------------------------------------------------------------------------------- |
+| id            | uuid        |    ✅    | App DB primary key                                                                        |
+| brain_node_id | text        |    ✅    | Unique soft reference to Brain node                                                       |
+| node_type     | text        |    ✅    | `topic`, `source`, `claim`, `person`, `organization`, `event`, `tag`, `document`, `video` |
+| slug          | text        |          | Public URL slug for topics/sources                                                        |
+| title         | text        |    ✅    | Public title                                                                              |
+| summary       | text        |          | Short public summary                                                                      |
+| content       | jsonb       |    ✅    | Renderable snapshot, e.g. localized body/source refs                                      |
+| status        | text        |    ✅    | `draft`, `review`, `published`, `archived`                                                |
+| credibility   | text        |          | Source credibility, e.g. `A`, `B`, `C`, `D`                                               |
+| claim_status  | text        |          | `supported`, `disputed`, `weak`, `unknown`, `needs_source`                                |
+| source_refs   | jsonb       |    ✅    | Source/claim ids used by the published snapshot                                           |
+| is_stale      | boolean     |    ✅    | Republish needed                                                                          |
+| published_at  | timestamptz |          | First/latest publish time                                                                 |
+| created_at    | timestamptz |    ✅    |                                                                                           |
+| updated_at    | timestamptz |    ✅    |                                                                                           |
 
 Recommended indexes:
 
@@ -88,6 +88,39 @@ CREATE UNIQUE INDEX idx_node_projection_brain_node_id ON public.node_projection(
 CREATE INDEX idx_node_projection_type_status ON public.node_projection(node_type, status);
 CREATE INDEX idx_node_projection_slug ON public.node_projection(slug) WHERE slug IS NOT NULL;
 ```
+
+### graph_edges
+
+Explicit public edge read model for the Awakening Map. It stores moderated
+relation snapshots between published `node_projection` rows while Brain remains
+the source of truth.
+
+| Field         | Type        | Required | Notes                                                                                                                                       |
+| ------------- | ----------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | uuid        |    ✅    | App DB primary key                                                                                                                          |
+| from_node_id  | uuid        |    ✅    | FK to `node_projection.id`                                                                                                                  |
+| to_node_id    | uuid        |    ✅    | FK to `node_projection.id`                                                                                                                  |
+| relation_type | text        |    ✅    | `related_to`, `supported_by`, `disputed_by`, `mentions`, `authored_by`, `participated_in`, `occurred_at`, `belongs_to`, `derived_from`, `contradicts`, `expands` |
+| strength      | numeric     |    ✅    | `0..1` confidence/weight for visual priority                                                                                                |
+| source_refs   | jsonb       |    ✅    | Evidence refs for the edge itself                                                                                                           |
+| status        | text        |    ✅    | `draft`, `review`, `published`, `archived`                                                                                                  |
+| created_at    | timestamptz |    ✅    |                                                                                                                                             |
+| updated_at    | timestamptz |    ✅    |                                                                                                                                             |
+
+Recommended indexes:
+
+```sql
+CREATE INDEX graph_edges_from_status_idx ON public.graph_edges(status, from_node_id, to_node_id);
+CREATE INDEX graph_edges_to_status_idx ON public.graph_edges(status, to_node_id, from_node_id);
+CREATE INDEX graph_edges_relation_status_idx ON public.graph_edges(status, relation_type);
+```
+
+RLS:
+
+- anon/authenticated can read only `published` edges;
+- a published edge is visible only when both endpoint `node_projection` rows are also `published`;
+- no public insert/update/delete policies;
+- service-role server actions can write curated edge snapshots after RBAC/audit checks.
 
 ### awakening_topic_suggestions
 

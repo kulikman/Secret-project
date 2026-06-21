@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { graphRelationTypeSchema } from "@/lib/graph-relations";
 import { sourceRefSchema } from "@/lib/source-refs";
 
 export const awakeningTopicSuggestionStatuses = [
@@ -13,7 +14,7 @@ export const awakeningTopicSuggestionStatusSchema = z.enum(awakeningTopicSuggest
 
 export const awakeningRelatedNodeRefSchema = z.object({
   nodeId: z.string().min(1),
-  relation: z.string().trim().min(1).max(80).optional(),
+  relation: graphRelationTypeSchema.default("related_to"),
   reason: z.string().trim().min(1).max(500).optional(),
 });
 

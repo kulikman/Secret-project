@@ -29,6 +29,7 @@ export {
   assertProjectionPublishable,
   claimStatusSchema,
   createDraftProjectionFromArchiveNode,
+  nodeProjectionNodeTypeFilterLimit,
   nodeProjectionNodeTypeSchema,
   nodeProjectionStatusSchema,
   nodeProjectionUpsertSchema,

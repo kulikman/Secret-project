@@ -73,6 +73,24 @@ describe("nodeProjectionUpsertSchema", () => {
       status: "published",
     });
   });
+
+  it("accepts document and video projection node types from the map contract", () => {
+    expect(
+      nodeProjectionUpsertSchema.parse({
+        brain_node_id: "brain-document-1",
+        node_type: "document",
+        title: "Архивный документ",
+      })
+    ).toMatchObject({ node_type: "document" });
+
+    expect(
+      nodeProjectionUpsertSchema.parse({
+        brain_node_id: "brain-video-1",
+        node_type: "video",
+        title: "Видеоархив",
+      })
+    ).toMatchObject({ node_type: "video" });
+  });
 });
 
 describe("assertProjectionPublishable()", () => {

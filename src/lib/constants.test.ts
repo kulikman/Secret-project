@@ -12,6 +12,11 @@ import { ROUTES } from "./constants";
  * via dynamic import keeps `"use client"` boundaries clean.
  */
 describe("ROUTES <-> SEGMENT_LABELS sync", () => {
+  it("uses /awakening-map as the public Awakening Map contract", () => {
+    expect(ROUTES.awakeningMap).toBe("/awakening-map");
+    expect(ROUTES.awakeningMapLegacy).toBe("/awakening/map");
+  });
+
   it("every nested segment in ROUTES has a label or is a known root", async () => {
     const breadcrumbsModule = await import("@/components/layout/breadcrumbs");
     expect(breadcrumbsModule.getBreadcrumbItems).toBeTypeOf("function");

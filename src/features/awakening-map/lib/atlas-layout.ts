@@ -54,12 +54,15 @@ const NODE_TYPE_ORDER = [
   "event",
   "source",
   "claim",
+  "document",
+  "video",
   "tag",
   "reference",
 ] as const;
 
 export const AWAKENING_ATLAS_NODE_TYPE_LABELS: Record<string, string> = {
   claim: "Тезис",
+  document: "Документ",
   event: "Событие",
   organization: "Организация",
   person: "Человек",
@@ -67,6 +70,7 @@ export const AWAKENING_ATLAS_NODE_TYPE_LABELS: Record<string, string> = {
   source: "Источник",
   tag: "Тег",
   topic: "Тема",
+  video: "Видео",
 };
 
 function getNodeTypeWeight(nodeType: string): number {
@@ -127,7 +131,14 @@ function getOrbit(input: {
   if (input.isSelected) return 0;
   if (input.isNeighbor) return 1;
   if (!input.node.isProjected || input.node.nodeType === "reference") return 3;
-  if (input.node.nodeType === "source" || input.node.nodeType === "claim") return 2;
+  if (
+    input.node.nodeType === "source" ||
+    input.node.nodeType === "claim" ||
+    input.node.nodeType === "document" ||
+    input.node.nodeType === "video"
+  ) {
+    return 2;
+  }
   return 2;
 }
 
@@ -140,7 +151,8 @@ function getNodeRadius(input: {
   if (input.isSelected) return 32;
   if (!input.node.isProjected || input.node.nodeType === "reference") return 13;
   if (input.node.nodeType === "topic") return Math.min(27, 18 + input.degree * 2);
-  if (input.node.nodeType === "source") return 15;
+  if (input.node.nodeType === "source" || input.node.nodeType === "document") return 15;
+  if (input.node.nodeType === "video") return 16;
   return input.isNeighbor ? 17 : 14;
 }
 

@@ -21,7 +21,7 @@ describe("createAwakeningTopicSuggestionDraft()", () => {
         {
           title: "Карта пробуждения",
           summary: "Связи тем, источников и соседних смыслов для публичной карты.",
-          related_node_refs: [{ nodeId: "brain-topic-1", relation: "neighbor" }],
+          related_node_refs: [{ nodeId: "brain-topic-1", relation: "related_to" }],
           source_refs: [{ nodeId: "source-1", title: "Архивный источник" }],
         },
         USER_ID
@@ -29,7 +29,7 @@ describe("createAwakeningTopicSuggestionDraft()", () => {
     ).toEqual({
       title: "Карта пробуждения",
       summary: "Связи тем, источников и соседних смыслов для публичной карты.",
-      related_node_refs: [{ nodeId: "brain-topic-1", relation: "neighbor" }],
+      related_node_refs: [{ nodeId: "brain-topic-1", relation: "related_to" }],
       source_refs: [{ nodeId: "source-1", title: "Архивный источник" }],
       status: "pending",
       suggested_by: USER_ID,
@@ -52,6 +52,16 @@ describe("createAwakeningTopicSuggestionDraft()", () => {
         summary: "Тема с некорректным публичным slug.",
       })
     ).toThrow("Slug must be lowercase kebab-case.");
+  });
+
+  it("rejects relations outside the Awakening Map vocabulary", () => {
+    const invalidSuggestion = {
+      title: "Свободная связь",
+      summary: "Проверяем, что relation types не превращаются в произвольный текст.",
+      related_node_refs: [{ nodeId: "brain-topic-1", relation: "neighbor" }],
+    } as unknown as Parameters<typeof createAwakeningTopicSuggestionDraft>[0];
+
+    expect(() => createAwakeningTopicSuggestionDraft(invalidSuggestion)).toThrow();
   });
 });
 

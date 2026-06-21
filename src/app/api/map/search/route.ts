@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { nodeProjectionNodeTypeSchema, searchPublishedMapNodes } from "@/features/knowledge";
+import {
+  nodeProjectionNodeTypeFilterLimit,
+  nodeProjectionNodeTypeSchema,
+  searchPublishedMapNodes,
+} from "@/features/knowledge";
 import { apiError, apiOk, apiValidationError, createApiRequestContext } from "@/lib/api-response";
 
 const nodeTypesQuerySchema = z.preprocess((value) => {
@@ -10,7 +14,7 @@ const nodeTypesQuerySchema = z.preprocess((value) => {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-}, z.array(nodeProjectionNodeTypeSchema).max(7).optional());
+}, z.array(nodeProjectionNodeTypeSchema).max(nodeProjectionNodeTypeFilterLimit).optional());
 
 const searchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),

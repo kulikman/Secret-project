@@ -33,6 +33,21 @@ function projectionRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function graphEdgeRow(overrides: Record<string, unknown> = {}) {
+  return {
+    created_at: "2026-06-15T00:00:00.000Z",
+    from_node_id: "11111111-1111-4111-8111-111111111111",
+    id: "44444444-4444-4444-8444-444444444444",
+    relation_type: "contradicts",
+    source_refs: [{ nodeId: "brain-source-1", title: "Archive source" }],
+    status: "published",
+    strength: "0.72",
+    to_node_id: "22222222-2222-4222-8222-222222222222",
+    updated_at: "2026-06-15T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
 function createQuery(response: { limit?: unknown; maybeSingle?: unknown; range?: unknown }) {
   const query = {
     eq: vi.fn(),
@@ -66,7 +81,7 @@ describe("published map graph queries", () => {
     const topicRow = projectionRow({
       content: {
         related_node_refs: [
-          { nodeId: "brain-person-1", relation: "researched_by", reason: "Ключевая фигура" },
+          { nodeId: "brain-person-1", relation: "authored_by", reason: "Ключевая фигура" },
           { nodeId: "missing-node", relation: "mentions", title: "Неразобранный хвост" },
         ],
       },
@@ -86,27 +101,45 @@ describe("published map graph queries", () => {
       slug: "archive-source",
       title: "Archive source",
     });
-    const query = createQuery({
+    const projectionQuery = createQuery({
       range: {
         data: [topicRow, personRow, sourceRow],
         error: null,
       },
     });
-    const from = vi.fn(() => query);
-    mocks.createClient.mockResolvedValueOnce({ from });
+    const graphEdgeQuery = createQuery({
+      limit: {
+        data: [graphEdgeRow()],
+        error: null,
+      },
+    });
+    const projectionFrom = vi.fn(() => projectionQuery);
+    const graphEdgeFrom = vi.fn(() => graphEdgeQuery);
+    mocks.createClient
+      .mockResolvedValueOnce({ from: projectionFrom })
+      .mockResolvedValueOnce({ from: graphEdgeFrom });
 
     await expect(listPublishedMapGraph({ limit: 25 })).resolves.toMatchObject({
       edges: expect.arrayContaining([
         expect.objectContaining({
           kind: "related",
-          relation: "researched_by",
+          relation: "contradicts",
+          resolved: true,
+          sourceId: "brain-topic-1",
+          sourceRefs: [{ nodeId: "brain-source-1", title: "Archive source" }],
+          strength: 0.72,
+          targetId: "brain-person-1",
+        }),
+        expect.objectContaining({
+          kind: "related",
+          relation: "authored_by",
           resolved: true,
           sourceId: "brain-topic-1",
           targetId: "brain-person-1",
         }),
         expect.objectContaining({
           kind: "source",
-          relation: "source",
+          relation: "supported_by",
           resolved: true,
           sourceId: "brain-topic-1",
           targetId: "brain-source-1",
@@ -131,9 +164,58 @@ describe("published map graph queries", () => {
       ]),
     });
 
-    expect(from).toHaveBeenCalledWith("node_projection");
-    expect(query.eq).toHaveBeenCalledWith("status", "published");
-    expect(query.range).toHaveBeenCalledWith(0, 24);
+    expect(projectionFrom).toHaveBeenCalledWith("node_projection");
+    expect(graphEdgeFrom).toHaveBeenCalledWith("graph_edges");
+    expect(projectionQuery.eq).toHaveBeenCalledWith("status", "published");
+    expect(projectionQuery.range).toHaveBeenCalledWith(0, 24);
+    expect(graphEdgeQuery.in).toHaveBeenCalledWith("from_node_id", [
+      "11111111-1111-4111-8111-111111111111",
+      "22222222-2222-4222-8222-222222222222",
+      "33333333-3333-4333-8333-333333333333",
+    ]);
+  });
+
+  it("falls back to projection refs when graph_edges is not migrated yet", async () => {
+    const topicRow = projectionRow({
+      content: {
+        related_node_refs: [{ nodeId: "brain-person-1", relation: "authored_by" }],
+      },
+    });
+    const personRow = projectionRow({
+      brain_node_id: "brain-person-1",
+      id: "22222222-2222-4222-8222-222222222222",
+      node_type: "person",
+      title: "Исследователь",
+    });
+    const projectionQuery = createQuery({
+      range: {
+        data: [topicRow, personRow],
+        error: null,
+      },
+    });
+    const graphEdgeQuery = createQuery({
+      limit: {
+        data: null,
+        error: {
+          code: "42P01",
+          message: 'relation "public.graph_edges" does not exist',
+        },
+      },
+    });
+
+    mocks.createClient
+      .mockResolvedValueOnce({ from: vi.fn(() => projectionQuery) })
+      .mockResolvedValueOnce({ from: vi.fn(() => graphEdgeQuery) });
+
+    await expect(listPublishedMapGraph({ limit: 25 })).resolves.toMatchObject({
+      edges: [
+        expect.objectContaining({
+          relation: "authored_by",
+          sourceId: "brain-topic-1",
+          targetId: "brain-person-1",
+        }),
+      ],
+    });
   });
 
   it("applies query text and node type filters", async () => {
@@ -192,7 +274,7 @@ describe("published map graph queries", () => {
   it("returns a direct-neighbor graph for one root node", async () => {
     const rootRow = projectionRow({
       content: {
-        related_node_refs: [{ nodeId: "brain-person-1", relation: "connected_to" }],
+        related_node_refs: [{ nodeId: "brain-person-1", relation: "expands" }],
       },
       source_refs: [{ nodeId: "missing-source", title: "Pending source" }],
     });
@@ -214,8 +296,15 @@ describe("published map graph queries", () => {
         error: null,
       },
     });
+    const graphEdgeQuery = createQuery({
+      limit: {
+        data: [],
+        error: null,
+      },
+    });
     mocks.createClient
       .mockResolvedValueOnce({ from: vi.fn(() => rootQuery) })
+      .mockResolvedValueOnce({ from: vi.fn(() => graphEdgeQuery) })
       .mockResolvedValueOnce({ from: vi.fn(() => identifiersQuery) });
 
     await expect(
@@ -223,7 +312,7 @@ describe("published map graph queries", () => {
     ).resolves.toMatchObject({
       edges: expect.arrayContaining([
         expect.objectContaining({
-          relation: "connected_to",
+          relation: "expands",
           sourceId: "brain-topic-1",
           targetId: "brain-person-1",
         }),
@@ -245,6 +334,9 @@ describe("published map graph queries", () => {
       "missing-source",
     ]);
     expect(identifiersQuery.limit).toHaveBeenCalledWith(2);
+    expect(graphEdgeQuery.or).toHaveBeenCalledWith(
+      "from_node_id.eq.11111111-1111-4111-8111-111111111111,to_node_id.eq.11111111-1111-4111-8111-111111111111"
+    );
   });
 
   it("searches projected map nodes without reference placeholders", async () => {

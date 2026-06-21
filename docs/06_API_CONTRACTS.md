@@ -112,8 +112,11 @@ Reads one published source projection by App DB id or Brain node id, depending o
 Returns a projection-backed graph for the Awakening Map.
 
 Reads published rows from `node_projection`, not live Brain. Edges are derived
-from `content.related_node_refs` and `source_refs`. Unresolved refs are returned
-as `reference` nodes with `isProjected: false`.
+from published `graph_edges` first, then supplemented from
+`content.related_node_refs` and `source_refs` for legacy/fallback snapshots.
+Unresolved refs are returned as `reference` nodes with `isProjected: false`.
+Edges include `relation`, `sourceId`, `targetId`, `resolved`, `strength`, and
+`sourceRefs`; legacy JSON-derived edges use `strength: null`.
 
 Query params:
 

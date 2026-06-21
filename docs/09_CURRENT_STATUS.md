@@ -8,7 +8,7 @@
 
 ## Last Updated
 
-2026-06-19
+2026-06-21
 
 ## Current Phase
 
@@ -67,12 +67,16 @@ deployment context.
 - [x] `/admin/awakening-map` read-only review list/detail added for topic suggestions
 - [x] `/admin/awakening-map` approve/reject/merge actions added with RBAC and audit logging
 - [x] Projection-backed Awakening Map Graph API added at `/api/map`, `/api/map/node/:id`, `/api/map/neighbors`, and `/api/map/search`
-- [x] Visual Awakening Map MVP added at `/awakening/map` with SVG atlas, filters, node detail, and neighbor focus
+- [x] Visual Awakening Map MVP added at canonical `/awakening-map` with legacy `/awakening/map`, SVG atlas, filters, node detail, and neighbor focus
+- [x] Awakening Map route/node contract aligned with TЗ MVP: `document`/`video` projection types and typed relation vocabulary added
+- [x] Awakening Map explicit `graph_edges` read model added with public RLS and API fallback to legacy refs
+- [x] Awakening Map admin edge curation added for creating/updating curated `graph_edges`
 - [x] Awakening Map reference layer added with curated sector taxonomy, original-map hotspots, and compare mode
 - [x] Public topic pages upgraded to projection dossiers with mini-map, source evidence, versions, timeline, counterarguments, and unresolved tails
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
 - [ ] Supabase project connected (SETUP-001)
+- [ ] Latest migrations applied to Supabase and `src/types/database.ts` regenerated from the live schema
 - [x] Resend setup skipped by owner request; notifications remain provider-neutral/future only
 - [ ] Core feature implemented
 
@@ -99,6 +103,7 @@ deployment context.
 - [ ] Most domain admin mutations remain blocked; application status backend/UI is implemented, but admin JSON API route is not implemented
 - [ ] Member cabinet data model remains blocked until profile/community membership scope is approved
 - [ ] Backend audit found Supabase security-definer hardening, Brain adapter wiring, remaining API contract tests, and RLS scenario tests as remaining backend priorities
+- [ ] Local Supabase migration/typegen verification is blocked until Docker daemon or remote Supabase CLI access is available
 
 ---
 
@@ -158,6 +163,9 @@ These areas must not be changed without explicit discussion:
 - 2026-06-19: `/awakening/map` now includes curated reference sectors for the original Great Awakening poster, plus `Атлас / Оригинал / Сопоставление` modes and sector-to-atlas linking.
 - 2026-06-19: `/topics/[slug]` now renders a source-first projection dossier. Missing sections stay explicit empty states; no AI dossier text is generated yet.
 - 2026-06-19: `/admin/api` archive-project deletion no longer guesses a Brain endpoint. It requires explicit `BRAIN_PROJECT_DELETE_ENDPOINT_TEMPLATE` and returns a blocked result when the backend contract is absent.
+- 2026-06-21: `/awakening-map` is the canonical public map route; `/awakening/map` remains a legacy-compatible URL. Projection node types now include `document` and `video`, and relation refs use the Awakening Map vocabulary from the TЗ.
+- 2026-06-21: Awakening Map edges now have an explicit App DB read model in `graph_edges`; public map APIs read published edges first and fall back to legacy `related_node_refs`/`source_refs` while live Brain traversal remains future work.
+- 2026-06-21: `/admin/awakening-map` can create and update curated `graph_edges` after RBAC checks; publishing an edge is blocked unless both endpoint projections are already published.
 
 ---
 

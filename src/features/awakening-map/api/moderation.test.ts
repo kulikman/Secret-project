@@ -44,7 +44,7 @@ const suggestionRow = {
   description: "Развернутая заявка на добавление темы в карту пробуждения.",
   id: suggestionId,
   promoted_node_projection_id: null,
-  related_node_refs: [{ nodeId: "brain-topic-1", relation: "neighbor" }],
+  related_node_refs: [{ nodeId: "brain-topic-1", relation: "related_to" }],
   reviewed_at: null,
   reviewed_by: null,
   slug: "awakening-map",

@@ -8,6 +8,23 @@ export {
   rejectAwakeningTopicSuggestion,
   reviewAwakeningTopicSuggestionSchema,
 } from "./api/moderation";
+export {
+  awakeningGraphEdgeStatusSchema,
+  createAwakeningGraphEdge,
+  createAwakeningGraphEdgeSchema,
+  listAwakeningGraphEdges,
+  listAwakeningGraphEdgesSchema,
+  updateAwakeningGraphEdge,
+  updateAwakeningGraphEdgeSchema,
+} from "./api/graph-edges";
+export type {
+  AwakeningGraphEdge,
+  AwakeningGraphEdgeNode,
+  AwakeningGraphEdgeStatus,
+  CreateAwakeningGraphEdgeInput,
+  ListAwakeningGraphEdgesInput,
+  UpdateAwakeningGraphEdgeInput,
+} from "./api/graph-edges";
 export { AwakeningMapAtlas } from "./components/awakening-map-atlas";
 export type {
   AwakeningTopicSuggestion,

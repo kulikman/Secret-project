@@ -1,90 +1,40 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5";
   };
   public: {
     Tables: {
-      api_keys: {
+      admin_role_assignments: {
         Row: {
           created_at: string;
-          expires_at: string | null;
+          granted_by: string | null;
           id: string;
-          key_hash: string;
-          key_prefix: string;
-          last_used_at: string | null;
-          name: string;
+          reason: string | null;
+          role: Database["public"]["Enums"]["admin_role"];
+          updated_at: string;
           user_id: string;
         };
         Insert: {
           created_at?: string;
-          expires_at?: string | null;
+          granted_by?: string | null;
           id?: string;
-          key_hash: string;
-          key_prefix: string;
-          last_used_at?: string | null;
-          name: string;
+          reason?: string | null;
+          role: Database["public"]["Enums"]["admin_role"];
+          updated_at?: string;
           user_id: string;
         };
         Update: {
           created_at?: string;
-          expires_at?: string | null;
+          granted_by?: string | null;
           id?: string;
-          key_hash?: string;
-          key_prefix?: string;
-          last_used_at?: string | null;
-          name?: string;
+          reason?: string | null;
+          role?: Database["public"]["Enums"]["admin_role"];
+          updated_at?: string;
           user_id?: string;
-        };
-        Relationships: [];
-      };
-      audit_logs: {
-        Row: {
-          action: string;
-          created_at: string;
-          id: number;
-          metadata: Json;
-          resource: string | null;
-          user_id: string | null;
-        };
-        Insert: {
-          action: string;
-          created_at?: string;
-          id?: never;
-          metadata?: Json;
-          resource?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          action?: string;
-          created_at?: string;
-          id?: never;
-          metadata?: Json;
-          resource?: string | null;
-          user_id?: string | null;
         };
         Relationships: [];
       };
@@ -140,7 +90,15 @@ export type Database = {
           topic_node_id?: string | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "ai_jobs_presentation_id_fkey";
+            columns: ["presentation_id"];
+            isOneToOne: false;
+            referencedRelation: "presentations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       ai_prompt_templates: {
         Row: {
@@ -175,6 +133,132 @@ export type Database = {
           title?: string;
           updated_at?: string;
           version?: number;
+        };
+        Relationships: [];
+      };
+      api_keys: {
+        Row: {
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          key_hash: string;
+          key_prefix: string;
+          last_used_at: string | null;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          key_hash: string;
+          key_prefix: string;
+          last_used_at?: string | null;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          key_hash?: string;
+          key_prefix?: string;
+          last_used_at?: string | null;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      applications: {
+        Row: {
+          city_id: string | null;
+          created_at: string;
+          email: string;
+          event_id: string | null;
+          full_name: string;
+          id: string;
+          motivation: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          selected_topic: string | null;
+          status: string;
+          telegram: string | null;
+          updated_at: string;
+          user_id: string | null;
+        };
+        Insert: {
+          city_id?: string | null;
+          created_at?: string;
+          email: string;
+          event_id?: string | null;
+          full_name: string;
+          id?: string;
+          motivation?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selected_topic?: string | null;
+          status?: string;
+          telegram?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          city_id?: string | null;
+          created_at?: string;
+          email?: string;
+          event_id?: string | null;
+          full_name?: string;
+          id?: string;
+          motivation?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selected_topic?: string | null;
+          status?: string;
+          telegram?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "applications_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "bureau_cities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "applications_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "bureau_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      audit_logs: {
+        Row: {
+          action: string;
+          created_at: string;
+          id: number;
+          metadata: Json;
+          resource: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          action: string;
+          created_at?: string;
+          id?: never;
+          metadata?: Json;
+          resource?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          action?: string;
+          created_at?: string;
+          id?: never;
+          metadata?: Json;
+          resource?: string | null;
+          user_id?: string | null;
         };
         Relationships: [];
       };
@@ -230,88 +314,15 @@ export type Database = {
           title?: string;
           updated_at?: string;
         };
-        Relationships: [];
-      };
-      admin_role_assignments: {
-        Row: {
-          created_at: string;
-          granted_by: string | null;
-          id: string;
-          reason: string | null;
-          role: Database["public"]["Enums"]["admin_role"];
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          granted_by?: string | null;
-          id?: string;
-          reason?: string | null;
-          role: Database["public"]["Enums"]["admin_role"];
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          granted_by?: string | null;
-          id?: string;
-          reason?: string | null;
-          role?: Database["public"]["Enums"]["admin_role"];
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
-      applications: {
-        Row: {
-          city_id: string | null;
-          created_at: string;
-          email: string;
-          event_id: string | null;
-          full_name: string;
-          id: string;
-          motivation: string | null;
-          reviewed_at: string | null;
-          reviewed_by: string | null;
-          selected_topic: string | null;
-          status: string;
-          telegram: string | null;
-          updated_at: string;
-          user_id: string | null;
-        };
-        Insert: {
-          city_id?: string | null;
-          created_at?: string;
-          email: string;
-          event_id?: string | null;
-          full_name: string;
-          id?: string;
-          motivation?: string | null;
-          reviewed_at?: string | null;
-          reviewed_by?: string | null;
-          selected_topic?: string | null;
-          status?: string;
-          telegram?: string | null;
-          updated_at?: string;
-          user_id?: string | null;
-        };
-        Update: {
-          city_id?: string | null;
-          created_at?: string;
-          email?: string;
-          event_id?: string | null;
-          full_name?: string;
-          id?: string;
-          motivation?: string | null;
-          reviewed_at?: string | null;
-          reviewed_by?: string | null;
-          selected_topic?: string | null;
-          status?: string;
-          telegram?: string | null;
-          updated_at?: string;
-          user_id?: string | null;
-        };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "awakening_topic_suggestions_promoted_node_projection_id_fkey";
+            columns: ["promoted_node_projection_id"];
+            isOneToOne: false;
+            referencedRelation: "node_projection";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       bureau_cities: {
         Row: {
@@ -377,7 +388,15 @@ export type Database = {
           title?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "bureau_events_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "bureau_cities";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       dossiers: {
         Row: {
@@ -414,6 +433,119 @@ export type Database = {
           source_refs?: Json;
           status?: string;
           topic_node_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "dossiers_parent_version_fkey";
+            columns: ["parent_version"];
+            isOneToOne: false;
+            referencedRelation: "dossiers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      graph_edges: {
+        Row: {
+          created_at: string;
+          from_node_id: string;
+          id: string;
+          relation_type: string;
+          source_refs: Json;
+          status: string;
+          strength: number;
+          to_node_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          from_node_id: string;
+          id?: string;
+          relation_type: string;
+          source_refs?: Json;
+          status?: string;
+          strength?: number;
+          to_node_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          from_node_id?: string;
+          id?: string;
+          relation_type?: string;
+          source_refs?: Json;
+          status?: string;
+          strength?: number;
+          to_node_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "graph_edges_from_node_id_fkey";
+            columns: ["from_node_id"];
+            isOneToOne: false;
+            referencedRelation: "node_projection";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "graph_edges_to_node_id_fkey";
+            columns: ["to_node_id"];
+            isOneToOne: false;
+            referencedRelation: "node_projection";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      node_projection: {
+        Row: {
+          brain_node_id: string;
+          claim_status: string | null;
+          content: Json;
+          created_at: string;
+          credibility: string | null;
+          id: string;
+          is_stale: boolean;
+          node_type: string;
+          published_at: string | null;
+          slug: string | null;
+          source_refs: Json;
+          status: string;
+          summary: string | null;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          brain_node_id: string;
+          claim_status?: string | null;
+          content?: Json;
+          created_at?: string;
+          credibility?: string | null;
+          id?: string;
+          is_stale?: boolean;
+          node_type: string;
+          published_at?: string | null;
+          slug?: string | null;
+          source_refs?: Json;
+          status?: string;
+          summary?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          brain_node_id?: string;
+          claim_status?: string | null;
+          content?: Json;
+          created_at?: string;
+          credibility?: string | null;
+          id?: string;
+          is_stale?: boolean;
+          node_type?: string;
+          published_at?: string | null;
+          slug?: string | null;
+          source_refs?: Json;
+          status?: string;
+          summary?: string | null;
+          title?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -554,60 +686,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      node_projection: {
-        Row: {
-          brain_node_id: string;
-          claim_status: string | null;
-          content: Json;
-          created_at: string;
-          credibility: string | null;
-          id: string;
-          is_stale: boolean;
-          node_type: string;
-          published_at: string | null;
-          slug: string | null;
-          source_refs: Json;
-          status: string;
-          summary: string | null;
-          title: string;
-          updated_at: string;
-        };
-        Insert: {
-          brain_node_id: string;
-          claim_status?: string | null;
-          content?: Json;
-          created_at?: string;
-          credibility?: string | null;
-          id?: string;
-          is_stale?: boolean;
-          node_type: string;
-          published_at?: string | null;
-          slug?: string | null;
-          source_refs?: Json;
-          status?: string;
-          summary?: string | null;
-          title: string;
-          updated_at?: string;
-        };
-        Update: {
-          brain_node_id?: string;
-          claim_status?: string | null;
-          content?: Json;
-          created_at?: string;
-          credibility?: string | null;
-          id?: string;
-          is_stale?: boolean;
-          node_type?: string;
-          published_at?: string | null;
-          slug?: string | null;
-          source_refs?: Json;
-          status?: string;
-          summary?: string | null;
-          title?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       photo_reports: {
         Row: {
           body: Json;
@@ -645,7 +723,22 @@ export type Database = {
           title?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "photo_reports_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "bureau_cities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "photo_reports_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "bureau_events";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       presentations: {
         Row: {
@@ -726,7 +819,29 @@ export type Database = {
           visual_model?: string | null;
           visual_provider?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "presentations_dossier_id_fkey";
+            columns: ["dossier_id"];
+            isOneToOne: false;
+            referencedRelation: "dossiers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "presentations_parent_version_fkey";
+            columns: ["parent_version"];
+            isOneToOne: false;
+            referencedRelation: "presentations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "presentations_prompt_template_id_fkey";
+            columns: ["prompt_template_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_prompt_templates";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -804,7 +919,15 @@ export type Database = {
           visual_asset?: Json;
           visual_prompt?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "slides_presentation_id_fkey";
+            columns: ["presentation_id"];
+            isOneToOne: false;
+            referencedRelation: "presentations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
@@ -939,9 +1062,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       admin_role: ["super_admin", "admin", "editor", "curator", "support", "viewer"],

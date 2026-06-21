@@ -16,6 +16,7 @@ export const claimStatusValues = [
   "needs_source",
 ] as const;
 
+export const nodeProjectionNodeTypeFilterLimit = archiveNodeTypes.length;
 export const nodeProjectionNodeTypeSchema = z.enum(archiveNodeTypes);
 export const nodeProjectionStatusSchema = z.enum(nodeProjectionStatuses);
 export const sourceCredibilitySchema = z.enum(sourceCredibilityValues);

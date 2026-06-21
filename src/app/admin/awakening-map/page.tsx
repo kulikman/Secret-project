@@ -4,17 +4,25 @@ import type { Metadata } from "next";
 
 import { Button } from "@/components/ui/button";
 import {
+  awakeningGraphEdgeStatusSchema,
+  createAwakeningGraphEdge,
   awakeningTopicSuggestionStatuses,
+  listAwakeningGraphEdges,
   approveAwakeningTopicSuggestion,
   getAwakeningTopicSuggestion,
   listAwakeningTopicSuggestions,
   mergeAwakeningTopicSuggestion,
   rejectAwakeningTopicSuggestion,
+  updateAwakeningGraphEdge,
+  type AwakeningGraphEdge,
+  type AwakeningGraphEdgeStatus,
   type AwakeningTopicSuggestion,
   type AwakeningTopicSuggestionStatus,
 } from "@/features/awakening-map";
 import { AdminAccessDeniedError } from "@/lib/admin-auth";
 import { ROUTES } from "@/lib/constants";
+import { graphRelationTypeSchema, graphRelationTypes } from "@/lib/graph-relations";
+import { sourceRefSchema, type SourceRef } from "@/lib/source-refs";
 
 export const metadata: Metadata = {
   title: "Карта пробуждения | Админка",
@@ -35,6 +43,27 @@ const STATUS_CLASS: Record<AwakeningTopicSuggestionStatus, string> = {
   pending: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200",
   rejected: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-200",
 };
+
+const GRAPH_EDGE_STATUS_LABEL: Record<AwakeningGraphEdgeStatus, string> = {
+  archived: "В архиве",
+  draft: "Черновик",
+  published: "Опубликована",
+  review: "На проверке",
+};
+
+const GRAPH_EDGE_STATUS_CLASS: Record<AwakeningGraphEdgeStatus, string> = {
+  archived: "border-stone-500/30 bg-stone-500/10 text-stone-700 dark:text-stone-200",
+  draft: "border-zinc-500/30 bg-zinc-500/10 text-zinc-700 dark:text-zinc-200",
+  published: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200",
+  review: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200",
+};
+
+const GRAPH_EDGE_STATUSES: AwakeningGraphEdgeStatus[] = [
+  "draft",
+  "review",
+  "published",
+  "archived",
+];
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
@@ -69,6 +98,45 @@ function getRequiredFormString(formData: FormData, key: string): string {
   }
 
   return value.trim();
+}
+
+function getOptionalSourceRefsFormValue(formData: FormData, key: string): SourceRef[] {
+  const value = formData.get(key);
+  if (typeof value !== "string" || value.trim().length === 0) return [];
+
+  const parsed: unknown = JSON.parse(value);
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Form field ${key} must be a JSON array.`);
+  }
+
+  return sourceRefSchema.array().max(25).parse(parsed);
+}
+
+async function createGraphEdgeAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await createAwakeningGraphEdge({
+    fromNodeProjectionId: getRequiredFormString(formData, "fromNodeProjectionId"),
+    relationType: graphRelationTypeSchema.parse(getRequiredFormString(formData, "relationType")),
+    sourceRefs: getOptionalSourceRefsFormValue(formData, "sourceRefs"),
+    status: awakeningGraphEdgeStatusSchema.parse(getRequiredFormString(formData, "status")),
+    strength: Number(getRequiredFormString(formData, "strength")),
+    toNodeProjectionId: getRequiredFormString(formData, "toNodeProjectionId"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
+}
+
+async function updateGraphEdgeAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await updateAwakeningGraphEdge({
+    edgeId: getRequiredFormString(formData, "edgeId"),
+    relationType: graphRelationTypeSchema.parse(getRequiredFormString(formData, "relationType")),
+    sourceRefs: getOptionalSourceRefsFormValue(formData, "sourceRefs"),
+    status: awakeningGraphEdgeStatusSchema.parse(getRequiredFormString(formData, "status")),
+    strength: Number(getRequiredFormString(formData, "strength")),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
 }
 
 async function approveSuggestionAction(formData: FormData): Promise<void> {
@@ -106,6 +174,16 @@ function StatusPill({ status }: { status: AwakeningTopicSuggestionStatus }): Rea
   return (
     <span className={`rounded-full border px-3 py-1 text-xs font-medium ${STATUS_CLASS[status]}`}>
       {STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+function GraphEdgeStatusPill({ status }: { status: AwakeningGraphEdgeStatus }): React.ReactElement {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-medium ${GRAPH_EDGE_STATUS_CLASS[status]}`}
+    >
+      {GRAPH_EDGE_STATUS_LABEL[status]}
     </span>
   );
 }
@@ -341,6 +419,210 @@ function DetailPanel({
   );
 }
 
+function formatGraphEdgeNode(edge: AwakeningGraphEdge, side: "from" | "to"): string {
+  const node = side === "from" ? edge.fromNode : edge.toNode;
+  if (!node) return side === "from" ? edge.fromNodeId : edge.toNodeId;
+
+  return `${node.title} · ${node.nodeType} · ${node.status}`;
+}
+
+function GraphEdgesPanel({ edges }: { edges: AwakeningGraphEdge[] }): React.ReactElement {
+  return (
+    <section className="grid gap-5 xl:grid-cols-[24rem_1fr]">
+      <form
+        action={createGraphEdgeAction}
+        className="border-border bg-card rounded-3xl border p-5 shadow-sm"
+      >
+        <p className="font-mono text-xs tracking-[0.24em] text-amber-700 uppercase dark:text-amber-300">
+          graph edges
+        </p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight">Новая связь</h2>
+        <p className="text-muted-foreground mt-2 text-sm leading-6">
+          Создает явное ребро между двумя `node_projection` карточками. Опубликовать можно только
+          связь между опубликованными узлами.
+        </p>
+        <label className="mt-4 block text-sm font-semibold">
+          From projection id
+          <input
+            className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+            name="fromNodeProjectionId"
+            placeholder="uuid исходного узла"
+            required
+          />
+        </label>
+        <label className="mt-3 block text-sm font-semibold">
+          To projection id
+          <input
+            className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+            name="toNodeProjectionId"
+            placeholder="uuid целевого узла"
+            required
+          />
+        </label>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="text-sm font-semibold">
+            Relation
+            <select
+              className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+              defaultValue="related_to"
+              name="relationType"
+            >
+              {graphRelationTypes.map((relation) => (
+                <option key={relation} value={relation}>
+                  {relation}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm font-semibold">
+            Status
+            <select
+              className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+              defaultValue="review"
+              name="status"
+            >
+              {GRAPH_EDGE_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {GRAPH_EDGE_STATUS_LABEL[status]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="mt-3 block text-sm font-semibold">
+          Strength
+          <input
+            className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+            defaultValue="1"
+            max="1"
+            min="0"
+            name="strength"
+            required
+            step="0.01"
+            type="number"
+          />
+        </label>
+        <label className="mt-3 block text-sm font-semibold">
+          Source refs JSON
+          <textarea
+            className="border-input bg-background mt-2 min-h-24 w-full rounded-md border px-3 py-2 font-mono text-xs"
+            defaultValue="[]"
+            name="sourceRefs"
+          />
+        </label>
+        <Button className="mt-4 w-full" type="submit">
+          Создать связь
+        </Button>
+      </form>
+
+      <div className="space-y-4">
+        <div className="border-border bg-muted/30 rounded-3xl border p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">Связи карты</h2>
+              <p className="text-muted-foreground mt-1 text-sm leading-6">
+                Эти ребра первичны для публичной карты; старые refs остаются fallback.
+              </p>
+            </div>
+            <span className="rounded-2xl bg-white/70 px-4 py-2 text-2xl font-semibold dark:bg-white/10">
+              {edges.length}
+            </span>
+          </div>
+        </div>
+
+        {edges.length === 0 ? (
+          <div className="border-border bg-card text-muted-foreground rounded-3xl border p-6 text-sm">
+            Явных `graph_edges` пока нет или миграция еще не применена в Supabase.
+          </div>
+        ) : (
+          edges.map((edge) => (
+            <form
+              action={updateGraphEdgeAction}
+              className="border-border bg-card rounded-3xl border p-5 shadow-sm"
+              key={edge.id}
+            >
+              <input name="edgeId" type="hidden" value={edge.id} />
+              <div className="flex flex-wrap items-center gap-3">
+                <GraphEdgeStatusPill status={edge.status} />
+                <span className="text-muted-foreground font-mono text-xs">{edge.id}</span>
+              </div>
+              <div className="mt-4 grid gap-3 text-sm lg:grid-cols-2">
+                <div className="bg-muted/40 rounded-2xl p-3">
+                  <p className="text-muted-foreground">From</p>
+                  <p className="mt-1 font-semibold">{formatGraphEdgeNode(edge, "from")}</p>
+                </div>
+                <div className="bg-muted/40 rounded-2xl p-3">
+                  <p className="text-muted-foreground">To</p>
+                  <p className="mt-1 font-semibold">{formatGraphEdgeNode(edge, "to")}</p>
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <label className="text-sm font-semibold">
+                  Relation
+                  <select
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={edge.relationType}
+                    name="relationType"
+                  >
+                    {graphRelationTypes.map((relation) => (
+                      <option key={relation} value={relation}>
+                        {relation}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm font-semibold">
+                  Status
+                  <select
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={edge.status}
+                    name="status"
+                  >
+                    {GRAPH_EDGE_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {GRAPH_EDGE_STATUS_LABEL[status]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm font-semibold">
+                  Strength
+                  <input
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={edge.strength}
+                    max="1"
+                    min="0"
+                    name="strength"
+                    required
+                    step="0.01"
+                    type="number"
+                  />
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-semibold">
+                Source refs JSON
+                <textarea
+                  className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                  defaultValue={JSON.stringify(edge.sourceRefs, null, 2)}
+                  name="sourceRefs"
+                />
+              </label>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-muted-foreground text-xs">
+                  Обновлено: {formatDate(edge.updatedAt)}
+                </span>
+                <Button type="submit" variant="outline">
+                  Сохранить связь
+                </Button>
+              </div>
+            </form>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default async function AdminAwakeningMapPage({
   searchParams,
 }: {
@@ -352,6 +634,7 @@ export default async function AdminAwakeningMapPage({
 
   let suggestions: AwakeningTopicSuggestion[] = [];
   let selectedSuggestion: AwakeningTopicSuggestion | null = null;
+  let graphEdges: AwakeningGraphEdge[] = [];
   let accessDenied = false;
 
   try {
@@ -360,6 +643,7 @@ export default async function AdminAwakeningMapPage({
       status: statusFilter,
     });
     selectedSuggestion = selectedId ? await getAwakeningTopicSuggestion(selectedId) : null;
+    graphEdges = await listAwakeningGraphEdges({ limit: 25 });
   } catch (error) {
     if (error instanceof AdminAccessDeniedError) {
       accessDenied = true;
@@ -418,6 +702,8 @@ export default async function AdminAwakeningMapPage({
           </Button>
         </div>
       </form>
+
+      <GraphEdgesPanel edges={graphEdges} />
 
       {suggestions.length === 0 ? (
         <EmptyState statusFilter={statusFilter} />

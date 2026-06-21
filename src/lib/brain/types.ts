@@ -6,6 +6,8 @@ export const archiveNodeTypes = [
   "organization",
   "event",
   "tag",
+  "document",
+  "video",
 ] as const;
 
 export const brainNodeStatuses = ["active", "pending", "merged"] as const;
