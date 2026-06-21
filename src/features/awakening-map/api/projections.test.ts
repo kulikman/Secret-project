@@ -183,6 +183,35 @@ describe("awakening map projection admin backend", () => {
     expect(mocks.writeAuditLog).not.toHaveBeenCalled();
   });
 
+  it("blocks publishing claim projections without source refs", async () => {
+    const readQuery = createQuery({
+      maybeSingle: {
+        data: {
+          ...projectionRow,
+          node_type: "claim",
+          slug: null,
+          source_refs: [],
+        },
+        error: null,
+      },
+    });
+    const from = vi.fn().mockReturnValueOnce(readQuery);
+    mocks.createAdminClient.mockReturnValue({ from });
+
+    await expect(
+      updateAwakeningMapProjection({
+        projectionId,
+        slug: null,
+        sourceRefs: [],
+        status: "published",
+        title: "Source-first проверка",
+      })
+    ).rejects.toThrow("Published claim projections require at least one source reference.");
+
+    expect(from).toHaveBeenCalledTimes(1);
+    expect(mocks.writeAuditLog).not.toHaveBeenCalled();
+  });
+
   it("archives projections without requiring a slug", async () => {
     const archivedRow = {
       ...projectionRow,
