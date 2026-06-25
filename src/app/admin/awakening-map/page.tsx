@@ -135,6 +135,10 @@ function countJsonArray(value: unknown): number {
   return Array.isArray(value) ? value.length : 0;
 }
 
+function formatShortId(value: string): string {
+  return value.slice(0, 8);
+}
+
 function getRequiredFormString(formData: FormData, key: string): string {
   const value = formData.get(key);
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -387,8 +391,10 @@ function SuggestionCard({
 }
 
 function DetailPanel({
+  mergeTargetProjections,
   suggestion,
 }: {
+  mergeTargetProjections: AwakeningMapProjection[];
   suggestion: AwakeningTopicSuggestion | null;
 }): React.ReactElement {
   if (!suggestion) {
@@ -488,14 +494,32 @@ function DetailPanel({
           >
             <input name="suggestionId" type="hidden" value={suggestion.id} />
             <label className="text-sm font-semibold">
-              ID существующей темы `node_projection`
-              <input
+              Каноническая тема
+              <select
                 className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                disabled={mergeTargetProjections.length === 0}
                 name="promotedNodeProjectionId"
-                placeholder="uuid существующей topic-проекции"
                 required
-              />
+              >
+                <option value="">Выберите существующую topic-проекцию</option>
+                {mergeTargetProjections.map((projection) => (
+                  <option key={projection.id} value={projection.id}>
+                    {projection.title} · {projection.status} · {formatShortId(projection.id)}
+                  </option>
+                ))}
+              </select>
             </label>
+            {mergeTargetProjections.length === 0 ? (
+              <p className="mt-2 text-xs leading-5 text-sky-800 dark:text-sky-100">
+                В последних `node_projection` нет topic-карточек. Сначала примите тему в review или
+                расширьте выборку реестра.
+              </p>
+            ) : (
+              <p className="mt-2 text-xs leading-5 text-sky-800 dark:text-sky-100">
+                Выбор ограничен существующими `topic`-проекциями; сервер повторно проверит тип и
+                UUID перед merge.
+              </p>
+            )}
             <label className="mt-3 block text-sm font-semibold">
               Причина merge
               <textarea
@@ -507,7 +531,12 @@ function DetailPanel({
                 required
               />
             </label>
-            <Button className="mt-3 w-full" type="submit" variant="outline">
+            <Button
+              className="mt-3 w-full"
+              disabled={mergeTargetProjections.length === 0}
+              type="submit"
+              variant="outline"
+            >
               Смержить
             </Button>
           </form>
@@ -1108,6 +1137,10 @@ export default async function AdminAwakeningMapPage({
 
   if (accessDenied) return <AccessDeniedState />;
 
+  const mergeTargetProjections = mapProjections.filter(
+    (projection) => projection.nodeType === "topic"
+  );
+
   return (
     <section className="space-y-8">
       <div className="relative overflow-hidden rounded-[2rem] border border-stone-900/10 bg-[#f2ead7] p-8 text-stone-950 shadow-sm dark:border-white/10 dark:bg-stone-950 dark:text-stone-50">
@@ -1177,7 +1210,10 @@ export default async function AdminAwakeningMapPage({
               />
             ))}
           </div>
-          <DetailPanel suggestion={selectedSuggestion} />
+          <DetailPanel
+            mergeTargetProjections={mergeTargetProjections}
+            suggestion={selectedSuggestion}
+          />
         </div>
       )}
     </section>

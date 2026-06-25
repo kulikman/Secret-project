@@ -570,6 +570,22 @@ keeps the in-repo taxonomy as an outage/empty-table fallback.
 - [x] Update actions write audit log entries.
 - [x] Tests cover public list, fallback, admin list, update, and audit.
 
+### APP-017D: Add safe Awakening Map suggestion merge picker
+
+**Priority:** P1 | **Status:** Done
+
+**Description:** Replace raw UUID entry for suggestion merge decisions with a
+safer admin picker over existing topic projections while keeping server-side
+UUID and node-type validation as the source of truth.
+
+**Acceptance Criteria:**
+
+- [x] `/admin/awakening-map` merge form lists existing `topic` projections as selectable targets.
+- [x] Admin sees title, projection status, and short id before choosing a merge target.
+- [x] Merge submit is disabled when no topic projection target is available.
+- [x] Existing backend validation still requires a UUID and an existing `topic` projection.
+- [x] No new API route, dependency, migration, or Brain integration is added.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers
