@@ -17,10 +17,13 @@ import {
   rejectAwakeningTopicSuggestion,
   updateAwakeningGraphEdge,
   updateAwakeningMapProjection,
+  awakeningReferenceClusters,
+  getAwakeningMapThemeGroup,
   type AwakeningGraphEdge,
   type AwakeningGraphEdgeStatus,
   type AwakeningMapProjection,
   type AwakeningMapProjectionStatus,
+  type AwakeningReferenceCluster,
   type AwakeningTopicSuggestion,
   type AwakeningTopicSuggestionStatus,
 } from "@/features/awakening-map";
@@ -809,6 +812,86 @@ function MapProjectionsPanel({
   );
 }
 
+function formatClusterBounds(cluster: AwakeningReferenceCluster): string {
+  const { bounds } = cluster;
+
+  return `x ${Math.round(bounds.x * 100)}% · y ${Math.round(bounds.y * 100)}% · w ${Math.round(bounds.width * 100)}% · h ${Math.round(bounds.height * 100)}%`;
+}
+
+function ReferenceClustersPanel(): React.ReactElement {
+  return (
+    <section className="space-y-4">
+      <div className="border-border bg-muted/30 rounded-3xl border p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs tracking-[0.24em] text-amber-700 uppercase dark:text-amber-300">
+              reference hotspot registry
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight">
+              Секторы оригинальной карты
+            </h2>
+            <p className="text-muted-foreground mt-1 text-sm leading-6">
+              Read-only реестр текущих hotspot-кластеров из `reference-map.ts`. Редактируемый
+              DB-backed registry остается следующим срезом, чтобы не делать вид, что runtime меняет
+              TS-константы.
+            </p>
+          </div>
+          <span className="rounded-2xl bg-white/70 px-4 py-2 text-2xl font-semibold dark:bg-white/10">
+            {awakeningReferenceClusters.length}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        {awakeningReferenceClusters.map((cluster) => {
+          const group = getAwakeningMapThemeGroup(cluster.groupId);
+
+          return (
+            <article
+              className="border-border bg-card rounded-3xl border p-5 shadow-sm"
+              key={cluster.id}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 font-mono text-xs text-amber-700 dark:text-amber-200">
+                  {cluster.id}
+                </span>
+                <span className="rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1 text-xs text-sky-700 dark:text-sky-200">
+                  {group?.label ?? cluster.groupId}
+                </span>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold tracking-tight">{cluster.label}</h3>
+              <p className="text-muted-foreground mt-2 text-sm leading-6">{cluster.summary}</p>
+              <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+                <div className="bg-muted/40 rounded-2xl p-3">
+                  <dt className="text-muted-foreground">Bounds</dt>
+                  <dd className="mt-1 font-mono">{formatClusterBounds(cluster)}</dd>
+                </div>
+                <div className="bg-muted/40 rounded-2xl p-3">
+                  <dt className="text-muted-foreground">Related</dt>
+                  <dd className="mt-1 font-mono">
+                    {cluster.relatedClusterIds.join(", ") || "none"}
+                  </dd>
+                </div>
+              </dl>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {cluster.keywords.map((keyword) => (
+                  <span className="bg-muted rounded-full px-2.5 py-1 text-xs" key={keyword}>
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+              <p className="text-muted-foreground mt-4 font-mono text-xs">
+                slugExact: {cluster.matcher.slugExact.join(", ") || "none"} · titleIncludes:{" "}
+                {cluster.matcher.titleIncludes.join(", ") || "none"}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default async function AdminAwakeningMapPage({
   searchParams,
 }: {
@@ -894,6 +977,8 @@ export default async function AdminAwakeningMapPage({
       <GraphEdgesPanel edges={graphEdges} />
 
       <MapProjectionsPanel projections={mapProjections} />
+
+      <ReferenceClustersPanel />
 
       {suggestions.length === 0 ? (
         <EmptyState statusFilter={statusFilter} />
