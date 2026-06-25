@@ -61,6 +61,14 @@ const graph: AwakeningAtlasGraph = {
       summary: "Energy body practices",
       title: "Crystals and Cymatics",
     },
+    {
+      id: "topic-7",
+      isProjected: true,
+      nodeType: "topic",
+      slug: "unmatched-ssp-summary",
+      summary: "A node summary that mentions solar warden without matching title or slug.",
+      title: "Fleet Program",
+    },
   ],
 };
 
@@ -126,5 +134,8 @@ describe("awakening reference map", () => {
     expect(
       matches.find((entry) => entry.cluster.id === "crystals-cymatics")?.matchedNodeIds
     ).toEqual(["topic-6"]);
+    expect(
+      matches.find((entry) => entry.cluster.id === "secret-space-program")?.matchedNodeIds
+    ).toContain("topic-7");
   });
 });

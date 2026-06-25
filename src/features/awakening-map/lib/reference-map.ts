@@ -440,11 +440,13 @@ function normalizeText(value: string | null | undefined): string {
 
 function matchesNode(node: AwakeningAtlasNode, cluster: AwakeningReferenceCluster): boolean {
   const slug = normalizeText(node.slug);
+  const summary = normalizeText(node.summary);
   const title = normalizeText(node.title);
 
   return (
     cluster.matcher.slugExact.some((candidate) => candidate === slug) ||
-    cluster.matcher.titleIncludes.some((candidate) => title.includes(candidate))
+    cluster.matcher.titleIncludes.some((candidate) => title.includes(candidate)) ||
+    cluster.keywords.some((keyword) => title.includes(keyword) || summary.includes(keyword))
   );
 }
 
