@@ -439,7 +439,7 @@ function AtlasSvg({
   return (
     <svg
       role="img"
-      aria-label="Визуальная карта связей между темами Тайного Бюро"
+      aria-label="Визуальная карта связей Тайного Бюро"
       className="h-full min-h-[520px] w-full"
       viewBox="0 0 1120 740"
     >
@@ -558,7 +558,7 @@ function ReferenceMapStage({
             </p>
             <p className="mt-2 text-sm leading-6 text-stone-300">
               Выбери крупный сектор поверх оригинальной карты, чтобы подсветить связанные узлы в
-              атласе и прочитать схему по большим темам.
+              атласе и прочитать схему по крупным секторам.
             </p>
           </div>
         )}
@@ -924,7 +924,7 @@ export function AwakeningMapAtlas({
               <input
                 type="search"
                 value={query}
-                placeholder="Найти тему, источник, человека или хвост"
+                placeholder="Найти узел, источник, человека или хвост"
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.06] py-3 pr-4 pl-11 text-sm text-white transition outline-none placeholder:text-stone-500 focus:border-amber-300/50 focus:ring-3 focus:ring-amber-300/15"
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -986,7 +986,7 @@ export function AwakeningMapAtlas({
               </p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-400">
                 Крупные сектора исходной карты. Выбор кластера подсвечивает связанные узлы и
-                помогает читать карту по большим темам.
+                помогает читать карту по крупным секторам.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {clusterMatches.map((entry) => (
@@ -1031,7 +1031,7 @@ export function AwakeningMapAtlas({
                         Карта ждёт первые опубликованные узлы
                       </h3>
                       <p className="mt-3 text-sm leading-7 text-stone-400">
-                        Когда темы появятся в `node_projection` со статусом `published`, они станут
+                        Когда узлы появятся в `node_projection` со статусом `published`, они станут
                         созвездием здесь.
                       </p>
                     </div>
@@ -1059,7 +1059,7 @@ export function AwakeningMapAtlas({
                       Карта ждёт первые опубликованные узлы
                     </h3>
                     <p className="mt-3 text-sm leading-7 text-stone-400">
-                      Когда темы появятся в `node_projection` со статусом `published`, они станут
+                      Когда узлы появятся в `node_projection` со статусом `published`, они станут
                       созвездием здесь.
                     </p>
                   </div>

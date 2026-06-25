@@ -74,7 +74,7 @@ export const AWAKENING_ATLAS_NODE_TYPE_LABELS: Record<string, string> = {
   reference: "Хвост",
   source: "Источник",
   tag: "Тег",
-  topic: "Тема",
+  topic: "Узел",
   video: "Видео",
 };
 

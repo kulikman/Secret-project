@@ -329,7 +329,7 @@ function EmptyState({
       <p className="text-muted-foreground mt-2 text-sm leading-6">
         {statusFilter
           ? `В статусе "${STATUS_LABEL[statusFilter]}" ничего не найдено.`
-          : "Когда появятся предложенные темы для карты, они попадут сюда как pending."}
+          : "Когда появятся предложенные узлы для карты, они попадут сюда как pending."}
       </p>
     </div>
   );
@@ -403,10 +403,10 @@ function DetailPanel({
         <p className="font-mono text-xs tracking-[0.24em] text-amber-700 uppercase dark:text-amber-300">
           detail
         </p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight">Выберите тему</h2>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight">Выберите узел</h2>
         <p className="text-muted-foreground mt-2 text-sm leading-6">
           Здесь откроется карточка редакторского решения: принять в карту, отклонить или смержить с
-          уже существующей темой.
+          уже существующим узлом.
         </p>
       </aside>
     );
@@ -479,7 +479,7 @@ function DetailPanel({
                 maxLength={1000}
                 minLength={3}
                 name="decisionReason"
-                placeholder="Например: источники проверены, тема готова к редакторской проекции."
+                placeholder="Например: источники проверены, узел готов к редакторской проекции."
                 required
               />
             </label>
@@ -494,14 +494,14 @@ function DetailPanel({
           >
             <input name="suggestionId" type="hidden" value={suggestion.id} />
             <label className="text-sm font-semibold">
-              Каноническая тема
+              Канонический узел
               <select
                 className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
                 disabled={mergeTargetProjections.length === 0}
                 name="promotedNodeProjectionId"
                 required
               >
-                <option value="">Выберите существующую topic-проекцию</option>
+                <option value="">Выберите существующую projection-карточку</option>
                 {mergeTargetProjections.map((projection) => (
                   <option key={projection.id} value={projection.id}>
                     {projection.title} · {projection.status} · {formatShortId(projection.id)}
@@ -511,7 +511,7 @@ function DetailPanel({
             </label>
             {mergeTargetProjections.length === 0 ? (
               <p className="mt-2 text-xs leading-5 text-sky-800 dark:text-sky-100">
-                В последних `node_projection` нет topic-карточек. Сначала примите тему в review или
+                В последних `node_projection` нет topic-карточек. Сначала примите узел в review или
                 расширьте выборку реестра.
               </p>
             ) : (
@@ -527,7 +527,7 @@ function DetailPanel({
                 maxLength={1000}
                 minLength={3}
                 name="decisionReason"
-                placeholder="Например: дубль существующей темы, оставляем каноническую карточку."
+                placeholder="Например: дубль существующего узла, оставляем каноническую карточку."
                 required
               />
             </label>
@@ -553,7 +553,7 @@ function DetailPanel({
                 maxLength={1000}
                 minLength={3}
                 name="decisionReason"
-                placeholder="Например: недостаточно источников или тема уже разобрана в другой карточке."
+                placeholder="Например: недостаточно источников или узел уже разобран в другой карточке."
                 required
               />
             </label>
@@ -1152,8 +1152,8 @@ export default async function AdminAwakeningMapPage({
           <div>
             <h1 className="text-4xl font-semibold tracking-tight">Карта пробуждения</h1>
             <p className="mt-4 max-w-3xl text-lg leading-8 text-stone-700 dark:text-stone-300">
-              Очередь предложенных тем: админ проверяет контекст, источники и связи, затем принимает
-              тему в `node_projection`, отклоняет её или мержит с канонической карточкой.
+              Очередь предложенных узлов: админ проверяет контекст, источники и связи, затем
+              принимает узел в `node_projection`, отклоняет его или мержит с канонической карточкой.
             </p>
           </div>
           <div className="rounded-2xl bg-white/70 p-4 text-sm shadow-sm dark:bg-white/10">
