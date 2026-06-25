@@ -168,6 +168,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-21: `/admin/awakening-map` can create and update curated `graph_edges` after RBAC checks; publishing an edge is blocked unless both endpoint projections are already published.
 - 2026-06-21: `/admin/awakening-map` can edit, publish, and archive `node_projection` map cards after RBAC checks; publishing topic/source rows requires a slug and publishing claim rows requires at least one source ref.
 - 2026-06-25: Awakening Map reference hotspots now have a DB-backed registry in `awakening_reference_clusters`; public map rendering reads published DB clusters with static taxonomy fallback, and `/admin/awakening-map` can edit cluster bounds/matcher metadata after RBAC checks.
+- 2026-06-25: Awakening Map node details show source-first evidence status (`source-backed`, `claim needs source`, `unresolved tail`) without presenting claims as verified facts.
 
 ---
 

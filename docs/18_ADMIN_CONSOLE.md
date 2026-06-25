@@ -269,7 +269,6 @@ Acceptance criteria:
 
 ## Current Safe Next Step
 
-Next safe slice: add a safer merge picker for existing `node_projection` topics,
-surface source/verification status more clearly on the public map, and assess
-the manual Brain republish contract. Provider calls for Claude/text and visual
-AI should wait until environment/provider choices are confirmed.
+Next safe slice: add a safer merge picker for existing `node_projection` topics
+and assess the manual Brain republish contract. Provider calls for Claude/text
+and visual AI should wait until environment/provider choices are confirmed.

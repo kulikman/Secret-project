@@ -26,6 +26,11 @@ export interface AwakeningAtlasGraph {
   nodes: AwakeningAtlasNode[];
 }
 
+export type AwakeningAtlasEvidenceStatus =
+  | "claim-needs-source"
+  | "source-backed"
+  | "unresolved-tail";
+
 export interface AwakeningAtlasLayoutNode extends AwakeningAtlasNode {
   degree: number;
   isNeighbor: boolean;
@@ -109,6 +114,20 @@ export function getDefaultAtlasNodeId(graph: AwakeningAtlasGraph): string | null
   });
 
   return sorted[0]?.id ?? null;
+}
+
+export function getAwakeningAtlasEvidenceStatus(
+  graph: AwakeningAtlasGraph,
+  node: AwakeningAtlasNode
+): AwakeningAtlasEvidenceStatus {
+  if (!node.isProjected) return "unresolved-tail";
+
+  const hasSourceEdge = graph.edges.some(
+    (edge) => (edge.sourceId === node.id || edge.targetId === node.id) && edge.kind === "source"
+  );
+
+  if (hasSourceEdge) return "source-backed";
+  return node.nodeType === "claim" ? "claim-needs-source" : "source-backed";
 }
 
 function getNeighborIds(graph: AwakeningAtlasGraph, selectedNodeId: string | null): Set<string> {

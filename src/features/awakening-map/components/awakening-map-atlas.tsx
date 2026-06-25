@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import {
   AWAKENING_ATLAS_NODE_TYPE_LABELS,
   createAwakeningAtlasLayout,
+  getAwakeningAtlasEvidenceStatus,
   getDefaultAtlasNodeId,
   type AwakeningAtlasGraph,
   type AwakeningAtlasLayoutEdge,
@@ -125,6 +126,18 @@ const EMPTY_NODE_ID_SET = new Set<string>();
 const REFERENCE_MAP_IMAGE_SRC = "/awakening/reference-map.jpg";
 
 type AwakeningMapViewMode = "atlas" | "reference" | "compare";
+
+const EVIDENCE_STATUS_LABEL: Record<ReturnType<typeof getAwakeningAtlasEvidenceStatus>, string> = {
+  "claim-needs-source": "claim needs source",
+  "source-backed": "source-backed",
+  "unresolved-tail": "unresolved tail",
+};
+
+const EVIDENCE_STATUS_CLASS: Record<ReturnType<typeof getAwakeningAtlasEvidenceStatus>, string> = {
+  "claim-needs-source": "border-amber-300/30 bg-amber-300/10 text-amber-100",
+  "source-backed": "border-emerald-300/30 bg-emerald-300/10 text-emerald-100",
+  "unresolved-tail": "border-stone-300/20 bg-stone-300/10 text-stone-300",
+};
 
 function getNodeVisual(nodeType: string) {
   return NODE_VISUALS[nodeType] ?? FALLBACK_NODE_VISUAL;
@@ -587,6 +600,7 @@ function SelectedNodePanel({
 
   const href = getNodeHref(node);
   const connectedEdges = getConnectedEdges(graph, node.id);
+  const evidenceStatus = getAwakeningAtlasEvidenceStatus(graph, node);
   const group = activeCluster ? getAwakeningMapThemeGroup(activeCluster.cluster.groupId) : null;
   const relatedClusters = activeCluster
     ? getRelatedAwakeningReferenceClusters(activeCluster.cluster.id, referenceClusters)
@@ -611,6 +625,21 @@ function SelectedNodePanel({
       </div>
 
       <h2 className="mt-4 text-3xl font-semibold tracking-tight">{node.title}</h2>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span
+          className={cn(
+            "rounded-full border px-2.5 py-1 text-xs",
+            EVIDENCE_STATUS_CLASS[evidenceStatus]
+          )}
+        >
+          {EVIDENCE_STATUS_LABEL[evidenceStatus]}
+        </span>
+        {node.nodeType === "claim" ? (
+          <span className="rounded-full border border-orange-300/25 bg-orange-300/10 px-2.5 py-1 text-xs text-orange-100">
+            claim, not fact
+          </span>
+        ) : null}
+      </div>
       <p className="mt-4 text-sm leading-7 text-stone-300">
         {node.summary ??
           (node.isProjected

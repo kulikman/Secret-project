@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createAwakeningAtlasLayout,
+  getAwakeningAtlasEvidenceStatus,
   getDefaultAtlasNodeId,
   type AwakeningAtlasGraph,
 } from "./atlas-layout";
@@ -95,5 +96,59 @@ describe("awakening atlas layout", () => {
     );
 
     expect(layout.edges.map((edge) => edge.id)).toEqual(["topic-person", "topic-tail"]);
+  });
+
+  it("labels evidence status without implying truth", () => {
+    const claimNode = {
+      id: "claim-1",
+      isProjected: true,
+      nodeType: "claim",
+      summary: null,
+      title: "Source-backed claim",
+    };
+    const unsourcedClaimNode = {
+      ...claimNode,
+      id: "claim-2",
+      title: "Unsourced claim",
+    };
+    const tailNode = graph.nodes.find((node) => node.id === "tail-1");
+
+    expect(
+      getAwakeningAtlasEvidenceStatus(
+        {
+          edges: [
+            {
+              id: "claim-source",
+              kind: "source",
+              reason: null,
+              relation: "supported_by",
+              resolved: true,
+              sourceId: "claim-1",
+              targetId: "source-1",
+            },
+          ],
+          nodes: [
+            claimNode,
+            {
+              id: "source-1",
+              isProjected: true,
+              nodeType: "source",
+              summary: null,
+              title: "Source",
+            },
+          ],
+        },
+        claimNode
+      )
+    ).toBe("source-backed");
+    expect(
+      getAwakeningAtlasEvidenceStatus(
+        { edges: [], nodes: [unsourcedClaimNode] },
+        unsourcedClaimNode
+      )
+    ).toBe("claim-needs-source");
+    expect(tailNode ? getAwakeningAtlasEvidenceStatus(graph, tailNode) : null).toBe(
+      "unresolved-tail"
+    );
   });
 });
