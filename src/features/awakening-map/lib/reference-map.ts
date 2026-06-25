@@ -105,6 +105,21 @@ export const awakeningMapThemeGroups: readonly AwakeningMapThemeGroup[] = [
 
 export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = [
   {
+    bounds: { height: 0.18, width: 0.26, x: 0.34, y: 0.31 },
+    groupId: "metaphysics",
+    id: "great-awakening-core",
+    keyTopics: ["Great Awakening", "Everything is an illusion", "Optimal Timeline Reality"],
+    keywords: ["great awakening", "everything is an illusion", "optimal timeline"],
+    label: "Great Awakening Core",
+    matcher: {
+      slugExact: ["great-awakening", "optimal-timeline-reality"],
+      titleIncludes: ["great awakening", "optimal timeline", "everything is an illusion"],
+    },
+    relatedClusterIds: ["solar-flash", "secret-space-program", "qanon-earth-alliance"],
+    summary:
+      "Центральный нарратив карты: пробуждение, иллюзорность реальности и выбор оптимальной временной линии.",
+  },
+  {
     bounds: { height: 0.2, width: 0.25, x: 0.03, y: 0.04 },
     groupId: "suppressed-science",
     id: "ai-signal",
@@ -150,6 +165,21 @@ export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = 
       "Буддийско-эзотерический блок про медитацию, ригпа, бардо и освобождение от цикла перерождений.",
   },
   {
+    bounds: { height: 0.15, width: 0.18, x: 0.78, y: 0.04 },
+    groupId: "spiritual-practice",
+    id: "return-to-source",
+    keyTopics: ["Return to Source", "Oneness", "Bardo", "Meditation Rigpa"],
+    keywords: ["return to source", "oneness", "bardo", "rigpa"],
+    label: "Return to Source",
+    matcher: {
+      slugExact: ["return-to-source", "oneness"],
+      titleIncludes: ["return to source", "oneness", "bardo", "rigpa"],
+    },
+    relatedClusterIds: ["rainbow-body", "solar-flash", "lightworkers-ascension"],
+    summary:
+      "Верхний правый блок описывает возвращение к Source, oneness и практики освобождения через медитацию.",
+  },
+  {
     bounds: { height: 0.18, width: 0.24, x: 0.54, y: 0.26 },
     groupId: "psychedelics",
     id: "psychedelic-renaissance",
@@ -180,6 +210,21 @@ export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = 
       "Крупнейший техно-конспирологический кластер: тайные космические программы, технологии и информаторы.",
   },
   {
+    bounds: { height: 0.18, width: 0.25, x: 0.45, y: 0.46 },
+    groupId: "galactic-federations",
+    id: "super-federation",
+    keyTopics: ["Super Federation", "RA: Law of One", "The Galactic Federation", "Free Will"],
+    keywords: ["super federation", "galactic federation", "law of one", "free will"],
+    label: "Super Federation & Free Will",
+    matcher: {
+      slugExact: ["super-federation", "free-will"],
+      titleIncludes: ["super federation", "galactic federation", "law of one", "free will"],
+    },
+    relatedClusterIds: ["galactic-federation", "ancient-builder-race", "great-awakening-core"],
+    summary:
+      "Центрально-правый сектор про Super Federation, Law of One и идею свободной воли как космического закона.",
+  },
+  {
     bounds: { height: 0.19, width: 0.28, x: 0.03, y: 0.24 },
     groupId: "hidden-infrastructure",
     id: "dark-fleet-saturn",
@@ -207,6 +252,21 @@ export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = 
     },
     relatedClusterIds: ["vatican-occult-control", "healing-energy", "secret-space-program"],
     summary: "Политическая ветка Great Awakening: QAnon, white hats, tribunals и борьба с cabal.",
+  },
+  {
+    bounds: { height: 0.15, width: 0.25, x: 0.04, y: 0.78 },
+    groupId: "earth-conspiracy",
+    id: "cabal-deep-state",
+    keyTopics: ["Cabal", "Deep State", "Illuminati", "Council of 200"],
+    keywords: ["cabal", "deep state", "illuminati", "council of 200"],
+    label: "Cabal, Deep State & Illuminati",
+    matcher: {
+      slugExact: ["cabal", "deep-state", "illuminati"],
+      titleIncludes: ["cabal", "deep state", "illuminati", "council of 200"],
+    },
+    relatedClusterIds: ["qanon-earth-alliance", "vatican-occult-control", "secret-space-program"],
+    summary:
+      "Нижний политический слой карты: cabal, deep state, Illuminati и земные структуры скрытого управления.",
   },
   {
     bounds: { height: 0.15, width: 0.24, x: 0.16, y: 0.44 },
@@ -314,6 +374,21 @@ export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = 
       "Антарктида, подземные и подводные базы, crashed craft и hidden civilization-инфраструктура.",
   },
   {
+    bounds: { height: 0.16, width: 0.27, x: 0.25, y: 0.8 },
+    groupId: "hidden-infrastructure",
+    id: "inner-earth-civilizations",
+    keyTopics: ["Inner Earth Civilizations", "Agartha", "D.U.M.B.S", "Dulce"],
+    keywords: ["inner earth civilizations", "agartha", "dumbs", "dulce"],
+    label: "Inner Earth Civilizations",
+    matcher: {
+      slugExact: ["inner-earth-civilizations", "agartha", "dulce"],
+      titleIncludes: ["inner earth", "agartha", "d.u.m.b", "dulce"],
+    },
+    relatedClusterIds: ["antarctica-inner-earth", "ancient-aliens", "dark-fleet-saturn"],
+    summary:
+      "Нижний сектор про внутреннюю Землю, Agartha, D.U.M.B.S и подземные базы как скрытую цивилизационную сеть.",
+  },
+  {
     bounds: { height: 0.14, width: 0.19, x: 0.69, y: 0.66 },
     groupId: "psychedelics",
     id: "entheogens",
@@ -326,6 +401,21 @@ export const awakeningReferenceClusters: readonly AwakeningReferenceCluster[] = 
     },
     relatedClusterIds: ["psychedelic-renaissance", "lightworkers-ascension", "rainbow-body"],
     summary: "Шаманизм и энтеогены поданы как древний путь доступа к тем же многомерным истинам.",
+  },
+  {
+    bounds: { height: 0.16, width: 0.21, x: 0.75, y: 0.58 },
+    groupId: "suppressed-science",
+    id: "crystals-cymatics",
+    keyTopics: ["Crystals", "Cymatics", "Chakras", "Merkaba"],
+    keywords: ["crystals", "cymatics", "chakras", "merkaba"],
+    label: "Crystals, Cymatics & Energy Body",
+    matcher: {
+      slugExact: ["crystals", "cymatics", "chakras", "merkaba"],
+      titleIncludes: ["crystals", "cymatics", "chakras", "merkaba"],
+    },
+    relatedClusterIds: ["healing-energy", "lightworkers-ascension", "entheogens"],
+    summary:
+      "Правый нижний energy-body блок: crystals, cymatics, chakras и merkaba как язык тонких практик.",
   },
   {
     bounds: { height: 0.17, width: 0.22, x: 0.44, y: 0.2 },
