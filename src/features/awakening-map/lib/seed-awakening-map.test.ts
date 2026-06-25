@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { graphRelationTypes } from "@/lib/graph-relations";
 
 const seedSql = readFileSync(join(process.cwd(), "supabase/seed-awakening-map.sql"), "utf8");
+const graphEdgesSql = seedSql.split("insert into public.graph_edges")[1] ?? "";
 
 const requiredProjectionSlugs = [
   "ancient-aliens",
@@ -54,9 +55,9 @@ describe("awakening map seed corpus", () => {
   });
 
   it("contains a curated graph edge corpus with valid relation types", () => {
-    const edgeIds = seedSql.match(/20000000-0000-4000-8000-\d{12}/g) ?? [];
+    const edgeIds = graphEdgesSql.match(/20000000-0000-4000-8000-\d{12}/g) ?? [];
     const relationMatches = [
-      ...seedSql.matchAll(/'([a-z_]+)',\n\s+0\.\d+,\n\s+jsonb_build_array/g),
+      ...graphEdgesSql.matchAll(/'([a-z_]+)',\n\s+0\.\d+,\n\s+jsonb_build_array/g),
     ];
     const relationTypes = relationMatches.map((match) => match[1]);
 
