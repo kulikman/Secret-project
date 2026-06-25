@@ -13,6 +13,7 @@ export type AuditAction =
   | "admin.awakening_graph_edge_created"
   | "admin.awakening_graph_edge_updated"
   | "admin.awakening_projection_updated"
+  | "admin.awakening_reference_cluster_updated"
   | "admin.awakening_topic_reviewed"
   | "admin.role_assigned"
   | "admin.role_revoked"

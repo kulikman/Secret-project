@@ -262,6 +262,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      awakening_reference_clusters: {
+        Row: {
+          bounds: Json;
+          created_at: string;
+          group_id: string;
+          id: string;
+          key_topics: Json;
+          keywords: Json;
+          label: string;
+          matcher: Json;
+          related_cluster_ids: Json;
+          status: string;
+          summary: string;
+          updated_at: string;
+        };
+        Insert: {
+          bounds: Json;
+          created_at?: string;
+          group_id: string;
+          id: string;
+          key_topics?: Json;
+          keywords?: Json;
+          label: string;
+          matcher?: Json;
+          related_cluster_ids?: Json;
+          status?: string;
+          summary: string;
+          updated_at?: string;
+        };
+        Update: {
+          bounds?: Json;
+          created_at?: string;
+          group_id?: string;
+          id?: string;
+          key_topics?: Json;
+          keywords?: Json;
+          label?: string;
+          matcher?: Json;
+          related_cluster_ids?: Json;
+          status?: string;
+          summary?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       awakening_topic_suggestions: {
         Row: {
           created_at: string;

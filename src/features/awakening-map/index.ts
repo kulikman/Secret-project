@@ -38,6 +38,20 @@ export type {
   ListAwakeningMapProjectionsInput,
   UpdateAwakeningMapProjectionInput,
 } from "./api/projections";
+export {
+  awakeningReferenceClusterStatusSchema,
+  listAdminAwakeningReferenceClusters,
+  listAwakeningReferenceClustersSchema,
+  listPublishedAwakeningReferenceClusters,
+  updateAwakeningReferenceCluster,
+  updateAwakeningReferenceClusterSchema,
+} from "./api/reference-clusters";
+export type {
+  AdminAwakeningReferenceCluster,
+  AwakeningReferenceClusterStatus,
+  ListAwakeningReferenceClustersInput,
+  UpdateAwakeningReferenceClusterInput,
+} from "./api/reference-clusters";
 export { AwakeningMapAtlas } from "./components/awakening-map-atlas";
 export type {
   AwakeningTopicSuggestion,
@@ -72,6 +86,7 @@ export {
   awakeningReferenceBoundsSchema,
   awakeningReferenceClusterSchema,
   awakeningReferenceClusters,
+  awakeningReferenceMatcherSchema,
   getAwakeningMapThemeGroup,
   getAwakeningReferenceCluster,
   getRelatedAwakeningReferenceClusters,

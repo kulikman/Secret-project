@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { AwakeningMapAtlas } from "@/features/awakening-map";
+import {
+  AwakeningMapAtlas,
+  listPublishedAwakeningReferenceClusters,
+  awakeningReferenceClusters,
+  type AwakeningReferenceCluster,
+} from "@/features/awakening-map";
 import { listPublishedMapGraph } from "@/features/knowledge";
 import type { PublishedMapGraph } from "@/features/knowledge";
 
@@ -26,14 +31,25 @@ async function loadInitialGraph(): Promise<PublishedMapGraph> {
   }
 }
 
+async function loadReferenceClusters(): Promise<readonly AwakeningReferenceCluster[]> {
+  try {
+    return await listPublishedAwakeningReferenceClusters();
+  } catch {
+    return awakeningReferenceClusters;
+  }
+}
+
 export default async function AwakeningMapPage(): Promise<React.ReactElement> {
-  const graph = await loadInitialGraph();
+  const [graph, referenceClusters] = await Promise.all([
+    loadInitialGraph(),
+    loadReferenceClusters(),
+  ]);
 
   return (
     <main className="bg-[#f5efe3] px-4 py-8 text-stone-950 sm:px-6 lg:px-8 dark:bg-stone-950">
       <div className="mx-auto w-full max-w-7xl">
         <Breadcrumbs className="mb-6 text-stone-600 dark:text-stone-400" />
-        <AwakeningMapAtlas initialGraph={graph} />
+        <AwakeningMapAtlas initialGraph={graph} referenceClusters={referenceClusters} />
       </div>
     </main>
   );

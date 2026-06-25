@@ -552,6 +552,26 @@ publication, and archive states.
 
 ---
 
+### APP-017C: Add DB-backed Awakening Map hotspot registry
+
+**Priority:** P0 | **Status:** Done
+
+**Description:** Move original-map hotspot/reference clusters from static-only
+taxonomy toward an App DB registry that admins can curate while the public UI
+keeps the in-repo taxonomy as an outage/empty-table fallback.
+
+**Acceptance Criteria:**
+
+- [x] New migration creates `awakening_reference_clusters` with RLS.
+- [x] Published clusters are publicly readable; writes stay service-role only.
+- [x] Seed file upserts the curated in-repo taxonomy into the DB registry.
+- [x] `/awakening-map` reads published DB clusters and falls back to static clusters.
+- [x] `/admin/awakening-map` lists and updates hotspot clusters after RBAC checks.
+- [x] Update actions write audit log entries.
+- [x] Tests cover public list, fallback, admin list, update, and audit.
+
+---
+
 ### APP-018: Upgrade public topic pages into projection dossiers
 
 **Priority:** P0 | **Status:** Done

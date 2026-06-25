@@ -4,9 +4,14 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { graphRelationTypes } from "@/lib/graph-relations";
+import { awakeningReferenceClusters } from "./reference-map";
 
 const seedSql = readFileSync(join(process.cwd(), "supabase/seed-awakening-map.sql"), "utf8");
 const graphEdgesSql = seedSql.split("insert into public.graph_edges")[1] ?? "";
+const referenceClusterSeedSql = readFileSync(
+  join(process.cwd(), "supabase/seed-awakening-reference-clusters.sql"),
+  "utf8"
+);
 
 const requiredProjectionSlugs = [
   "ancient-aliens",
@@ -72,5 +77,14 @@ describe("awakening map seed corpus", () => {
     for (const relationType of relationTypes) {
       expect(graphRelationTypes).toContain(relationType as (typeof graphRelationTypes)[number]);
     }
+  });
+
+  it("keeps the DB hotspot seed aligned with the curated reference taxonomy", () => {
+    for (const cluster of awakeningReferenceClusters) {
+      expect(referenceClusterSeedSql).toContain(`'${cluster.id}'`);
+    }
+
+    expect(referenceClusterSeedSql).toContain("insert into public.awakening_reference_clusters");
+    expect(referenceClusterSeedSql).toContain("on conflict (id) do update");
   });
 });

@@ -18,14 +18,22 @@ import {
   updateAwakeningGraphEdge,
   updateAwakeningMapProjection,
   awakeningReferenceClusters,
+  awakeningReferenceBoundsSchema,
+  awakeningReferenceClusterStatusSchema,
+  awakeningReferenceMatcherSchema,
+  awakeningMapThemeGroupIdSchema,
   getAwakeningMapThemeGroup,
+  listAdminAwakeningReferenceClusters,
   type AwakeningGraphEdge,
   type AwakeningGraphEdgeStatus,
   type AwakeningMapProjection,
   type AwakeningMapProjectionStatus,
+  type AdminAwakeningReferenceCluster,
   type AwakeningReferenceCluster,
+  type AwakeningReferenceClusterStatus,
   type AwakeningTopicSuggestion,
   type AwakeningTopicSuggestionStatus,
+  updateAwakeningReferenceCluster,
 } from "@/features/awakening-map";
 import { AdminAccessDeniedError } from "@/lib/admin-auth";
 import { ROUTES } from "@/lib/constants";
@@ -87,6 +95,20 @@ const MAP_PROJECTION_STATUSES: AwakeningMapProjectionStatus[] = [
   "archived",
 ];
 
+const REFERENCE_CLUSTER_STATUS_LABEL: Record<AwakeningReferenceClusterStatus, string> = {
+  archived: "В архиве",
+  draft: "Черновик",
+  published: "Опубликован",
+  review: "На проверке",
+};
+
+const REFERENCE_CLUSTER_STATUSES: AwakeningReferenceClusterStatus[] = [
+  "draft",
+  "review",
+  "published",
+  "archived",
+];
+
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -142,6 +164,32 @@ function getOptionalSourceRefsFormValue(formData: FormData, key: string): Source
   return sourceRefSchema.array().max(25).parse(parsed);
 }
 
+function getJsonArrayFormValue(formData: FormData, key: string): string[] {
+  const value = formData.get(key);
+  if (typeof value !== "string" || value.trim().length === 0) return [];
+
+  const parsed: unknown = JSON.parse(value);
+  if (!Array.isArray(parsed) || parsed.some((item) => typeof item !== "string")) {
+    throw new Error(`Form field ${key} must be a JSON string array.`);
+  }
+
+  return parsed.map((item) => item.trim()).filter(Boolean);
+}
+
+function getJsonObjectFormValue(formData: FormData, key: string): Record<string, unknown> {
+  const value = formData.get(key);
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`Missing required JSON object field: ${key}`);
+  }
+
+  const parsed: unknown = JSON.parse(value);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error(`Form field ${key} must be a JSON object.`);
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
 async function createGraphEdgeAction(formData: FormData): Promise<void> {
   "use server";
 
@@ -179,6 +227,25 @@ async function updateMapProjectionAction(formData: FormData): Promise<void> {
     status: awakeningMapProjectionStatusSchema.parse(getRequiredFormString(formData, "status")),
     summary: getOptionalFormString(formData, "summary"),
     title: getRequiredFormString(formData, "title"),
+  });
+  revalidatePath(ROUTES.adminAwakeningMap);
+  revalidatePath(ROUTES.awakeningMap);
+}
+
+async function updateReferenceClusterAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await updateAwakeningReferenceCluster({
+    bounds: awakeningReferenceBoundsSchema.parse(getJsonObjectFormValue(formData, "bounds")),
+    clusterId: getRequiredFormString(formData, "clusterId"),
+    groupId: awakeningMapThemeGroupIdSchema.parse(getRequiredFormString(formData, "groupId")),
+    keyTopics: getJsonArrayFormValue(formData, "keyTopics"),
+    keywords: getJsonArrayFormValue(formData, "keywords"),
+    label: getRequiredFormString(formData, "label"),
+    matcher: awakeningReferenceMatcherSchema.parse(getJsonObjectFormValue(formData, "matcher")),
+    relatedClusterIds: getJsonArrayFormValue(formData, "relatedClusterIds"),
+    status: awakeningReferenceClusterStatusSchema.parse(getRequiredFormString(formData, "status")),
+    summary: getRequiredFormString(formData, "summary"),
   });
   revalidatePath(ROUTES.adminAwakeningMap);
   revalidatePath(ROUTES.awakeningMap);
@@ -818,7 +885,25 @@ function formatClusterBounds(cluster: AwakeningReferenceCluster): string {
   return `x ${Math.round(bounds.x * 100)}% · y ${Math.round(bounds.y * 100)}% · w ${Math.round(bounds.width * 100)}% · h ${Math.round(bounds.height * 100)}%`;
 }
 
-function ReferenceClustersPanel(): React.ReactElement {
+function ReferenceClusterStatusPill({
+  status,
+}: {
+  status: AwakeningReferenceClusterStatus;
+}): React.ReactElement {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-medium ${GRAPH_EDGE_STATUS_CLASS[status]}`}
+    >
+      {REFERENCE_CLUSTER_STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+function ReferenceClustersPanel({
+  clusters,
+}: {
+  clusters: AdminAwakeningReferenceCluster[];
+}): React.ReactElement {
   return (
     <section className="space-y-4">
       <div className="border-border bg-muted/30 rounded-3xl border p-5">
@@ -831,27 +916,29 @@ function ReferenceClustersPanel(): React.ReactElement {
               Секторы оригинальной карты
             </h2>
             <p className="text-muted-foreground mt-1 text-sm leading-6">
-              Read-only реестр текущих hotspot-кластеров из `reference-map.ts`. Редактируемый
-              DB-backed registry остается следующим срезом, чтобы не делать вид, что runtime меняет
-              TS-константы.
+              DB-backed registry hotspot-кластеров. Public UI читает опубликованные строки из App DB
+              и сохраняет in-repo taxonomy как fallback при пустой таблице или outage.
             </p>
           </div>
           <span className="rounded-2xl bg-white/70 px-4 py-2 text-2xl font-semibold dark:bg-white/10">
-            {awakeningReferenceClusters.length}
+            {clusters.length}
           </span>
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        {awakeningReferenceClusters.map((cluster) => {
+        {clusters.map((cluster) => {
           const group = getAwakeningMapThemeGroup(cluster.groupId);
 
           return (
-            <article
+            <form
+              action={updateReferenceClusterAction}
               className="border-border bg-card rounded-3xl border p-5 shadow-sm"
               key={cluster.id}
             >
+              <input name="clusterId" type="hidden" value={cluster.id} />
               <div className="flex flex-wrap items-center gap-2">
+                <ReferenceClusterStatusPill status={cluster.status} />
                 <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 font-mono text-xs text-amber-700 dark:text-amber-200">
                   {cluster.id}
                 </span>
@@ -859,32 +946,126 @@ function ReferenceClustersPanel(): React.ReactElement {
                   {group?.label ?? cluster.groupId}
                 </span>
               </div>
-              <h3 className="mt-3 text-lg font-semibold tracking-tight">{cluster.label}</h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-6">{cluster.summary}</p>
-              <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
-                <div className="bg-muted/40 rounded-2xl p-3">
-                  <dt className="text-muted-foreground">Bounds</dt>
-                  <dd className="mt-1 font-mono">{formatClusterBounds(cluster)}</dd>
-                </div>
-                <div className="bg-muted/40 rounded-2xl p-3">
-                  <dt className="text-muted-foreground">Related</dt>
-                  <dd className="mt-1 font-mono">
-                    {cluster.relatedClusterIds.join(", ") || "none"}
-                  </dd>
-                </div>
-              </dl>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {cluster.keywords.map((keyword) => (
-                  <span className="bg-muted rounded-full px-2.5 py-1 text-xs" key={keyword}>
-                    {keyword}
-                  </span>
-                ))}
+
+              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_12rem]">
+                <label className="text-sm font-semibold">
+                  Label
+                  <input
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={cluster.label}
+                    maxLength={160}
+                    name="label"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold">
+                  Status
+                  <select
+                    className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                    defaultValue={cluster.status}
+                    name="status"
+                  >
+                    {REFERENCE_CLUSTER_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {REFERENCE_CLUSTER_STATUS_LABEL[status]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
-              <p className="text-muted-foreground mt-4 font-mono text-xs">
-                slugExact: {cluster.matcher.slugExact.join(", ") || "none"} · titleIncludes:{" "}
-                {cluster.matcher.titleIncludes.join(", ") || "none"}
-              </p>
-            </article>
+
+              <label className="mt-3 block text-sm font-semibold">
+                Group
+                <select
+                  className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
+                  defaultValue={cluster.groupId}
+                  name="groupId"
+                >
+                  {awakeningReferenceClusters
+                    .map((candidate) => candidate.groupId)
+                    .filter((groupId, index, all) => all.indexOf(groupId) === index)
+                    .map((groupId) => (
+                      <option key={groupId} value={groupId}>
+                        {getAwakeningMapThemeGroup(groupId)?.label ?? groupId}
+                      </option>
+                    ))}
+                </select>
+              </label>
+
+              <label className="mt-3 block text-sm font-semibold">
+                Summary
+                <textarea
+                  className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                  defaultValue={cluster.summary}
+                  maxLength={320}
+                  name="summary"
+                  required
+                />
+              </label>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <label className="text-sm font-semibold">
+                  Bounds JSON
+                  <textarea
+                    className="border-input bg-background mt-2 min-h-24 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                    defaultValue={JSON.stringify(cluster.bounds, null, 2)}
+                    name="bounds"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold">
+                  Matcher JSON
+                  <textarea
+                    className="border-input bg-background mt-2 min-h-24 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                    defaultValue={JSON.stringify(cluster.matcher, null, 2)}
+                    name="matcher"
+                    required
+                  />
+                </label>
+              </div>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                <label className="text-sm font-semibold">
+                  Key topics JSON
+                  <textarea
+                    className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                    defaultValue={JSON.stringify(cluster.keyTopics, null, 2)}
+                    name="keyTopics"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold">
+                  Keywords JSON
+                  <textarea
+                    className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                    defaultValue={JSON.stringify(cluster.keywords, null, 2)}
+                    name="keywords"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold">
+                  Related ids JSON
+                  <textarea
+                    className="border-input bg-background mt-2 min-h-20 w-full rounded-md border px-3 py-2 font-mono text-xs"
+                    defaultValue={JSON.stringify(cluster.relatedClusterIds, null, 2)}
+                    name="relatedClusterIds"
+                  />
+                </label>
+              </div>
+
+              <div className="text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <span>{formatClusterBounds(cluster)}</span>
+                <span>
+                  Обновлено: {cluster.updatedAt ? formatDate(cluster.updatedAt) : "static fallback"}
+                </span>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button type="submit" variant="outline">
+                  Сохранить сектор
+                </Button>
+              </div>
+            </form>
           );
         })}
       </div>
@@ -905,6 +1086,7 @@ export default async function AdminAwakeningMapPage({
   let selectedSuggestion: AwakeningTopicSuggestion | null = null;
   let graphEdges: AwakeningGraphEdge[] = [];
   let mapProjections: AwakeningMapProjection[] = [];
+  let referenceClusters: AdminAwakeningReferenceCluster[] = [];
   let accessDenied = false;
 
   try {
@@ -915,6 +1097,7 @@ export default async function AdminAwakeningMapPage({
     selectedSuggestion = selectedId ? await getAwakeningTopicSuggestion(selectedId) : null;
     graphEdges = await listAwakeningGraphEdges({ limit: 25 });
     mapProjections = await listAwakeningMapProjections({ limit: 50 });
+    referenceClusters = await listAdminAwakeningReferenceClusters({ limit: 100 });
   } catch (error) {
     if (error instanceof AdminAccessDeniedError) {
       accessDenied = true;
@@ -978,7 +1161,7 @@ export default async function AdminAwakeningMapPage({
 
       <MapProjectionsPanel projections={mapProjections} />
 
-      <ReferenceClustersPanel />
+      <ReferenceClustersPanel clusters={referenceClusters} />
 
       {suggestions.length === 0 ? (
         <EmptyState statusFilter={statusFilter} />

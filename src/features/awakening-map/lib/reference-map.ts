@@ -457,28 +457,31 @@ export function getAwakeningMapThemeGroup(
 }
 
 export function getAwakeningReferenceCluster(
-  clusterId: string
+  clusterId: string,
+  clusters: readonly AwakeningReferenceCluster[] = awakeningReferenceClusters
 ): AwakeningReferenceCluster | undefined {
-  return awakeningReferenceClusters.find((cluster) => cluster.id === clusterId);
+  return clusters.find((cluster) => cluster.id === clusterId);
 }
 
 export function getRelatedAwakeningReferenceClusters(
-  clusterId: string
+  clusterId: string,
+  clusters: readonly AwakeningReferenceCluster[] = awakeningReferenceClusters
 ): AwakeningReferenceCluster[] {
-  const cluster = getAwakeningReferenceCluster(clusterId);
+  const cluster = getAwakeningReferenceCluster(clusterId, clusters);
   if (!cluster) return [];
 
   return cluster.relatedClusterIds
-    .map((relatedClusterId) => getAwakeningReferenceCluster(relatedClusterId))
+    .map((relatedClusterId) => getAwakeningReferenceCluster(relatedClusterId, clusters))
     .filter((relatedCluster): relatedCluster is AwakeningReferenceCluster =>
       Boolean(relatedCluster)
     );
 }
 
 export function matchAwakeningReferenceClusters(
-  graph: AwakeningAtlasGraph
+  graph: AwakeningAtlasGraph,
+  clusters: readonly AwakeningReferenceCluster[] = awakeningReferenceClusters
 ): AwakeningReferenceClusterMatch[] {
-  return awakeningReferenceClusters.map((cluster) => ({
+  return clusters.map((cluster) => ({
     cluster,
     matchedNodeIds: graph.nodes.filter((node) => matchesNode(node, cluster)).map((node) => node.id),
   }));

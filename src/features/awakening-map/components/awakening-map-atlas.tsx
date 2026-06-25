@@ -27,9 +27,11 @@ import {
   type AwakeningAtlasNode,
 } from "../lib/atlas-layout";
 import {
+  awakeningReferenceClusters,
   getAwakeningMapThemeGroup,
   getRelatedAwakeningReferenceClusters,
   matchAwakeningReferenceClusters,
+  type AwakeningReferenceCluster,
   type AwakeningReferenceClusterMatch,
 } from "../lib/reference-map";
 
@@ -47,6 +49,7 @@ type ApiEnvelope<TData> =
 
 interface AwakeningMapAtlasProps {
   initialGraph: AwakeningAtlasGraph;
+  referenceClusters?: readonly AwakeningReferenceCluster[];
 }
 
 interface NodeVisual {
@@ -166,8 +169,11 @@ function getNodeTypes(graph: AwakeningAtlasGraph): string[] {
   );
 }
 
-function getReferenceClusterMatches(graph: AwakeningAtlasGraph): AwakeningReferenceClusterMatch[] {
-  return matchAwakeningReferenceClusters(graph)
+function getReferenceClusterMatches(
+  graph: AwakeningAtlasGraph,
+  referenceClusters: readonly AwakeningReferenceCluster[]
+): AwakeningReferenceClusterMatch[] {
+  return matchAwakeningReferenceClusters(graph, referenceClusters)
     .filter((entry) => entry.matchedNodeIds.length > 0)
     .sort((left, right) => right.matchedNodeIds.length - left.matchedNodeIds.length);
 }
@@ -556,6 +562,7 @@ function SelectedNodePanel({
   onSelectCluster,
   onLoadNeighbors,
   onReset,
+  referenceClusters,
 }: {
   activeCluster: AwakeningReferenceClusterMatch | null;
   graph: AwakeningAtlasGraph;
@@ -564,6 +571,7 @@ function SelectedNodePanel({
   onSelectCluster: (clusterId: string) => void;
   onLoadNeighbors: (node: AwakeningAtlasNode) => void;
   onReset: () => void;
+  referenceClusters: readonly AwakeningReferenceCluster[];
 }): React.ReactElement {
   if (!node) {
     return (
@@ -581,7 +589,7 @@ function SelectedNodePanel({
   const connectedEdges = getConnectedEdges(graph, node.id);
   const group = activeCluster ? getAwakeningMapThemeGroup(activeCluster.cluster.groupId) : null;
   const relatedClusters = activeCluster
-    ? getRelatedAwakeningReferenceClusters(activeCluster.cluster.id)
+    ? getRelatedAwakeningReferenceClusters(activeCluster.cluster.id, referenceClusters)
     : [];
 
   return (
@@ -722,7 +730,10 @@ function SelectedNodePanel({
   );
 }
 
-export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): React.ReactElement {
+export function AwakeningMapAtlas({
+  initialGraph,
+  referenceClusters = awakeningReferenceClusters,
+}: AwakeningMapAtlasProps): React.ReactElement {
   const [graph, setGraph] = useState<AwakeningAtlasGraph>(
     initialGraph.nodes.length > 0 ? initialGraph : EMPTY_GRAPH
   );
@@ -737,7 +748,7 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query);
   const visibleGraph = getVisibleGraph({ graph, nodeTypeFilter, query: deferredQuery });
-  const clusterMatches = getReferenceClusterMatches(graph);
+  const clusterMatches = getReferenceClusterMatches(graph, referenceClusters);
   const explicitCluster = getClusterMatchById(clusterMatches, selectedClusterId);
   const inferredCluster = getClusterMatchForNode(clusterMatches, selectedNodeId);
   const activeCluster = explicitCluster ?? inferredCluster;
@@ -1054,6 +1065,7 @@ export function AwakeningMapAtlas({ initialGraph }: AwakeningMapAtlasProps): Rea
             onSelectCluster={selectCluster}
             onLoadNeighbors={loadNeighbors}
             onReset={resetGraph}
+            referenceClusters={referenceClusters}
           />
 
           <div className="mt-4 grid gap-3 rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 text-stone-200">
