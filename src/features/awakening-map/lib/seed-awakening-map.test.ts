@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { graphRelationTypes } from "@/lib/graph-relations";
+
 const seedSql = readFileSync(join(process.cwd(), "supabase/seed-awakening-map.sql"), "utf8");
 
 const requiredProjectionSlugs = [
@@ -49,5 +51,25 @@ describe("awakening map seed corpus", () => {
     expect(seedSql).toContain(
       "jsonb_build_array(jsonb_build_object('nodeId', 'seed:source:tz-map', 'title', 'ТЗ интерактивной карты'))"
     );
+  });
+
+  it("contains a curated graph edge corpus with valid relation types", () => {
+    const edgeIds = seedSql.match(/20000000-0000-4000-8000-\d{12}/g) ?? [];
+    const relationMatches = [
+      ...seedSql.matchAll(/'([a-z_]+)',\n\s+0\.\d+,\n\s+jsonb_build_array/g),
+    ];
+    const relationTypes = relationMatches.map((match) => match[1]);
+
+    expect(new Set(edgeIds).size).toBeGreaterThanOrEqual(28);
+    expect(relationTypes).toContain("contradicts");
+    expect(relationTypes).toContain("derived_from");
+    expect(relationTypes).toContain("expands");
+    expect(relationTypes).toContain("mentions");
+    expect(relationTypes).toContain("related_to");
+    expect(relationTypes).toContain("supported_by");
+
+    for (const relationType of relationTypes) {
+      expect(graphRelationTypes).toContain(relationType as (typeof graphRelationTypes)[number]);
+    }
   });
 });
