@@ -586,6 +586,22 @@ UUID and node-type validation as the source of truth.
 - [x] Existing backend validation still requires a UUID and an existing `topic` projection.
 - [x] No new API route, dependency, migration, or Brain integration is added.
 
+### APP-017E: Add Obsidian-style Awakening Map visual layer
+
+**Priority:** P1 | **Status:** Done
+
+**Description:** Shift the public atlas toward an Obsidian-like graph workspace
+without changing the projection graph data contract or adding a rendering
+dependency.
+
+**Acceptance Criteria:**
+
+- [x] Atlas canvas uses a dark dot-grid workspace with orbit rings and subtle graph glow.
+- [x] Selected and neighboring nodes have stronger visual focus while non-relevant graph elements can dim.
+- [x] Edges use source-aware styling and highlight behavior without changing edge data.
+- [x] Header, filters, view-mode controls, legend, and side panel match the graph workspace style.
+- [x] No route, API, database, Perplexity, or navigation changes are included in this visual-only epic.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers

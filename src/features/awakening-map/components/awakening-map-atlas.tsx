@@ -222,6 +222,10 @@ function formatDate(value?: string | null): string {
   return new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium" }).format(new Date(value));
 }
 
+function formatSvgNumber(value: number): string {
+  return value.toFixed(3).replace(/\.?0+$/, "");
+}
+
 function NodeTypePill({
   active,
   children,
@@ -236,10 +240,10 @@ function NodeTypePill({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        "rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors",
         active
-          ? "border-amber-300/70 bg-amber-300/20 text-amber-100"
-          : "border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/25 hover:text-white"
+          ? "border-sky-300/70 bg-sky-300/15 text-sky-50 shadow-sky-500/20"
+          : "border-white/10 bg-[#141821]/80 text-stone-300 hover:border-sky-200/35 hover:text-white"
       )}
     >
       {children}
@@ -263,17 +267,17 @@ function ClusterPill({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors",
         active
-          ? "border-teal-300/70 bg-teal-300/15 text-teal-100"
-          : "border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/25 hover:text-white"
+          ? "border-cyan-300/70 bg-cyan-300/15 text-cyan-100 shadow-cyan-500/20"
+          : "border-white/10 bg-[#141821]/80 text-stone-300 hover:border-cyan-200/35 hover:text-white"
       )}
     >
       <span>{label}</span>
       <span
         className={cn(
           "rounded-full px-2 py-0.5 text-[10px]",
-          active ? "bg-teal-100/15 text-teal-50" : "bg-white/10 text-stone-400"
+          active ? "bg-cyan-100/15 text-cyan-50" : "bg-white/10 text-stone-400"
         )}
       >
         {count}
@@ -298,16 +302,14 @@ function ViewModeButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-w-[10rem] flex-1 flex-col rounded-[1.4rem] border px-4 py-3 text-left transition-colors",
+        "flex min-w-[10rem] flex-1 flex-col rounded-[1.4rem] border px-4 py-3 text-left shadow-sm transition-colors",
         active
-          ? "border-amber-300/50 bg-amber-300/10 text-amber-50"
-          : "border-white/10 bg-white/[0.04] text-stone-200 hover:border-white/20 hover:bg-white/[0.07]"
+          ? "border-sky-300/50 bg-sky-300/10 text-sky-50 shadow-sky-500/10"
+          : "border-white/10 bg-[#141821]/80 text-stone-200 hover:border-white/20 hover:bg-white/[0.07]"
       )}
     >
       <span className="text-sm font-semibold">{label}</span>
-      <span
-        className={cn("mt-1 text-xs leading-5", active ? "text-amber-100/80" : "text-stone-500")}
-      >
+      <span className={cn("mt-1 text-xs leading-5", active ? "text-sky-100/80" : "text-stone-500")}>
         {description}
       </span>
     </button>
@@ -344,21 +346,89 @@ function AtlasLegend(): React.ReactElement {
   );
 }
 
-function AtlasEdge({ edge }: { edge: AwakeningAtlasLayoutEdge }): React.ReactElement {
+function AtlasBackdrop(): React.ReactElement {
+  return (
+    <>
+      <defs>
+        <radialGradient id="awakening-atlas-core" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(59, 130, 246, 0.22)" />
+          <stop offset="42%" stopColor="rgba(14, 165, 233, 0.08)" />
+          <stop offset="100%" stopColor="rgba(2, 6, 23, 0)" />
+        </radialGradient>
+        <radialGradient id="awakening-atlas-node-heat" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
+          <stop offset="70%" stopColor="rgba(125, 211, 252, 0.04)" />
+          <stop offset="100%" stopColor="rgba(125, 211, 252, 0)" />
+        </radialGradient>
+        <pattern id="awakening-atlas-dot-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.1" fill="rgba(148, 163, 184, 0.28)" />
+        </pattern>
+        <filter id="awakening-atlas-soft-glow" x="-45%" y="-45%" width="190%" height="190%">
+          <feGaussianBlur stdDeviation="5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <rect width="1120" height="740" fill="#080b12" />
+      <rect width="1120" height="740" fill="url(#awakening-atlas-dot-grid)" opacity="0.55" />
+      <rect width="1120" height="740" fill="url(#awakening-atlas-core)" />
+      <path
+        d="M82 368 C236 254 330 492 498 348 S790 244 1036 388"
+        fill="none"
+        stroke="rgba(56,189,248,0.08)"
+        strokeWidth="52"
+      />
+      {[148, 244, 354].map((radius) => (
+        <ellipse
+          key={radius}
+          cx="560"
+          cy="370"
+          rx={radius}
+          ry={radius * 0.76}
+          fill="none"
+          stroke="rgba(148,163,184,0.14)"
+          strokeDasharray={radius === 354 ? "2 12" : "1 10"}
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cx="560" cy="370" r="176" fill="url(#awakening-atlas-node-heat)" opacity="0.55" />
+    </>
+  );
+}
+
+function AtlasEdge({
+  edge,
+  hasHighlight,
+  highlightedNodeIds,
+}: {
+  edge: AwakeningAtlasLayoutEdge;
+  hasHighlight: boolean;
+  highlightedNodeIds: Set<string>;
+}): React.ReactElement {
   const isSourceEdge = edge.kind === "source";
-  const stroke = isSourceEdge ? "rgba(250, 204, 21, 0.42)" : "rgba(226, 232, 240, 0.22)";
+  const highlighted =
+    !hasHighlight || highlightedNodeIds.has(edge.sourceId) || highlightedNodeIds.has(edge.targetId);
+  const stroke = isSourceEdge ? "rgba(251, 191, 36, 0.62)" : "rgba(148, 163, 184, 0.30)";
   const strokeDasharray = edge.resolved ? undefined : "7 8";
+  const strokeWidth = isSourceEdge
+    ? 1.8
+    : edge.source.isSelected || edge.target.isSelected
+      ? 1.7
+      : 1;
 
   return (
     <line
-      x1={edge.source.x}
-      y1={edge.source.y}
-      x2={edge.target.x}
-      y2={edge.target.y}
+      x1={formatSvgNumber(edge.source.x)}
+      y1={formatSvgNumber(edge.source.y)}
+      x2={formatSvgNumber(edge.target.x)}
+      y2={formatSvgNumber(edge.target.y)}
       stroke={stroke}
       strokeDasharray={strokeDasharray}
       strokeLinecap="round"
-      strokeWidth={isSourceEdge ? 1.8 : 1.2}
+      strokeWidth={strokeWidth}
+      opacity={highlighted ? 1 : 0.18}
     />
   );
 }
@@ -373,7 +443,7 @@ function AtlasNode({
   onSelect: (nodeId: string) => void;
 }): React.ReactElement {
   const visual = getNodeVisual(node.nodeType);
-  const fill = node.isProjected ? "rgba(12, 10, 9, 0.95)" : "rgba(28, 25, 23, 0.74)";
+  const fill = node.isProjected ? "rgba(8, 11, 18, 0.96)" : "rgba(30, 41, 59, 0.72)";
   const strokeWidth = node.isSelected ? 3 : node.isNeighbor ? 2 : 1.4;
 
   return (
@@ -383,7 +453,7 @@ function AtlasNode({
       aria-label={`Выбрать узел ${node.title}`}
       className="cursor-pointer transition-opacity outline-none focus-visible:opacity-100"
       style={{ opacity: dimmed ? 0.28 : 1 }}
-      transform={`translate(${node.x} ${node.y})`}
+      transform={`translate(${formatSvgNumber(node.x)} ${formatSvgNumber(node.y)})`}
       onClick={() => onSelect(node.id)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -392,7 +462,23 @@ function AtlasNode({
         }
       }}
     >
-      <circle r={node.radius + 12} fill={visual.glow} opacity={node.isSelected ? 0.95 : 0.55} />
+      {node.isSelected ? (
+        <circle
+          r={node.radius + 22}
+          fill="none"
+          stroke={visual.stroke}
+          strokeDasharray="2 9"
+          strokeLinecap="round"
+          strokeWidth="1.4"
+          opacity="0.72"
+        />
+      ) : null}
+      <circle
+        r={node.radius + (node.isSelected ? 18 : 11)}
+        fill={visual.glow}
+        filter="url(#awakening-atlas-soft-glow)"
+        opacity={node.isSelected ? 0.95 : node.isNeighbor ? 0.64 : 0.38}
+      />
       <circle
         r={node.radius}
         fill={fill}
@@ -400,7 +486,12 @@ function AtlasNode({
         strokeDasharray={node.isProjected ? undefined : "3 4"}
         strokeWidth={strokeWidth}
       />
-      <circle r={Math.max(3, node.radius * 0.18)} fill={visual.stroke} opacity={0.92} />
+      <circle
+        r={Math.max(3, node.radius * 0.18)}
+        fill={visual.stroke}
+        filter="url(#awakening-atlas-soft-glow)"
+        opacity={0.92}
+      />
       <text
         className={cn(
           "pointer-events-none font-mono text-[10px] tracking-[0.16em] uppercase",
@@ -443,29 +534,15 @@ function AtlasSvg({
       className="h-full min-h-[520px] w-full"
       viewBox="0 0 1120 740"
     >
-      <defs>
-        <radialGradient id="awakening-atlas-core" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(245, 158, 11, 0.24)" />
-          <stop offset="62%" stopColor="rgba(15, 23, 42, 0.08)" />
-          <stop offset="100%" stopColor="rgba(15, 23, 42, 0)" />
-        </radialGradient>
-      </defs>
-      <rect width="1120" height="740" fill="url(#awakening-atlas-core)" />
-      {[142, 240, 352].map((radius) => (
-        <ellipse
-          key={radius}
-          cx="560"
-          cy="370"
-          rx={radius}
-          ry={radius * 0.76}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeDasharray={radius === 352 ? "8 10" : undefined}
-        />
-      ))}
+      <AtlasBackdrop />
       <g>
         {layout.edges.map((edge) => (
-          <AtlasEdge key={edge.id} edge={edge} />
+          <AtlasEdge
+            key={edge.id}
+            edge={edge}
+            hasHighlight={hasHighlight}
+            highlightedNodeIds={highlightedNodeIds}
+          />
         ))}
       </g>
       <g>
@@ -492,8 +569,8 @@ function ReferenceMapStage({
   selectedCluster: AwakeningReferenceClusterMatch | null;
 }): React.ReactElement {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/30">
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.18),transparent_34%)]" />
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#080b12] shadow-2xl shadow-black/30">
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_34%)]" />
       <Image
         alt="Оригинальная карта Great Awakening с интерактивными секторами"
         className="relative z-0 block h-auto w-full"
@@ -516,8 +593,8 @@ function ReferenceMapStage({
               className={cn(
                 "absolute rounded-[1.6rem] border transition-all",
                 active
-                  ? "border-teal-300 bg-teal-300/18 shadow-[0_0_0_1px_rgba(94,234,212,0.35),0_0_40px_rgba(45,212,191,0.22)]"
-                  : "border-white/10 bg-white/[0.03] hover:border-teal-200/60 hover:bg-teal-200/10"
+                  ? "border-sky-300 bg-sky-300/18 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_0_40px_rgba(14,165,233,0.24)]"
+                  : "border-white/10 bg-white/[0.03] hover:border-sky-200/60 hover:bg-sky-200/10"
               )}
               style={{
                 height: `${bounds.height * 100}%`,
@@ -535,7 +612,7 @@ function ReferenceMapStage({
         })}
       </div>
 
-      <div className="absolute right-3 bottom-3 left-3 z-20 rounded-[1.6rem] border border-white/10 bg-stone-950/82 p-4 text-stone-100 backdrop-blur">
+      <div className="absolute right-3 bottom-3 left-3 z-20 rounded-[1.6rem] border border-white/10 bg-[#080b12]/88 p-4 text-stone-100 shadow-2xl shadow-black/40 backdrop-blur">
         {selectedCluster ? (
           <div>
             <p className="font-mono text-[11px] tracking-[0.22em] text-teal-100 uppercase">
@@ -607,7 +684,7 @@ function SelectedNodePanel({
     : [];
 
   return (
-    <aside className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 text-stone-100 shadow-2xl shadow-black/30 backdrop-blur">
+    <aside className="rounded-[2rem] border border-white/10 bg-[#0b0f18]/82 p-5 text-stone-100 shadow-2xl shadow-black/35 backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <p className="font-mono text-xs tracking-[0.24em] text-amber-200 uppercase">
           {getNodeTypeLabel(node.nodeType)}
@@ -616,7 +693,7 @@ function SelectedNodePanel({
           className={cn(
             "rounded-full border px-2.5 py-1 text-xs",
             node.isProjected
-              ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
+              ? "border-sky-300/30 bg-sky-300/10 text-sky-100"
               : "border-stone-300/20 bg-stone-300/10 text-stone-300"
           )}
         >
@@ -701,7 +778,7 @@ function SelectedNodePanel({
 
       <div className="mt-5 flex flex-col gap-2">
         <Button
-          className="h-10 justify-start bg-amber-300 text-stone-950 hover:bg-amber-200"
+          className="h-10 justify-start bg-sky-300 text-slate-950 hover:bg-sky-200"
           disabled={!node.isProjected || isLoadingNeighbors}
           type="button"
           onClick={() => onLoadNeighbors(node)}
@@ -871,17 +948,18 @@ export function AwakeningMapAtlas({
   }
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[2.5rem] border border-stone-950/10 bg-stone-950 text-stone-50 shadow-2xl shadow-stone-950/20">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_18%,rgba(245,158,11,0.26),transparent_28%),radial-gradient(circle_at_82%_8%,rgba(20,184,166,0.18),transparent_24%),linear-gradient(145deg,#0c0a09,#111827_52%,#1c1917)]" />
-      <div className="absolute inset-0 -z-10 [background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px)] [background-size:42px_42px] opacity-[0.08]" />
+    <section className="relative isolate overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#080b12] text-stone-50 shadow-2xl shadow-slate-950/30">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_28%_12%,rgba(14,165,233,0.24),transparent_28%),radial-gradient(circle_at_84%_16%,rgba(99,102,241,0.18),transparent_24%),linear-gradient(145deg,#070a11,#0f172a_50%,#111827)]" />
+      <div className="absolute inset-0 -z-10 [background-image:radial-gradient(circle,rgba(148,163,184,0.32)_1px,transparent_1px)] [background-size:28px_28px] opacity-30" />
+      <div className="absolute inset-x-8 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-sky-200/30 to-transparent" />
 
       <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="min-w-0 p-4 sm:p-6">
           <div className="mb-4 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 font-mono text-xs tracking-[0.22em] text-amber-100 uppercase">
-                  awakening atlas
+                <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-3 py-1 font-mono text-xs tracking-[0.22em] text-sky-100 uppercase">
+                  obsidian atlas
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-stone-300">
                   projection-backed
@@ -890,7 +968,7 @@ export function AwakeningMapAtlas({
                   original map linked
                 </span>
               </div>
-              <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">
+              <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-5xl">
                 Карта, которая показывает не ответы, а связи.
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-400 sm:text-base">
@@ -899,7 +977,7 @@ export function AwakeningMapAtlas({
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 rounded-3xl border border-white/10 bg-white/[0.06] p-3 text-center backdrop-blur">
+            <div className="grid grid-cols-3 gap-2 rounded-3xl border border-white/10 bg-[#111827]/75 p-3 text-center shadow-xl shadow-black/20 backdrop-blur">
               <div>
                 <p className="text-2xl font-semibold">{graph.nodes.length}</p>
                 <p className="text-[11px] text-stone-500">узлов</p>
@@ -1015,7 +1093,7 @@ export function AwakeningMapAtlas({
                 onSelectCluster={selectCluster}
                 selectedCluster={activeCluster}
               />
-              <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
+              <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#080b12] shadow-2xl shadow-black/25">
                 {visibleGraph.nodes.length > 0 ? (
                   <AtlasSvg
                     graph={visibleGraph}
@@ -1037,13 +1115,13 @@ export function AwakeningMapAtlas({
                     </div>
                   </div>
                 )}
-                <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-stone-950/75 p-4 backdrop-blur lg:block">
+                <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-[#080b12]/82 p-4 shadow-2xl shadow-black/30 backdrop-blur lg:block">
                   <AtlasLegend />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
+            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#080b12] shadow-2xl shadow-black/25">
               {visibleGraph.nodes.length > 0 ? (
                 <AtlasSvg
                   graph={visibleGraph}
@@ -1066,7 +1144,7 @@ export function AwakeningMapAtlas({
                 </div>
               )}
 
-              <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-stone-950/75 p-4 backdrop-blur lg:block">
+              <div className="absolute bottom-4 left-4 hidden rounded-2xl border border-white/10 bg-[#080b12]/82 p-4 shadow-2xl shadow-black/30 backdrop-blur lg:block">
                 <AtlasLegend />
               </div>
 
