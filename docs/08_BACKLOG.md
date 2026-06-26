@@ -652,6 +652,21 @@ context without manually searching for the same topic.
 - [x] Unknown linked nodes show a non-fatal status message instead of crashing the map.
 - [x] No new database, Perplexity, or publication logic is added.
 
+### APP-017I: Make original-map hotspots visually explicit
+
+**Priority:** P1 | **Status:** In Progress
+
+**Description:** Improve the original-image map mode so users immediately see
+that the large sectors are clickable hotspots connected to atlas nodes.
+
+**Acceptance Criteria:**
+
+- [x] Original image hotspots have visible numbered markers.
+- [x] Each hotspot shows the matched atlas-node count.
+- [x] Hover/focus states expose a short sector summary.
+- [x] A map overlay explains that clicking a hotspot highlights atlas nodes.
+- [x] No new database, Perplexity, or publication logic is added.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers

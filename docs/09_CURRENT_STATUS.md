@@ -180,6 +180,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-26: Perplexity live research is guarded by IP/slug rate limiting plus a server-side request timeout; provider failures are returned as sanitized API errors.
 - 2026-06-26: Perplexity live research can be saved by admin/editor users as a `dossiers` draft for review; it still does not publish or mutate `node_projection`.
 - 2026-06-26: Topic mini-maps now deep-link to `/awakening-map?node=<brain_node_id>`, and the public atlas focuses that node when it is present in the published graph.
+- 2026-06-26: Original-map mode now renders explicit numbered hotspots with node counts, hover summaries, and a small legend explaining that hotspots highlight atlas nodes.
 
 ---
 

@@ -584,7 +584,7 @@ function ReferenceMapStage({
       />
 
       <div className="absolute inset-0 z-10">
-        {clusterMatches.map((entry) => {
+        {clusterMatches.map((entry, index) => {
           const active = selectedCluster?.cluster.id === entry.cluster.id;
           const { bounds } = entry.cluster;
 
@@ -593,11 +593,12 @@ function ReferenceMapStage({
               key={entry.cluster.id}
               type="button"
               aria-label={`Выбрать сектор ${entry.cluster.label}`}
+              aria-pressed={active}
               className={cn(
-                "absolute rounded-[1.6rem] border transition-all",
+                "group/hotspot absolute rounded-[1.6rem] border text-left transition-all focus-visible:ring-3 focus-visible:ring-sky-200/45 focus-visible:outline-none",
                 active
                   ? "border-sky-300 bg-sky-300/18 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_0_40px_rgba(14,165,233,0.24)]"
-                  : "border-white/10 bg-white/[0.03] hover:border-sky-200/60 hover:bg-sky-200/10"
+                  : "border-white/10 bg-white/[0.035] hover:border-sky-200/70 hover:bg-sky-200/12"
               )}
               style={{
                 height: `${bounds.height * 100}%`,
@@ -607,12 +608,39 @@ function ReferenceMapStage({
               }}
               onClick={() => onSelectCluster(entry.cluster.id)}
             >
-              <span className="absolute inset-x-2 top-2 rounded-full bg-stone-950/80 px-2 py-1 text-left font-mono text-[10px] tracking-[0.14em] text-teal-50 uppercase backdrop-blur">
-                {entry.cluster.label}
+              <span
+                className={cn(
+                  "absolute -top-2 -left-2 grid size-8 place-items-center rounded-full border font-mono text-[11px] font-semibold shadow-lg backdrop-blur",
+                  active
+                    ? "border-sky-200 bg-sky-200 text-slate-950"
+                    : "border-white/15 bg-slate-950/85 text-sky-100"
+                )}
+              >
+                {index + 1}
+              </span>
+              <span className="absolute inset-x-2 top-2 rounded-2xl bg-stone-950/82 px-2.5 py-2 text-left backdrop-blur transition-all group-hover/hotspot:bg-stone-950/95">
+                <span className="block font-mono text-[10px] tracking-[0.14em] text-teal-50 uppercase">
+                  {entry.cluster.label}
+                </span>
+                <span className="mt-1 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] text-stone-300">
+                  {entry.matchedNodeIds.length} atlas nodes
+                </span>
+              </span>
+              <span className="absolute right-2 bottom-2 hidden max-w-[12rem] rounded-2xl border border-white/10 bg-slate-950/90 p-2 text-xs leading-5 text-stone-200 shadow-2xl shadow-black/30 backdrop-blur group-hover/hotspot:block group-focus-visible/hotspot:block">
+                {entry.cluster.summary}
               </span>
             </button>
           );
         })}
+      </div>
+
+      <div className="absolute top-3 right-3 z-20 rounded-[1.4rem] border border-sky-200/20 bg-slate-950/88 p-3 text-slate-100 shadow-2xl shadow-black/35 backdrop-blur">
+        <p className="font-mono text-[10px] tracking-[0.22em] text-sky-100 uppercase">
+          interactive hotspots
+        </p>
+        <p className="mt-1 text-xs text-slate-300">
+          {clusterMatches.length} зон · клик подсвечивает atlas-узлы
+        </p>
       </div>
 
       <div className="absolute right-3 bottom-3 left-3 z-20 rounded-[1.6rem] border border-white/10 bg-[#080b12]/88 p-4 text-stone-100 shadow-2xl shadow-black/40 backdrop-blur">
