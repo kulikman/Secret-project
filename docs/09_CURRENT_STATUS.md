@@ -179,6 +179,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-26: Topic cards can request Perplexity live research on demand, but the response is displayed as unreviewed live context and is not saved to `node_projection` or dossier tables.
 - 2026-06-26: Perplexity live research is guarded by IP/slug rate limiting plus a server-side request timeout; provider failures are returned as sanitized API errors.
 - 2026-06-26: Perplexity live research can be saved by admin/editor users as a `dossiers` draft for review; it still does not publish or mutate `node_projection`.
+- 2026-06-26: Topic mini-maps now deep-link to `/awakening-map?node=<brain_node_id>`, and the public atlas focuses that node when it is present in the published graph.
 
 ---
 

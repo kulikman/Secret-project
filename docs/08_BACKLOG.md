@@ -637,6 +637,21 @@ Russian with citations, and never written into projection/dossier content.
 - [x] Editors can save a live research result as a `dossiers.status='draft'` admin review artifact.
 - [ ] Verify endpoint/UI with configured Perplexity key.
 
+### APP-017H: Deep-link topic cards into Awakening Map focus
+
+**Priority:** P1 | **Status:** In Progress
+
+**Description:** Allow topic cards to open the public Awakening Map with a
+specific node preselected, so users can move from a dossier into the graph
+context without manually searching for the same topic.
+
+**Acceptance Criteria:**
+
+- [x] Topic mini-map CTA links to `/awakening-map?node=<brain_node_id>`.
+- [x] Awakening Map reads the `node` query parameter and focuses the matching published node.
+- [x] Unknown linked nodes show a non-fatal status message instead of crashing the map.
+- [x] No new database, Perplexity, or publication logic is added.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers

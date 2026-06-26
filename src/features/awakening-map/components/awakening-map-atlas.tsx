@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Compass,
   Eye,
@@ -14,7 +14,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { startTransition, useDeferredValue, useState } from "react";
+import { startTransition, useDeferredValue, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -844,11 +844,15 @@ export function AwakeningMapAtlas({
   referenceClusters = awakeningReferenceClusters,
 }: AwakeningMapAtlasProps): React.ReactElement {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const linkedNodeId = searchParams.get("node")?.trim() ?? null;
   const [graph, setGraph] = useState<AwakeningAtlasGraph>(
     initialGraph.nodes.length > 0 ? initialGraph : EMPTY_GRAPH
   );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(() =>
-    getDefaultAtlasNodeId(initialGraph)
+    linkedNodeId && initialGraph.nodes.some((node) => node.id === linkedNodeId)
+      ? linkedNodeId
+      : getDefaultAtlasNodeId(initialGraph)
   );
   const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<AwakeningMapViewMode>("atlas");
@@ -884,6 +888,26 @@ export function AwakeningMapAtlas({
         : EMPTY_NODE_ID_SET;
   const projectedCount = graph.nodes.filter((node) => node.isProjected).length;
   const unresolvedCount = graph.nodes.length - projectedCount;
+
+  useEffect(() => {
+    if (!linkedNodeId) return;
+
+    const linkedNode = graph.nodes.find((node) => node.id === linkedNodeId);
+    if (!linkedNode) {
+      setStatusMessage("Узел из ссылки не найден в опубликованной карте.");
+      return;
+    }
+
+    const nextClusterMatches = getReferenceClusterMatches(graph, referenceClusters);
+
+    setSelectedNodeId(linkedNode.id);
+    setSelectedClusterId(
+      getClusterMatchForNode(nextClusterMatches, linkedNode.id)?.cluster.id ?? null
+    );
+    setNodeTypeFilter("all");
+    setQuery("");
+    setStatusMessage(`Фокус из ссылки: ${linkedNode.title}.`);
+  }, [graph, linkedNodeId, referenceClusters]);
 
   function selectCluster(clusterId: string): void {
     const nextCluster = getClusterMatchById(clusterMatches, clusterId);

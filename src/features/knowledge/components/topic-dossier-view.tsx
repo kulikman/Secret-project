@@ -320,7 +320,7 @@ function MiniMap({
       </svg>
       <div className="border-t border-white/10 p-5">
         <Button asChild className="w-full bg-amber-300 text-stone-950 hover:bg-amber-200">
-          <Link href={ROUTES.awakeningMap}>
+          <Link href={`${ROUTES.awakeningMap}?node=${encodeURIComponent(topic.brain_node_id)}`}>
             <MapIcon className="size-4" />
             Открыть в Карте пробуждения
           </Link>
