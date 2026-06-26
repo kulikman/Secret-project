@@ -19,6 +19,7 @@ export type AuditAction =
   | "admin.role_revoked"
   | "admin.application_status_changed"
   | "admin.brain_project_deleted"
+  | "admin.dossier_draft_created"
   | "admin.prompt_template_updated"
   | "admin.generated_content_published"
   | "profile.updated"

@@ -19,3 +19,8 @@ export {
   getSourceFirstIssues,
 } from "./lib/source-first";
 export type { DossierVersionDraft, GeneratedBlock, GeneratedDocument } from "./lib/source-first";
+export {
+  createDossierDraftFromLiveResearch,
+  liveResearchDraftInputSchema,
+} from "./lib/research-draft";
+export type { LiveResearchDraftInput } from "./lib/research-draft";

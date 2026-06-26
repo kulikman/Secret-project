@@ -32,13 +32,31 @@ interface ResearchEnvelope {
   error?: string;
 }
 
+interface DraftEnvelope {
+  ok: boolean;
+  data?: {
+    draft: {
+      created_at: string;
+      id: string;
+      status: string;
+      topic_node_id: string;
+    };
+  };
+  error?: string;
+}
+
 export function TopicLiveResearch({ slug, title }: TopicLiveResearchProps): React.ReactElement {
-  const [error, setError] = useState<string | null>(null);
+  const [draftError, setDraftError] = useState<string | null>(null);
+  const [draftMessage, setDraftMessage] = useState<string | null>(null);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [researchError, setResearchError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [research, setResearch] = useState<LiveResearchResult | null>(null);
 
   async function loadResearch(): Promise<void> {
-    setError(null);
+    setDraftError(null);
+    setDraftMessage(null);
+    setResearchError(null);
     setIsLoading(true);
 
     try {
@@ -48,12 +66,12 @@ export function TopicLiveResearch({ slug, title }: TopicLiveResearchProps): Reac
       const payload = (await response.json()) as ResearchEnvelope;
 
       if (payload.ok && payload.data?.status === "not_configured") {
-        setError("Perplexity пока не настроен: добавь PERPLEXITY_API_KEY на сервере.");
+        setResearchError("Perplexity пока не настроен: добавь PERPLEXITY_API_KEY на сервере.");
         return;
       }
 
       if (!response.ok || !payload.ok || !payload.data?.research) {
-        setError(
+        setResearchError(
           payload.error
             ? "Не удалось собрать live research. Попробуй ещё раз позже."
             : "Research endpoint вернул пустой ответ."
@@ -63,9 +81,47 @@ export function TopicLiveResearch({ slug, title }: TopicLiveResearchProps): Reac
 
       setResearch(payload.data.research);
     } catch {
-      setError("Не удалось связаться с research endpoint.");
+      setResearchError("Не удалось связаться с research endpoint.");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function saveDraft(): Promise<void> {
+    if (!research) return;
+
+    setDraftError(null);
+    setDraftMessage(null);
+    setIsSavingDraft(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/topics/${encodeURIComponent(slug)}/research-drafts`,
+        {
+          body: JSON.stringify(research),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+        }
+      );
+      const payload = (await response.json()) as DraftEnvelope;
+
+      if (!response.ok || !payload.ok || !payload.data?.draft) {
+        if (response.status === 401 || response.status === 403) {
+          setDraftError("Сохранение доступно только админам/редакторам.");
+          return;
+        }
+
+        setDraftError("Не удалось сохранить черновик. Проверь admin-доступ и попробуй ещё раз.");
+        return;
+      }
+
+      setDraftMessage(`Черновик сохранён: ${payload.data.draft.id}`);
+    } catch {
+      setDraftError("Не удалось связаться с admin draft endpoint.");
+    } finally {
+      setIsSavingDraft(false);
     }
   }
 
@@ -98,9 +154,9 @@ export function TopicLiveResearch({ slug, title }: TopicLiveResearchProps): Reac
         {isLoading ? "Собираю источники..." : "Собрать исследование"}
       </Button>
 
-      {error ? (
+      {researchError ? (
         <p className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-3 text-sm leading-6 text-amber-100">
-          {error}
+          {researchError}
         </p>
       ) : null}
 
@@ -142,6 +198,32 @@ export function TopicLiveResearch({ slug, title }: TopicLiveResearchProps): Reac
             Provider: {research.provider} · model: {research.model} ·{" "}
             {new Date(research.generatedAt).toLocaleString("ru-RU")}
           </p>
+          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
+            <p className="text-sm leading-6 text-slate-300">
+              Редакторский шаг: можно сохранить этот ответ как черновик досье. Он останется `draft`
+              и не попадёт в public projection без отдельной проверки.
+            </p>
+            <Button
+              className="mt-3 w-full"
+              disabled={isSavingDraft}
+              onClick={saveDraft}
+              type="button"
+              variant="secondary"
+            >
+              {isSavingDraft ? <Loader2 className="animate-spin" /> : <Sparkles />}
+              {isSavingDraft ? "Сохраняю черновик..." : "Сохранить как draft"}
+            </Button>
+            {draftMessage ? (
+              <p className="mt-3 rounded-xl bg-emerald-400/10 p-3 text-sm text-emerald-100">
+                {draftMessage}
+              </p>
+            ) : null}
+            {draftError ? (
+              <p className="mt-3 rounded-xl bg-amber-300/10 p-3 text-sm text-amber-100">
+                {draftError}
+              </p>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </section>

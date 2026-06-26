@@ -34,6 +34,12 @@ export const PROMPT_TEMPLATE_EDITOR_ROLES = [
   "editor",
 ] as const satisfies readonly AdminRole[];
 
+export const AI_CONTENT_EDITOR_ROLES = [
+  "super_admin",
+  "admin",
+  "editor",
+] as const satisfies readonly AdminRole[];
+
 export class AdminAccessDeniedError extends Error {
   constructor(readonly role: AdminRole | null) {
     super("Admin access denied");

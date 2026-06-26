@@ -634,6 +634,7 @@ Russian with citations, and never written into projection/dossier content.
 - [x] Research output is labeled as live research and does not overwrite projection dossier data.
 - [x] Research endpoint is IP/slug rate-limited and returns `Retry-After` on 429.
 - [x] Perplexity requests use a server-side timeout and return a sanitized provider error.
+- [x] Editors can save a live research result as a `dossiers.status='draft'` admin review artifact.
 - [ ] Verify endpoint/UI with configured Perplexity key.
 
 ---
