@@ -75,6 +75,7 @@ deployment context.
 - [x] Public topic pages upgraded to projection dossiers with mini-map, source evidence, versions, timeline, counterarguments, and unresolved tails
 - [x] Awakening Map admin suggestion merge form uses a safer topic projection picker instead of raw UUID entry
 - [x] Awakening Map public atlas uses an Obsidian-style dark graph workspace without changing the data/API contract
+- [x] Awakening Map SVG nodes with existing public routes open their card directly from the atlas
 - [x] Presentation cache/generation contract added for 20-25 page PDF decks, Claude-compatible text generation, separate visual provider metadata, and stored artifacts
 - [x] Supabase project URL/ref received: `https://wtfrvaifeaovywzaejul.supabase.co` / `wtfrvaifeaovywzaejul`
 - [ ] Supabase project connected (SETUP-001)
@@ -173,6 +174,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-25: Awakening Map node details show source-first evidence status (`source-backed`, `claim needs source`, `unresolved tail`) without presenting claims as verified facts.
 - 2026-06-25: `/admin/awakening-map` suggestion merge now uses a selectable list of existing `topic` projections; server-side UUID and node-type validation remains the source of truth.
 - 2026-06-25: `/awakening-map` atlas styling now reads as an Obsidian-like graph workspace: dot-grid canvas, orbit rings, stronger selected-node glow, dimmed graph context, and matching dark controls.
+- 2026-06-26: `/awakening-map` SVG node clicks now navigate directly to existing public cards for published topic/source nodes; unresolved tails still select inside the graph.
 
 ---
 

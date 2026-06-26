@@ -42,4 +42,12 @@ describe("getBreadcrumbItems()", () => {
 
     expect(items.at(-1)?.label).toBe("Acme Inc");
   });
+
+  it("supports serializable labels for server-rendered dynamic segments", () => {
+    const items = getBreadcrumbItems("/topics/ancient-builder-race", {
+      labels: { "ancient-builder-race": "Ancient Builder Race" },
+    });
+
+    expect(items.at(-1)?.label).toBe("Ancient Builder Race");
+  });
 });

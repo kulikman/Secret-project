@@ -350,10 +350,7 @@ export function TopicDossierView({
   return (
     <article className="flex flex-1 bg-[#f5efe3] px-4 py-8 text-stone-950 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl">
-        <Breadcrumbs
-          className="mb-6 text-stone-600"
-          resolveLabel={(segment) => (segment === slug ? topic.title : null)}
-        />
+        <Breadcrumbs className="mb-6 text-stone-600" labels={{ [slug]: topic.title }} />
 
         <header className="relative overflow-hidden rounded-[2.5rem] border border-stone-900/10 bg-[#ebe0c9] p-6 shadow-sm sm:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(146,64,14,0.18),transparent_28%),radial-gradient(circle_at_82%_8%,rgba(15,23,42,0.12),transparent_24%)]" />

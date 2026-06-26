@@ -602,6 +602,22 @@ dependency.
 - [x] Header, filters, view-mode controls, legend, and side panel match the graph workspace style.
 - [x] No route, API, database, Perplexity, or navigation changes are included in this visual-only epic.
 
+### APP-017F: Open published map nodes from the atlas
+
+**Priority:** P1 | **Status:** Done
+
+**Description:** Make the graph itself act as the navigation surface: clicking a
+published node with an existing public route opens its card, while unresolved
+tails still behave as selectable graph context.
+
+**Acceptance Criteria:**
+
+- [x] Published `topic` nodes with slug open `/topics/[slug]` from the SVG atlas.
+- [x] Published `source` nodes open `/sources/[id]` from the SVG atlas.
+- [x] Nodes without a public route still select/focus in the atlas instead of navigating.
+- [x] Existing side-panel "Открыть карточку" link remains available.
+- [x] No new route, API, database, Perplexity, or research-generation logic is added.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * Route segment → human-readable label map.
  *
  * Add entries here when creating new routes. Dynamic segments (e.g. `[slug]`)
- * are resolved at render time via the `resolveLabel` prop.
+ * are resolved at render time via `labels` or the `resolveLabel` prop.
  */
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -48,6 +48,12 @@ export interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   /**
+   * Serializable segment → label map for Server Components.
+   * Prefer this on app route pages because function props cannot cross
+   * the Server → Client boundary.
+   */
+  labels?: Record<string, string>;
+  /**
    * Resolve a dynamic segment (e.g. `[slug]`) to a readable label.
    * Called for every segment not found in SEGMENT_LABELS.
    * Return `null` to use the raw segment as-is.
@@ -64,23 +70,25 @@ interface BreadcrumbsProps {
  *
  * Usage:
  *   - Drop `<Breadcrumbs />` into any layout or page.
- *   - For dynamic routes, pass `resolveLabel` to map slugs to titles.
- *
- * @example
- *   // /docs/getting-started → Dashboard › Docs › Getting Started
- *   <Breadcrumbs resolveLabel={(seg) => seg.replace(/-/g, " ")} />
+ *   - For dynamic routes from Server Components, pass `labels`.
+ *   - For dynamic routes fully inside Client Components, `resolveLabel` is supported.
  *
  * @example
  *   // /projects/abc123 → Dashboard › Projects › My Project
+ *   <Breadcrumbs labels={{ abc123: "My Project" }} />
+ *
+ * @example
+ *   // Client Component only: /projects/abc123 → Dashboard › Projects › My Project
  *   <Breadcrumbs resolveLabel={(seg) => projectMap[seg] ?? null} />
  */
 export function Breadcrumbs({
+  labels,
   resolveLabel,
   className,
 }: BreadcrumbsProps): React.ReactElement | null {
   const pathname = usePathname();
 
-  const items = getBreadcrumbItems(pathname, { resolveLabel });
+  const items = getBreadcrumbItems(pathname, { labels, resolveLabel });
   if (items.length === 0) return null;
 
   return (
@@ -115,6 +123,7 @@ export function Breadcrumbs({
 }
 
 interface GetBreadcrumbItemsOptions {
+  labels?: Record<string, string>;
   resolveLabel?: (segment: string, segments: string[]) => string | null;
 }
 
@@ -126,7 +135,7 @@ interface GetBreadcrumbItemsOptions {
  */
 export function getBreadcrumbItems(
   pathname: string,
-  { resolveLabel }: GetBreadcrumbItemsOptions = {}
+  { labels, resolveLabel }: GetBreadcrumbItemsOptions = {}
 ): BreadcrumbItem[] {
   if (pathname === "/" || pathname === "/dashboard" || pathname.startsWith("/settings")) {
     return [];
@@ -149,6 +158,7 @@ export function getBreadcrumbItems(
     const label =
       resolveSpecialLabel(segment, visibleSegments) ??
       SEGMENT_LABELS[segment] ??
+      labels?.[segment] ??
       resolveLabel?.(segment, visibleSegments) ??
       formatSegment(segment);
 

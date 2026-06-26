@@ -64,10 +64,7 @@ export default async function SourcePage({ params }: PageProps): Promise<React.R
   return (
     <article className="bg-background flex flex-1 px-6 py-12">
       <div className="mx-auto w-full max-w-4xl">
-        <Breadcrumbs
-          className="mb-6"
-          resolveLabel={(segment) => (segment === id ? source.title : null)}
-        />
+        <Breadcrumbs className="mb-6" labels={{ [id]: source.title }} />
         <p className="text-muted-foreground font-mono text-xs tracking-[0.25em] uppercase">
           source projection
         </p>

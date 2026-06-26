@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import {
   Compass,
   Eye,
@@ -436,29 +437,31 @@ function AtlasEdge({
 function AtlasNode({
   dimmed,
   node,
-  onSelect,
+  onOpen,
 }: {
   dimmed: boolean;
   node: AwakeningAtlasLayoutNode;
-  onSelect: (nodeId: string) => void;
+  onOpen: (node: AwakeningAtlasLayoutNode) => void;
 }): React.ReactElement {
   const visual = getNodeVisual(node.nodeType);
+  const href = getNodeHref(node);
   const fill = node.isProjected ? "rgba(8, 11, 18, 0.96)" : "rgba(30, 41, 59, 0.72)";
   const strokeWidth = node.isSelected ? 3 : node.isNeighbor ? 2 : 1.4;
+  const actionLabel = href ? "Открыть карточку" : "Выбрать узел";
 
   return (
     <g
       role="button"
       tabIndex={0}
-      aria-label={`Выбрать узел ${node.title}`}
+      aria-label={`${actionLabel} ${node.title}`}
       className="cursor-pointer transition-opacity outline-none focus-visible:opacity-100"
       style={{ opacity: dimmed ? 0.28 : 1 }}
       transform={`translate(${formatSvgNumber(node.x)} ${formatSvgNumber(node.y)})`}
-      onClick={() => onSelect(node.id)}
+      onClick={() => onOpen(node)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onSelect(node.id);
+          onOpen(node);
         }
       }}
     >
@@ -516,12 +519,12 @@ function AtlasNode({
 function AtlasSvg({
   graph,
   highlightedNodeIds,
-  onSelectNode,
+  onOpenNode,
   selectedNodeId,
 }: {
   graph: AwakeningAtlasGraph;
   highlightedNodeIds: Set<string>;
-  onSelectNode: (nodeId: string) => void;
+  onOpenNode: (node: AwakeningAtlasLayoutNode) => void;
   selectedNodeId: string | null;
 }): React.ReactElement {
   const layout = createAwakeningAtlasLayout(graph, selectedNodeId);
@@ -551,7 +554,7 @@ function AtlasSvg({
             key={node.id}
             dimmed={hasHighlight && !highlightedNodeIds.has(node.id)}
             node={node}
-            onSelect={onSelectNode}
+            onOpen={onOpenNode}
           />
         ))}
       </g>
@@ -840,6 +843,7 @@ export function AwakeningMapAtlas({
   initialGraph,
   referenceClusters = awakeningReferenceClusters,
 }: AwakeningMapAtlasProps): React.ReactElement {
+  const router = useRouter();
   const [graph, setGraph] = useState<AwakeningAtlasGraph>(
     initialGraph.nodes.length > 0 ? initialGraph : EMPTY_GRAPH
   );
@@ -899,6 +903,16 @@ export function AwakeningMapAtlas({
     setSelectedNodeId(nodeId);
     const nextCluster = getClusterMatchForNode(clusterMatches, nodeId);
     setSelectedClusterId(nextCluster?.cluster.id ?? null);
+  }
+
+  function openNode(node: AwakeningAtlasNode): void {
+    const href = getNodeHref(node);
+    if (href) {
+      router.push(href);
+      return;
+    }
+
+    selectNode(node.id);
   }
 
   async function loadNeighbors(node: AwakeningAtlasNode): Promise<void> {
@@ -1099,7 +1113,7 @@ export function AwakeningMapAtlas({
                     graph={visibleGraph}
                     highlightedNodeIds={highlightedNodeIds}
                     selectedNodeId={selectedNodeId}
-                    onSelectNode={selectNode}
+                    onOpenNode={openNode}
                   />
                 ) : (
                   <div className="flex min-h-[560px] items-center justify-center p-8 text-center">
@@ -1127,7 +1141,7 @@ export function AwakeningMapAtlas({
                   graph={visibleGraph}
                   highlightedNodeIds={highlightedNodeIds}
                   selectedNodeId={selectedNodeId}
-                  onSelectNode={selectNode}
+                  onOpenNode={openNode}
                 />
               ) : (
                 <div className="flex min-h-[560px] items-center justify-center p-8 text-center">
