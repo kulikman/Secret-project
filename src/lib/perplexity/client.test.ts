@@ -77,4 +77,27 @@ describe("createPerplexityTopicResearch()", () => {
       )
     ).rejects.toMatchObject(new PerplexityApiError("Perplexity research request failed.", 502));
   });
+
+  it("maps timed-out requests to a 504 provider error", async () => {
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      await new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new DOMException("Aborted", "AbortError"));
+        });
+      });
+
+      return Response.json({});
+    });
+
+    await expect(
+      createPerplexityTopicResearch(
+        {
+          slug: "ancient-builder-race",
+          summary: null,
+          title: "Ancient Builder Race",
+        },
+        { apiKey: "pplx-secret", fetcher: fetcher as typeof fetch, timeoutMs: 1 }
+      )
+    ).rejects.toMatchObject(new PerplexityApiError("Perplexity research request timed out.", 504));
+  });
 });

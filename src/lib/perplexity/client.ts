@@ -6,6 +6,7 @@ import { getServerEnv, type ServerEnv } from "@/lib/env";
 
 export const DEFAULT_PERPLEXITY_MODEL = "sonar";
 export const PERPLEXITY_API_URL = "https://api.perplexity.ai/v1/sonar";
+export const DEFAULT_PERPLEXITY_TIMEOUT_MS = 20_000;
 
 const perplexityCitationSchema = z.string().url();
 
@@ -61,6 +62,7 @@ interface PerplexityTopicResearchOptions {
   env?: ServerEnv;
   fetcher?: typeof fetch;
   model?: string;
+  timeoutMs?: number;
 }
 
 export class PerplexityNotConfiguredError extends Error {
@@ -134,6 +136,28 @@ function normalizeSearchResults(
   return Array.from(byUrl.values());
 }
 
+async function fetchWithTimeout(
+  fetcher: typeof fetch,
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetcher(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new PerplexityApiError("Perplexity research request timed out.", 504);
+    }
+
+    throw new PerplexityApiError("Perplexity research request failed.");
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function createPerplexityTopicResearch(
   input: PerplexityTopicResearchInput,
   options: PerplexityTopicResearchOptions = {}
@@ -143,32 +167,38 @@ export async function createPerplexityTopicResearch(
     : createPerplexityConfigFromEnv(options.env);
   const model = options.model ?? config.model;
   const fetcher = options.fetcher ?? fetch;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_PERPLEXITY_TIMEOUT_MS;
 
-  const response = await fetcher(PERPLEXITY_API_URL, {
-    body: JSON.stringify({
-      messages: [
-        {
-          content:
-            "Ты аккуратный исследователь. Отвечай на русском, отделяй подтвержденные сведения от гипотез и всегда опирайся на найденные источники.",
-          role: "system",
+  const response = await fetchWithTimeout(
+    fetcher,
+    PERPLEXITY_API_URL,
+    {
+      body: JSON.stringify({
+        messages: [
+          {
+            content:
+              "Ты аккуратный исследователь. Отвечай на русском, отделяй подтвержденные сведения от гипотез и всегда опирайся на найденные источники.",
+            role: "system",
+          },
+          {
+            content: buildTopicResearchPrompt(input),
+            role: "user",
+          },
+        ],
+        model,
+        language_preference: "ru",
+        web_search_options: {
+          search_mode: "web",
         },
-        {
-          content: buildTopicResearchPrompt(input),
-          role: "user",
-        },
-      ],
-      model,
-      language_preference: "ru",
-      web_search_options: {
-        search_mode: "web",
+      }),
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
       },
-    }),
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
+      method: "POST",
     },
-    method: "POST",
-  });
+    timeoutMs
+  );
 
   if (!response.ok) {
     throw new PerplexityApiError("Perplexity research request failed.", response.status);

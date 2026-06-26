@@ -177,6 +177,7 @@ These areas must not be changed without explicit discussion:
 - 2026-06-25: `/awakening-map` atlas styling now reads as an Obsidian-like graph workspace: dot-grid canvas, orbit rings, stronger selected-node glow, dimmed graph context, and matching dark controls.
 - 2026-06-26: `/awakening-map` SVG node clicks now navigate directly to existing public cards for published topic/source nodes; unresolved tails still select inside the graph.
 - 2026-06-26: Topic cards can request Perplexity live research on demand, but the response is displayed as unreviewed live context and is not saved to `node_projection` or dossier tables.
+- 2026-06-26: Perplexity live research is guarded by IP/slug rate limiting plus a server-side request timeout; provider failures are returned as sanitized API errors.
 
 ---
 

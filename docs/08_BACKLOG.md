@@ -632,6 +632,8 @@ Russian with citations, and never written into projection/dossier content.
 - [x] Missing Perplexity config returns a clear not-configured state instead of failing the page.
 - [x] Topic card has an explicit user-triggered "Собрать исследование" action.
 - [x] Research output is labeled as live research and does not overwrite projection dossier data.
+- [x] Research endpoint is IP/slug rate-limited and returns `Retry-After` on 429.
+- [x] Perplexity requests use a server-side timeout and return a sanitized provider error.
 - [ ] Verify endpoint/UI with configured Perplexity key.
 
 ---

@@ -7,6 +7,13 @@ import {
   PerplexityApiError,
   PerplexityNotConfiguredError,
 } from "@/lib/perplexity/client";
+import { limit } from "@/lib/rate-limit";
+import { getClientIpFromHeaders } from "@/lib/request-ip";
+
+const TOPIC_RESEARCH_RATE_LIMIT = {
+  limit: 6,
+  windowMs: 10 * 60 * 1000,
+} as const;
 
 interface RouteContext {
   params: Promise<{
@@ -20,6 +27,22 @@ export async function POST(request: NextRequest, context: RouteContext): Promise
 
   if (!slug) {
     return apiValidationError("Topic slug is required", { status: 422 }, apiContext);
+  }
+
+  const clientIp = getClientIpFromHeaders(request.headers);
+  const rate = await limit(`topic-research:${clientIp}:${slug}`, TOPIC_RESEARCH_RATE_LIMIT);
+
+  if (!rate.success) {
+    return apiError(
+      "Too many research attempts",
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(Math.max(0, rate.reset - Date.now()) / 1000)),
+        },
+      },
+      apiContext
+    );
   }
 
   try {
