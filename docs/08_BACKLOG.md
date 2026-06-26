@@ -618,6 +618,22 @@ tails still behave as selectable graph context.
 - [x] Existing side-panel "Открыть карточку" link remains available.
 - [x] No new route, API, database, Perplexity, or research-generation logic is added.
 
+### APP-017G: Add Perplexity live research to topic cards
+
+**Priority:** P1 | **Status:** In Progress
+
+**Description:** Add an on-demand, server-only Perplexity Sonar research surface
+for public topic cards. The result is clearly labeled as live research, shown in
+Russian with citations, and never written into projection/dossier content.
+
+**Acceptance Criteria:**
+
+- [x] Server-only Perplexity adapter uses `PERPLEXITY_API_KEY` without exposing it to the browser.
+- [x] Missing Perplexity config returns a clear not-configured state instead of failing the page.
+- [x] Topic card has an explicit user-triggered "Собрать исследование" action.
+- [x] Research output is labeled as live research and does not overwrite projection dossier data.
+- [ ] Verify endpoint/UI with configured Perplexity key.
+
 ---
 
 ### APP-018: Upgrade public topic pages into projection dossiers

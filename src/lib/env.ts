@@ -36,6 +36,8 @@ const serverSchema = z
     // AI (optional)
     ANTHROPIC_API_KEY: z.string().optional(),
     OPENAI_API_KEY: z.string().optional(),
+    PERPLEXITY_API_KEY: z.string().optional(),
+    PERPLEXITY_MODEL: z.string().min(1).optional(),
 
     // Email (optional)
     RESEND_API_KEY: z.string().optional(),

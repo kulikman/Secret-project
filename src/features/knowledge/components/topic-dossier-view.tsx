@@ -26,6 +26,7 @@ import type {
   TopicDossierTextItem,
   TopicDossierTimelineItem,
 } from "../lib/topic-dossier";
+import { TopicLiveResearch } from "./topic-live-research";
 
 interface TopicDossierViewProps {
   dossier: TopicDossier;
@@ -447,6 +448,8 @@ export function TopicDossierView({
           </div>
 
           <aside className="space-y-6">
+            <TopicLiveResearch slug={slug} title={topic.title} />
+
             <MiniMap graph={neighbors} topic={topic} />
 
             <section className="rounded-[2rem] border border-stone-900/10 bg-white/70 p-5 shadow-sm">
